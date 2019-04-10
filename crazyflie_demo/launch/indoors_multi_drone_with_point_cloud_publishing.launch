@@ -66,27 +66,30 @@ A few notes:
                 "range.right" , "range.zrange" ]
             </rosparam>
         </node>
-        <!--            The node for actually running desired python code -->
-        <node name="crazyflie_demo_hover" pkg="crazyflie_demo" type="hl_traj_arg.py" output="screen">
-            <param name="tf_prefix" value="$(arg frame1)"/>
-            <!--            Pass a 'list' as ros param-->
-            <rosparam param="traj_list" subst_value="True">$(arg traj_list)</rosparam>
-        </node>
+<!--        &lt;!&ndash;            The node for actually running desired python code &ndash;&gt;-->
+<!--        <node name="crazyflie_demo_hover" pkg="crazyflie_demo" type="hl_traj_arg.py" output="screen">-->
+<!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
+<!--            &lt;!&ndash;            Pass a 'list' as ros param&ndash;&gt;-->
+<!--            <rosparam param="traj_list" subst_value="True">$(arg traj_list)</rosparam>-->
+<!--        </node>-->
 
-        <!--        Tf_broadcast a specific drone with world-->
-        <node name="tf_broadcast" pkg="crazyflie_demo" type="tf_broadcaster.py" output="screen">
-            <param name="tf_prefix" value="$(arg frame1)"/>
-            <param name="initX" value="$(arg initX1)"/>
-            <param name="initY" value="$(arg initY1)"/>
-            <param name="initZ" value="$(arg initZ1)"/>
-        </node>
-        <!--        Publish TOF sensors readings as pointcloud-->
-        <node name="points_publisher" pkg="crazyflie_demo" type="publish_scan.py" output="screen">
-            <param name="tf_prefix" value="$(arg frame1)"/>
-        </node>
-        <!--        Rotem.py capture all ros data of a certain CF and wrap it with python object.-->
-        <node name="drone_data_parser" pkg="crazyflie_demo" type="rotem.py" output="screen">
-            <param name="tf_prefix" value="$(arg frame1)"/>
+<!--        &lt;!&ndash;        Tf_broadcast a specific drone with world&ndash;&gt;-->
+<!--        <node name="tf_broadcast" pkg="crazyflie_demo" type="tf_broadcaster.py" output="screen">-->
+<!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
+<!--            <param name="initX" value="$(arg initX1)"/>-->
+<!--            <param name="initY" value="$(arg initY1)"/>-->
+<!--            <param name="initZ" value="$(arg initZ1)"/>-->
+<!--        </node>-->
+<!--        &lt;!&ndash;        Publish TOF sensors readings as pointcloud&ndash;&gt;-->
+<!--        <node name="points_publisher" pkg="crazyflie_demo" type="publish_scan.py" output="screen">-->
+<!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
+<!--        </node>-->
+<!--        &lt;!&ndash;        Rotem.py capture all ros data of a certain CF and wrap it with python object.&ndash;&gt;-->
+<!--        <node name="drone_data_parser" pkg="crazyflie_demo" type="rotem.py" output="screen">-->
+<!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
+<!--        </node>-->
+        <node name="grid_publisher" pkg="crazyflie_demo" type="Grid.py" output="screen">
+
         </node>
 
     </group>
