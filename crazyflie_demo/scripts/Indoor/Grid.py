@@ -5,7 +5,9 @@ from std_msgs.msg import String
 from sensor_msgs.msg import PointCloud2
 from crazyflie_driver.msg import GenericLogData
 import sensor_msgs.point_cloud2 as pc2
+import matplotlib.pyplot as plt
 
+# Drone position
 class drone_pos:
     def __init__(self, time = None, x = None, y = None, z = None, w = None):
 
@@ -16,6 +18,7 @@ class drone_pos:
         self.w = w
 
 
+# Drone point cloud (from range sensors)
 class drone_pc:
     def __init__(self, time=None, pc_sens=None):
         self.time = time
@@ -46,6 +49,9 @@ class Grid:
         self.m_to_cm = 100
         self.min_rng = 20
 
+        # For debug only:
+        self.pos_scatter = None # A handle to scatter plot of drone position
+
         self.drones_pos_list = dict()
         self.drones_pc_list = dict()
         for iDrone in range(self.nDrones):
@@ -62,6 +68,7 @@ class Grid:
         point_cloud = pc2.read_points_list(msg, skip_nans=True)
 
         sens = []
+        # Read data from all sensors (probably 4)
         for i in range(len(point_cloud)):
             point = point_cloud[i]
             sens.append([point.x*self.m_to_cm, point.y*self.m_to_cm, point.z*self.m_to_cm])
@@ -69,6 +76,7 @@ class Grid:
         drone_id = point_cloud_last_timestamp.frame_id
         self.drones_pc_list[drone_id] = drone_pc(point_cloud_last_timestamp.stamp.secs, sens)
 
+        # Update grid using the new data
         self.update_from_tof_sensing_list(drone_id)
 
 
@@ -78,9 +86,20 @@ class Grid:
         # rospy.loginfo(self.pos_header)
         # rospy.loginfo(self.pos_val)
 
-        drone_id = pos_header.frame_id.split("/")[0]
+        drone_id = pos_header.frame_id.split("/")[0] # Extract drone name from topic name
+        # Store drone position and convert it from [m] to [cm]
         self.drones_pos_list[drone_id] = drone_pos(pos_header.stamp.secs, pos_val[0]*self.m_to_cm, pos_val[1]*self.m_to_cm, pos_val[2]*self.m_to_cm, None)
 
+        # For debug only:
+        if self.pos_scatter is not None:
+            self.pos_scatter.remove() # Remove previous position scatter plot
+        self.pos_scatter = plt.scatter(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y, s=10, c='r')
+        plt.draw()
+        plt.xlim(-2, 2)
+        plt.ylim(-2, 2)
+        plt.pause(0.0000000001)
+
+    # Check if two time stamps are close enough (self.eps is the threshold)
     def is_time_equal(self, t1, t2):
         return abs(t1-t2) <= self.eps
 
@@ -117,7 +136,7 @@ class Grid:
                 self.update_with_tof_sensor([[current_pos.x, current_pos.y]], sensing_pos, 1)
 
     def update_with_tof_sensor(self, sensor_pos, tof_sensing_pos, is_tof_senses):
-        num_of_samples = int(np.floor(np.linalg.norm(tof_sensing_pos - sensor_pos) / self.res * 2))
+        num_of_samples = int(np.floor(np.linalg.norm(np.subtract(tof_sensing_pos, sensor_pos)) / self.res * 2))
         xs = np.linspace(sensor_pos[0][0], tof_sensing_pos[0][0], num=num_of_samples, endpoint=True)
         ys = np.linspace(sensor_pos[0][1], tof_sensing_pos[0][1], num=num_of_samples, endpoint=True)
         for ind in range(1, num_of_samples):
@@ -142,5 +161,9 @@ if __name__ == "__main__":
     rospy.init_node("grid_builder")
 
     grid = Grid([(0, 0), (570, 0), (570, 550), (0, 550), (0, 0)], 10)
+
+    # For debug only:
+    plt.ion()
+    plt.show()
 
     rospy.spin()
