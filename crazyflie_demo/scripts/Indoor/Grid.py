@@ -6,6 +6,7 @@ from sensor_msgs.msg import PointCloud2
 from crazyflie_driver.msg import GenericLogData
 import sensor_msgs.point_cloud2 as pc2
 import matplotlib.pyplot as plt
+from nav_msgs.msg import OccupancyGrid
 
 # Drone position
 class drone_pos:
@@ -61,6 +62,10 @@ class Grid:
             self.pos_sub = rospy.Subscriber("/cf4/log_pos", GenericLogData,
                                             self.pos_parser)
 
+        # Start occupancy grid piblisher
+        self.init_grid_publisher()
+
+
 
     def point_cloud_parser(self, msg):
         """Each publicitation, theres' an array of 10 points."""
@@ -93,11 +98,22 @@ class Grid:
         # For debug only:
         if self.pos_scatter is not None:
             self.pos_scatter.remove() # Remove previous position scatter plot
-        self.pos_scatter = plt.scatter(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y, s=10, c='r')
+        self.pos_scatter = plt.scatter(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y, s=100, c='r')
         plt.draw()
         plt.xlim(-2, 2)
         plt.ylim(-2, 2)
         plt.pause(0.0000000001)
+
+    # Initialize a publisher for occupancy grid
+    def init_grid_publisher(self):
+        self.grid_publisher = rospy.Publisher('/indoor/occupancy_grid_topic', OccupancyGrid, queue_size=10)
+        # OccupancyGrid documentation:
+        # http://docs.ros.org/melodic/api/nav_msgs/html/msg/MapMetaData.html
+        occ_grid_msg = OccupancyGrid()
+        rate = rospy.Rate(0.5)  # 0.5 Hz
+        while not rospy.is_shutdown():
+            self.grid_publisher.publish(occ_grid_msg)
+            rate.sleep()
 
     # Check if two time stamps are close enough (self.eps is the threshold)
     def is_time_equal(self, t1, t2):
