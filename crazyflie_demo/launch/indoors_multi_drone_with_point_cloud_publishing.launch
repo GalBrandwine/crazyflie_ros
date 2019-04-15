@@ -119,27 +119,27 @@ A few notes:
             </rosparam>
         </node>
         <!--            The node for actually running desired python code -->
-        <node name="crazyflie_demo_hover" pkg="crazyflie_demo" type="hl_traj_arg.py" output="screen">
-            <param name="tf_prefix" value="$(arg frame2)"/>
-            <!--            Pass a list as ros param-->
-            <rosparam param="traj_list" subst_value="True">$(arg traj_list2)</rosparam>
-        </node>
+<!--        <node name="crazyflie_demo_hover" pkg="crazyflie_demo" type="hl_traj_arg.py" output="screen">-->
+<!--            <param name="tf_prefix" value="$(arg frame2)"/>-->
+<!--            &lt;!&ndash;            Pass a list as ros param&ndash;&gt;-->
+<!--            <rosparam param="traj_list" subst_value="True">$(arg traj_list2)</rosparam>-->
+<!--        </node>-->
 
-        <!--        Tf_broadcast a specific drone with world-->
-        <node name="tf_broadcast" pkg="crazyflie_demo" type="tf_broadcaster.py" output="screen">
-            <param name="tf_prefix" value="$(arg frame2)"/>
-            <param name="initX" value="$(arg initX2)"/>
-            <param name="initY" value="$(arg initY2)"/>
-            <param name="initZ" value="$(arg initZ2)"/>
-        </node>
-        <!--        Publish TOF sensors readings as pointcloud-->
-        <node name="points_publisher" pkg="crazyflie_demo" type="publish_scan.py" output="screen">
-            <param name="tf_prefix" value="$(arg frame2)"/>
-        </node>
-        <!--        Rotem.py capture all ros data of a certain CF and wrap it with python object.-->
-        <node name="drone_data_parser" pkg="crazyflie_demo" type="rotem.py" output="screen">
-            <param name="tf_prefix" value="$(arg frame1)"/>
-        </node>
+<!--        &lt;!&ndash;        Tf_broadcast a specific drone with world&ndash;&gt;-->
+<!--        <node name="tf_broadcast" pkg="crazyflie_demo" type="tf_broadcaster.py" output="screen">-->
+<!--            <param name="tf_prefix" value="$(arg frame2)"/>-->
+<!--            <param name="initX" value="$(arg initX2)"/>-->
+<!--            <param name="initY" value="$(arg initY2)"/>-->
+<!--            <param name="initZ" value="$(arg initZ2)"/>-->
+<!--        </node>-->
+<!--        &lt;!&ndash;        Publish TOF sensors readings as pointcloud&ndash;&gt;-->
+<!--        <node name="points_publisher" pkg="crazyflie_demo" type="publish_scan.py" output="screen">-->
+<!--            <param name="tf_prefix" value="$(arg frame2)"/>-->
+<!--        </node>-->
+<!--        &lt;!&ndash;        Rotem.py capture all ros data of a certain CF and wrap it with python object.&ndash;&gt;-->
+<!--        <node name="drone_data_parser" pkg="crazyflie_demo" type="rotem.py" output="screen">-->
+<!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
+<!--        </node>-->
     </group>
 
 </launch>
