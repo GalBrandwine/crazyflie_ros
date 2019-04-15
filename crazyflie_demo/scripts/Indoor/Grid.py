@@ -7,6 +7,11 @@ from crazyflie_driver.msg import GenericLogData
 import sensor_msgs.point_cloud2 as pc2
 import matplotlib.pyplot as plt
 from nav_msgs.msg import OccupancyGrid
+from shapely.geometry import Point, LineString, Polygon
+from descartes import PolygonPatch
+import time
+import threading
+
 
 # Drone position
 class drone_pos:
@@ -46,25 +51,62 @@ class Grid:
         self.empty_idxs = []
         self.wall_idxs = []
         self.nDrones = 1
-        self.eps = 1 # allowed time difference between messages
+        self.eps = 1 # Allowed time difference between messages
         self.m_to_cm = 100
-        self.min_rng = 20
-
-        # For debug only:
-        self.pos_scatter = None # A handle to scatter plot of drone position
-
+        self.min_rng = 20 # Range which indicates equal positions
         self.drones_pos_list = dict()
         self.drones_pc_list = dict()
+
+        ###################################### Only for debug ##################################################
+        self.initpos = [15, 15, 30]  # Initial position in cm
+        self.headinglist = ['cf4']
+        for heading in self.headinglist:
+            self.drones_pos_list[heading] = drone_pos(0, self.initpos[0], self.initpos[1], self.initpos[2], None)
+        self.prevpos = self.initpos
+        self.tail_handles = list()
+        self.drone_handel = []
+        self.fig = plt.figure()
+        ax = self.fig.subplots(1, 1)
+        plt.axis([self.x_lim[0], self.x_lim[1], self.y_lim[0], self.y_lim[1]])
+        self.ax = ax
+        for i in range(0, self.matrix.__len__()):
+            handles_list = list()
+            for j in range(0, self.matrix[i].__len__()):
+                handles_list.append(self.plot_ij(i, j))
+            self.tail_handles.append(handles_list)
+
+        self.drone_handel, = self.ax.plot(self.initpos[0], self.initpos[1], 'ob')
+
+        self.fig.show()
+        self.fig.canvas.draw()
+        plt.pause(0.001)
+        ########################################################################################################
+
         for iDrone in range(self.nDrones):
             # Init listeners
-            self.pc_sub = rospy.Subscriber("/cf4/point_cloud", PointCloud2,
-                                           self.point_cloud_parser)
             self.pos_sub = rospy.Subscriber("/cf4/log_pos", GenericLogData,
                                             self.pos_parser)
+            self.pc_sub = rospy.Subscriber("/cf4/point_cloud", PointCloud2,
+                                           self.point_cloud_parser)
 
-        # Start occupancy grid piblisher
-        self.init_grid_publisher()
 
+        # Start occupancy grid publisher
+        # grid_pub_thread = threading.Thread(name='grid_pub_thread', target=self.init_grid_publisher)
+        # grid_pub_thread.start()
+
+    ###################################### Only for debug ##################################################
+    def plot_ij(self, i, j):
+        pol_center = self.ij_to_xy(i, j)
+        tail = Polygon([(pol_center[0] - self.res / 2, pol_center[1] - self.res / 2),
+                        (pol_center[0] - self.res / 2, pol_center[1] + self.res / 2)
+                           , (pol_center[0] + self.res / 2, pol_center[1] + self.res / 2),
+                        (pol_center[0] + self.res / 2, pol_center[1] - self.res / 2)
+                           , (pol_center[0] - self.res / 2, pol_center[1] - self.res / 2)])
+        return self.ax.add_patch(PolygonPatch(tail, facecolor='gray'))
+
+    def change_tail_color_ij(self, i, j, color):
+        self.tail_handles[i][j].set_fc(color)
+        ########################################################################################################
 
 
     def point_cloud_parser(self, msg):
@@ -88,21 +130,19 @@ class Grid:
     def pos_parser(self, msg):
         pos_header = msg.header
         pos_val = msg.values
-        # rospy.loginfo(self.pos_header)
-        # rospy.loginfo(self.pos_val)
 
         drone_id = pos_header.frame_id.split("/")[0] # Extract drone name from topic name
         # Store drone position and convert it from [m] to [cm]
-        self.drones_pos_list[drone_id] = drone_pos(pos_header.stamp.secs, pos_val[0]*self.m_to_cm, pos_val[1]*self.m_to_cm, pos_val[2]*self.m_to_cm, None)
+        temp_drones_pos_list = [self.drones_pos_list[drone_id].x+(pos_val[0]*self.m_to_cm),
+                                self.drones_pos_list[drone_id].y+(pos_val[1]*self.m_to_cm),
+                                self.drones_pos_list[drone_id].z+(pos_val[2]*self.m_to_cm)]
+        self.drones_pos_list[drone_id] = drone_pos(pos_header.stamp.secs, temp_drones_pos_list[0], temp_drones_pos_list[1], temp_drones_pos_list[2], None)
 
-        # For debug only:
-        if self.pos_scatter is not None:
-            self.pos_scatter.remove() # Remove previous position scatter plot
-        self.pos_scatter = plt.scatter(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y, s=100, c='r')
-        plt.draw()
-        plt.xlim(-2, 2)
-        plt.ylim(-2, 2)
-        plt.pause(0.0000000001)
+        ###################################### Only for debug ##################################################
+        self.drone_handel.set_data(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
+        self.fig.canvas.draw()
+
+        ########################################################################################################
 
     # Initialize a publisher for occupancy grid
     def init_grid_publisher(self):
@@ -130,11 +170,11 @@ class Grid:
         return x, y
 
     def change_tail_to_empty(self, i, j):
-        # self.change_tail_color_ij(i, j, 'k')
+        self.change_tail_color_ij(i, j, 'k')
         self.matrix[i][j] = 1
 
     def change_tail_to_wall(self, i, j):
-        # self.change_tail_color_ij(i, j, 'w')
+        self.change_tail_color_ij(i, j, 'w')
         self.matrix[i][j] = 2
 
     def update_from_tof_sensing_list(self, drone_id):
@@ -147,11 +187,14 @@ class Grid:
         self.wall_idxs = []
 
         for elem in current_pc.pc_sens:
-            if np.linalg.norm([elem[0], elem[1]]) >= self.min_rng:
+            rospy.loginfo(np.linalg.norm(elem))
+            if np.linalg.norm(elem) <= np.linalg.norm([self.x_lim[1], self.y_lim[1], 0]):
                 sensing_pos = [[current_pos.x+elem[0], current_pos.y+elem[1]]]
-                self.update_with_tof_sensor([[current_pos.x, current_pos.y]], sensing_pos, 1)
+                rospy.loginfo(sensing_pos)
+                rospy.loginfo([current_pos.x, current_pos.y])
+                self.update_with_tof_sensor([[current_pos.x, current_pos.y]], sensing_pos)
 
-    def update_with_tof_sensor(self, sensor_pos, tof_sensing_pos, is_tof_senses):
+    def update_with_tof_sensor(self, sensor_pos, tof_sensing_pos):
         num_of_samples = int(np.floor(np.linalg.norm(np.subtract(tof_sensing_pos, sensor_pos)) / self.res * 2))
         xs = np.linspace(sensor_pos[0][0], tof_sensing_pos[0][0], num=num_of_samples, endpoint=True)
         ys = np.linspace(sensor_pos[0][1], tof_sensing_pos[0][1], num=num_of_samples, endpoint=True)
@@ -162,8 +205,8 @@ class Grid:
             if self.matrix[i][j] == 0:
                 self.change_tail_to_empty(i, j)
                 self.empty_idxs.append([i,j])
-        if is_tof_senses:
-            d = tof_sensing_pos - sensor_pos
+        if np.linalg.norm(np.subtract(tof_sensing_pos, sensor_pos)) >= self.res/2:
+            d = np.subtract(tof_sensing_pos, sensor_pos)
             norm_d = np.linalg.norm(d)
             if norm_d > 0:
                 wall_pos = tof_sensing_pos + d /norm_d*self.res/1000
@@ -176,10 +219,7 @@ if __name__ == "__main__":
 
     rospy.init_node("grid_builder")
 
-    grid = Grid([(0, 0), (570, 0), (570, 550), (0, 550), (0, 0)], 10)
+    # grid = Grid([(0, 0), (570, 0), (570, 550), (0, 550), (0, 0)], 10)
+    grid = Grid([(0, 0), (200, 0), (200, 200), (0, 200), (0, 0)], 10)
 
-    # For debug only:
-    plt.ion()
-    plt.show()
-
-    rospy.spin()
+    plt.show(block=True)
