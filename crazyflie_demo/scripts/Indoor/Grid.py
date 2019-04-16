@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from nav_msgs.msg import OccupancyGrid
 from shapely.geometry import Point, LineString, Polygon
 from descartes import PolygonPatch
+from bresenham import bresenham
 import time
 import threading
 
@@ -56,13 +57,11 @@ class Grid:
         self.min_rng = 20 # Range which indicates equal positions
         self.drones_pos_list = dict()
         self.drones_pc_list = dict()
+        # maximal limit for pc delta from drone reference in cm
+        self.pc_lim = 200
 
         ###################################### Only for debug ##################################################
-        self.initpos = [15, 15, 30]  # Initial position in cm
-        self.headinglist = ['cf4']
-        for heading in self.headinglist:
-            self.drones_pos_list[heading] = drone_pos(0, self.initpos[0], self.initpos[1], self.initpos[2], None)
-        self.prevpos = self.initpos
+        self.initpos = [5, 5, 0]  # Initial position in cm
         self.tail_handles = list()
         self.drone_handel = []
         self.fig = plt.figure()
@@ -118,13 +117,14 @@ class Grid:
         # Read data from all sensors (probably 4)
         for i in range(len(point_cloud)):
             point = point_cloud[i]
-            sens.append([point.x*self.m_to_cm, point.y*self.m_to_cm, point.z*self.m_to_cm])
+            if np.linalg.norm([point.x, point.y]) > 0:
+                sens.append([point.x*self.m_to_cm, point.y*self.m_to_cm, point.z*self.m_to_cm])
 
-        drone_id = point_cloud_last_timestamp.frame_id
-        self.drones_pc_list[drone_id] = drone_pc(point_cloud_last_timestamp.stamp.secs, sens)
-
-        # Update grid using the new data
-        self.update_from_tof_sensing_list(drone_id)
+        if sens:
+            drone_id = point_cloud_last_timestamp.frame_id
+            self.drones_pc_list[drone_id] = drone_pc(point_cloud_last_timestamp.stamp.secs, sens)
+            # Update grid using the new data
+            self.update_from_tof_sensing_list(drone_id)
 
 
     def pos_parser(self, msg):
@@ -133,16 +133,15 @@ class Grid:
 
         drone_id = pos_header.frame_id.split("/")[0] # Extract drone name from topic name
         # Store drone position and convert it from [m] to [cm]
-        temp_drones_pos_list = [self.drones_pos_list[drone_id].x+(pos_val[0]*self.m_to_cm),
-                                self.drones_pos_list[drone_id].y+(pos_val[1]*self.m_to_cm),
-                                self.drones_pos_list[drone_id].z+(pos_val[2]*self.m_to_cm)]
-        self.drones_pos_list[drone_id] = drone_pos(pos_header.stamp.secs, temp_drones_pos_list[0], temp_drones_pos_list[1], temp_drones_pos_list[2], None)
+        # temp_drones_pos_list = [self.drones_pos_list[drone_id].x+(pos_val[0]*self.m_to_cm),
+        #                         self.drones_pos_list[drone_id].y+(pos_val[1]*self.m_to_cm),
+        #                         pos_val[2]*self.m_to_cm]
+        self.drones_pos_list[drone_id] = drone_pos(pos_header.stamp.secs, self.initpos[0]+(pos_val[0]*self.m_to_cm), self.initpos[1]+(pos_val[1]*self.m_to_cm), self.initpos[2]+(pos_val[2]*self.m_to_cm), None)
+        i, j = self.xy_to_ij(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
+        if self.matrix[i][j] == 0:
+            self.change_tail_to_empty(i, j)
+            self.empty_idxs.append([i, j])
 
-        ###################################### Only for debug ##################################################
-        self.drone_handel.set_data(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
-        self.fig.canvas.draw()
-
-        ########################################################################################################
 
     # Initialize a publisher for occupancy grid
     def init_grid_publisher(self):
@@ -186,16 +185,39 @@ class Grid:
         self.empty_idxs = []
         self.wall_idxs = []
 
+        # rospy.loginfo("Point cloud")
         for elem in current_pc.pc_sens:
-            rospy.loginfo(np.linalg.norm(elem))
-            if np.linalg.norm(elem) <= np.linalg.norm([self.x_lim[1], self.y_lim[1], 0]):
-                sensing_pos = [[current_pos.x+elem[0], current_pos.y+elem[1]]]
-                rospy.loginfo(sensing_pos)
-                rospy.loginfo([current_pos.x, current_pos.y])
+            if abs(elem[0]) < self.pc_lim and abs(elem[1]) < self.pc_lim and np.linalg.norm(elem) > 0:
+                # sensing_pos = [[current_pos.x+elem[0], current_pos.y+elem[1]]]
+                sensing_pos = [[self.initpos[0]+elem[0], self.initpos[1]+elem[1]]]
+                # rospy.loginfo(elem)
                 self.update_with_tof_sensor([[current_pos.x, current_pos.y]], sensing_pos)
 
+                ###################################### Only for debug ##################################################
+                self.drone_handel.set_data(current_pos.x, current_pos.y)
+                self.fig.canvas.draw()
+
+                ########################################################################################################
+
+    # def update_with_tof_sensor(self, sensor_pos, tof_sensing_pos):
+    #     si, sj = self.xy_to_ij(sensor_pos[0][0], sensor_pos[0][1])
+    #     d = np.subtract(tof_sensing_pos, sensor_pos)
+    #     norm_d = np.linalg.norm(d)
+    #     wall_pos = tof_sensing_pos + d / norm_d * self.res / 1000
+    #     gi, gj = self.xy_to_ij(wall_pos[0][0], wall_pos[0][1])
+    #     bpath = list(bresenham(si, sj, gi, gj))
+    #     for ii, elem in enumerate(bpath):
+    #         if 0 > elem[0] or elem[0] >= self.matrix.shape[0] or 0 > elem[1] or elem[1] >= self.matrix.shape[1]:
+    #             return
+    #         if self.matrix[elem[0]][elem[1]] == 0:
+    #             self.change_tail_to_empty(elem[0], elem[1])
+    #             self.empty_idxs.append([elem[0], elem[1]])
+    #     self.change_tail_to_wall(gi, gj)
+    #     self.wall_idxs.append([gi, gj])
+
+
     def update_with_tof_sensor(self, sensor_pos, tof_sensing_pos):
-        num_of_samples = int(np.floor(np.linalg.norm(np.subtract(tof_sensing_pos, sensor_pos)) / self.res * 2))
+        num_of_samples = int(np.floor(np.linalg.norm(np.subtract(tof_sensing_pos, sensor_pos)) / self.res * 3))
         xs = np.linspace(sensor_pos[0][0], tof_sensing_pos[0][0], num=num_of_samples, endpoint=True)
         ys = np.linspace(sensor_pos[0][1], tof_sensing_pos[0][1], num=num_of_samples, endpoint=True)
         for ind in range(1, num_of_samples):
@@ -204,15 +226,14 @@ class Grid:
                 return
             if self.matrix[i][j] == 0:
                 self.change_tail_to_empty(i, j)
-                self.empty_idxs.append([i,j])
-        if np.linalg.norm(np.subtract(tof_sensing_pos, sensor_pos)) >= self.res/2:
-            d = np.subtract(tof_sensing_pos, sensor_pos)
-            norm_d = np.linalg.norm(d)
-            if norm_d > 0:
-                wall_pos = tof_sensing_pos + d /norm_d*self.res/1000
-                i, j = self.xy_to_ij(wall_pos[0][0], wall_pos[0][1])
-                self.change_tail_to_wall(i, j)
-                self.wall_idxs.append([i, j])
+                self.empty_idxs.append([i, j])
+        d = np.subtract(tof_sensing_pos, sensor_pos)
+        norm_d = np.linalg.norm(d)
+        if norm_d > 0:
+            wall_pos = tof_sensing_pos + d / norm_d * self.res / 1000
+            i, j = self.xy_to_ij(wall_pos[0][0], wall_pos[0][1])
+            self.change_tail_to_wall(i, j)
+            self.wall_idxs.append([i, j])
 
 
 if __name__ == "__main__":
