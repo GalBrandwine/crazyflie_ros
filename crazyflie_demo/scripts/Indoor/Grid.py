@@ -6,12 +6,13 @@ from sensor_msgs.msg import PointCloud2
 from crazyflie_driver.msg import GenericLogData
 import sensor_msgs.point_cloud2 as pc2
 import matplotlib.pyplot as plt
-from nav_msgs.msg import OccupancyGrid
+from nav_msgs.msg import OccupancyGrid, MapMetaData
 from shapely.geometry import Point, LineString, Polygon
 from descartes import PolygonPatch
 from bresenham import bresenham
 import time
 import threading
+from geometry_msgs.msg import Pose
 
 
 # Drone position
@@ -90,8 +91,8 @@ class Grid:
 
 
         # Start occupancy grid publisher
-        # grid_pub_thread = threading.Thread(name='grid_pub_thread', target=self.init_grid_publisher)
-        # grid_pub_thread.start()
+        grid_pub_thread = threading.Thread(name='grid_pub_thread', target=self.init_grid_publisher)
+        grid_pub_thread.start()
 
     ###################################### Only for debug ##################################################
     def plot_ij(self, i, j):
@@ -149,8 +150,23 @@ class Grid:
         # OccupancyGrid documentation:
         # http://docs.ros.org/melodic/api/nav_msgs/html/msg/MapMetaData.html
         occ_grid_msg = OccupancyGrid()
+
         rate = rospy.Rate(0.5)  # 0.5 Hz
         while not rospy.is_shutdown():
+            m = MapMetaData() # Grid metadata
+            m.resolution = self.res # Grid resolution
+            m.width = self.x_lim[1] - self.x_lim[0] # Grid width in world CS
+            m.height = self.y_lim[1] - self.y_lim[0] # Grid height in worlds CS
+            m.origin = Pose() # The grid origin in world CS (there is no need for indoor navigation)
+            occ_grid_msg.info = m
+
+            occ_grid_msg.header.stamp = rospy.Time.now()
+            occ_grid_msg.header.frame_id = "/indoor/occupancy_grid"
+
+            # Convert the matrix from 2D fload64 to 1D uin8 list
+            occ_grid_msg.data = list(np.asarray(self.matrix.flatten(), dtype=np.uint8))
+
+            # Publish the message
             self.grid_publisher.publish(occ_grid_msg)
             rate.sleep()
 
