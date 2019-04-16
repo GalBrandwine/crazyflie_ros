@@ -24,12 +24,12 @@ list of topics per drone:
     /cf4/external_position
     /cf4/imu
     /cf4/laserScan
-    /cf4/log_pos                <---- We are listening to this
+    /cf4/log_pos                
     /cf4/log_ranges
     /cf4/log_rpy
     /cf4/odom
     /cf4/packets
-    /cf4/point_cloud            <---- We are listening to this
+    /cf4/point_cloud            <---- source for point cloud
     /cf4/points/back
     /cf4/points/back_WC
     /cf4/points/front
@@ -39,6 +39,7 @@ list of topics per drone:
     /cf4/points/right
     /cf4/points/right_WC
     /cf4/rssi
+    /tf                         <---- source for drone position rotation 6dof
 
 
 

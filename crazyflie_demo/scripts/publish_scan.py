@@ -19,6 +19,7 @@ from time import sleep
 from math import pi
 
 import laser_geometry.laser_geometry as lg
+from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
 
 
 def get_ranges(msg):
@@ -31,9 +32,9 @@ def get_ranges(msg):
     left = msg.values[3] / 1000
     right = msg.values[4] / 1000
 
-    # inf=float('inf')
-    # scan.ranges = [inf,inf,inf,inf] #TODO - fix error with inf values
-    scan.ranges = [0, 0, 0, 0]
+    inf=float('inf')
+    scan.ranges = [inf,inf,inf,inf] #if there is no reading will publish inf
+    #scan.ranges = [0, 0, 0, 0]
 
     transform = None
     try:
@@ -123,16 +124,14 @@ def get_ranges(msg):
             pub_right_WC.publish(right_WC)
 
     scan.header.stamp = rospy.Time.now()
-    scan_pub.publish(scan)
+    scan_pub.publish(scan) #publish LaserScan message in LOCAL (drone) coordinates
 
-    # convert the message of type LaserScan to a PointCloud2
-    pc2_msg = lp.projectLaser(scan)
-
-    # publish it
-    pc2_pub.publish(pc2_msg)
+    if (transform != None):
+        pc2_msg_LC = lp.projectLaser(scan) # convert the message of type LaserScan to a PointCloud2
+        pc2_msg_WC = do_transform_cloud(pc2_msg_LC, transform) #transform pointcloud to world coordinates
+        pc2_pub.publish(pc2_msg_WC) # publish pointcloud
 
     seq += 1
-
 
 if __name__ == '__main__':
     rospy.init_node('publish_point', anonymous=False)
