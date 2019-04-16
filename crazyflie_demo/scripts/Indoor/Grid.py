@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from nav_msgs.msg import OccupancyGrid
 from shapely.geometry import Point, LineString, Polygon
 from descartes import PolygonPatch
+from bresenham import bresenham
 import time
 import threading
 
@@ -198,6 +199,23 @@ class Grid:
 
                 ########################################################################################################
 
+    # def update_with_tof_sensor(self, sensor_pos, tof_sensing_pos):
+    #     si, sj = self.xy_to_ij(sensor_pos[0][0], sensor_pos[0][1])
+    #     d = np.subtract(tof_sensing_pos, sensor_pos)
+    #     norm_d = np.linalg.norm(d)
+    #     wall_pos = tof_sensing_pos + d / norm_d * self.res / 1000
+    #     gi, gj = self.xy_to_ij(wall_pos[0][0], wall_pos[0][1])
+    #     bpath = list(bresenham(si, sj, gi, gj))
+    #     for ii, elem in enumerate(bpath):
+    #         if 0 > elem[0] or elem[0] >= self.matrix.shape[0] or 0 > elem[1] or elem[1] >= self.matrix.shape[1]:
+    #             return
+    #         if self.matrix[elem[0]][elem[1]] == 0:
+    #             self.change_tail_to_empty(elem[0], elem[1])
+    #             self.empty_idxs.append([elem[0], elem[1]])
+    #     self.change_tail_to_wall(gi, gj)
+    #     self.wall_idxs.append([gi, gj])
+
+
     def update_with_tof_sensor(self, sensor_pos, tof_sensing_pos):
         num_of_samples = int(np.floor(np.linalg.norm(np.subtract(tof_sensing_pos, sensor_pos)) / self.res * 3))
         xs = np.linspace(sensor_pos[0][0], tof_sensing_pos[0][0], num=num_of_samples, endpoint=True)
@@ -208,11 +226,11 @@ class Grid:
                 return
             if self.matrix[i][j] == 0:
                 self.change_tail_to_empty(i, j)
-                self.empty_idxs.append([i,j])
+                self.empty_idxs.append([i, j])
         d = np.subtract(tof_sensing_pos, sensor_pos)
         norm_d = np.linalg.norm(d)
         if norm_d > 0:
-            wall_pos = tof_sensing_pos + d /norm_d*self.res/1000
+            wall_pos = tof_sensing_pos + d / norm_d * self.res / 1000
             i, j = self.xy_to_ij(wall_pos[0][0], wall_pos[0][1])
             self.change_tail_to_wall(i, j)
             self.wall_idxs.append([i, j])
