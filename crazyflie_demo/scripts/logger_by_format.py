@@ -52,7 +52,7 @@ def get_sensors(msg):
     global deltaX, deltaY, outlierCount
     deltaX = msg.values[0]
     deltaY = msg.values[1]
-    outlierCount = msg.values[2]
+
 
 
 def get_imu(msg):
@@ -103,9 +103,11 @@ def logger_handler(tf_prefix):
         t.gyroX = gyroX
         t.gyroY = gyroY
         t.gyroZ = gyroZ
+        t.deltaX=deltaX
+        t.deltaY=deltaY
 
         try:  # if optitrack message exists
-            trans = tfBuffer.lookup_transform('world', tf_prefix, rospy.Time(0))
+            trans = tfBuffer.lookup_transform('world', tf_prefix +'_vrpn', rospy.Time(0))
 
             q = (trans.transform.rotation.x,
                  trans.transform.rotation.y,
@@ -130,7 +132,7 @@ def logger_handler(tf_prefix):
             t.ref_roll = 0
             t.ref_pitch = 0
             t.ref_yaw = 0
-            rospy.loginfo("tf lookup -- {} not found".format(tf_prefix))
+            rospy.loginfo("tf lookup -- {} not found".format(tf_prefix+'_vrpn'))
 
         pub.publish(t)
 

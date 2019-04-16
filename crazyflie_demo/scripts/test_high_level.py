@@ -25,7 +25,7 @@ import tty, termios
 import sys
 
 speed = 0.25
-initialZ = 0.35
+initialZ = 0.4 #fixed flight height
 
 global front, back, up, left, right, zrange
 front = back = up = left = right = zrange = 0.0
@@ -70,7 +70,7 @@ def handler(cf_handler):
     key = None
     global front, back, up, left, right, zrange
     dist_threshold = 0.1
-    def_duration = 1.8
+    def_duration = 1.5
 
     try:
         rospy.loginfo("keyboard controller.\n")
@@ -145,11 +145,11 @@ def handler(cf_handler):
                     cf_handler.goTo(goal=[0.0, 0.0, -0.05], yaw=0, duration=def_duration, relative=True)
                 elif key == 'q':
                     # 45 degrees CW
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=1.5708, duration=def_duration + 1.0,
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=1.5708, duration=def_duration+0.5 ,
                                     relative=True)  # slow down yaw rotation
                 elif key == 'e':
                     # 45 degrees CCW
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=-1.5708, duration=def_duration + 1.0,
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=-1.5708, duration=def_duration+0.5 ,
                                     relative=True)  # slow down yaw rotation
                 # elif key == 's':
                 # stop

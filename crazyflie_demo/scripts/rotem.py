@@ -30,16 +30,8 @@ list of topics per drone:
     /cf4/odom
     /cf4/packets
     /cf4/point_cloud            <---- source for point cloud
-    /cf4/points/back
-    /cf4/points/back_WC
-    /cf4/points/front
-    /cf4/points/front_WC
-    /cf4/points/left
-    /cf4/points/left_WC
-    /cf4/points/right
-    /cf4/points/right_WC
     /cf4/rssi
-    /tf                         <---- source for drone position rotation 6dof
+    /tf                         <---- source for drone position/rotation 6dof
 
 
 
@@ -71,24 +63,42 @@ class CrazyflieFlightData:
         # Init listeners
         self.pc_sub = rospy.Subscriber("/" + prefix + "/point_cloud", PointCloud2,
                                        self.point_cloud_parser)
-        self.pos_sub = rospy.Subscriber("/" + prefix + "/log_pos", GenericLogData,
-                                        self.pos_parser)
+
+
 
     def point_cloud_parser(self, msg):
-        """Each publicitation, theres' an array of 10 points."""
+        """Each publicitation, theres' an array of 1-4 points in 3D space (x,y,z)"""
         self.point_cloud_last_timestamp = msg.header
         self.point_cloud = pc2.read_points_list(msg, skip_nans=True)
 
-    def pos_parser(self, msg):
-        self.pos = msg.header
-        self.pos = msg.values
+        """Each publicitation, we do a lookup for where the drone currently is, in x,y,z, r,p,y """
+
+    #     try:
+    #         trans = tfBuffer.lookup_transform('world', prefix, rospy.Time(0))
+    #
+    #         q = (trans.transform.rotation.x,
+    #              trans.transform.rotation.y,
+    #              trans.transform.rotation.z,
+    #              trans.transform.rotation.w)
+    #
+    #         euler = euler_from_quaternion(q, axes='sxyz')
+    #
+    #         x = trans.transform.translation.x
+    #         y = trans.transform.translation.y
+    #         z = trans.transform.translation.z
+    #         roll = euler[0]
+    #         pitch = euler[1]
+    #         yaw = euler[2]
+    #
+    #     except:
+    #         rospy.loginfo("tf lookup -- {} not found".format(prefix))
 
 
 if __name__ == '__main__':
     rospy.init_node("drone_data_parser")
 
     # get cf name
-    prefix = rospy.get_param("~tf_prefix")
+    prefix = 'cf6'#rospy.get_param("~tf_prefix")
     CrazyflieFlightData(prefix)
 
     rospy.spin()
