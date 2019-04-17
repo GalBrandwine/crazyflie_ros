@@ -62,7 +62,8 @@ class Grid:
         self.pc_lim = 200
 
         ###################################### Only for debug ##################################################
-        self.initpos = [5, 5, 0]  # Initial position in cm
+        self.initpos = [0, 0, 0]  # Reference point
+        self.takeofpos = [100, 100, 0] # Take off position
         self.tail_handles = list()
         self.drone_handel = []
         self.fig = plt.figure()
@@ -75,7 +76,7 @@ class Grid:
                 handles_list.append(self.plot_ij(i, j))
             self.tail_handles.append(handles_list)
 
-        self.drone_handel, = self.ax.plot(self.initpos[0], self.initpos[1], 'ob')
+        self.drone_handel, = self.ax.plot(self.takeofpos[0], self.takeofpos[1], 'ob')
 
         self.fig.show()
         self.fig.canvas.draw()
@@ -84,9 +85,9 @@ class Grid:
 
         for iDrone in range(self.nDrones):
             # Init listeners
-            self.pos_sub = rospy.Subscriber("/cf4/log_pos", GenericLogData,
+            self.pos_sub = rospy.Subscriber("/cf6/log_pos", GenericLogData,
                                             self.pos_parser)
-            self.pc_sub = rospy.Subscriber("/cf4/point_cloud", PointCloud2,
+            self.pc_sub = rospy.Subscriber("/cf6/point_cloud", PointCloud2,
                                            self.point_cloud_parser)
 
 
@@ -118,11 +119,11 @@ class Grid:
         # Read data from all sensors (probably 4)
         for i in range(len(point_cloud)):
             point = point_cloud[i]
-            if np.linalg.norm([point.x, point.y]) > 0:
-                sens.append([point.x*self.m_to_cm, point.y*self.m_to_cm, point.z*self.m_to_cm])
-
-        if sens:
-            drone_id = point_cloud_last_timestamp.frame_id
+            sens.append([point.x*self.m_to_cm, point.y*self.m_to_cm, point.z*self.m_to_cm])
+            # drone_id = point_cloud_last_timestamp.frame_id # need to change frame_id from "world" to cf6
+            drone_id = "cf6"
+            # rospy.loginfo("PC")
+            # rospy.loginfo(drone_id)
             self.drones_pc_list[drone_id] = drone_pc(point_cloud_last_timestamp.stamp.secs, sens)
             # Update grid using the new data
             self.update_from_tof_sensing_list(drone_id)
@@ -134,10 +135,9 @@ class Grid:
 
         drone_id = pos_header.frame_id.split("/")[0] # Extract drone name from topic name
         # Store drone position and convert it from [m] to [cm]
-        # temp_drones_pos_list = [self.drones_pos_list[drone_id].x+(pos_val[0]*self.m_to_cm),
-        #                         self.drones_pos_list[drone_id].y+(pos_val[1]*self.m_to_cm),
-        #                         pos_val[2]*self.m_to_cm]
-        self.drones_pos_list[drone_id] = drone_pos(pos_header.stamp.secs, self.initpos[0]+(pos_val[0]*self.m_to_cm), self.initpos[1]+(pos_val[1]*self.m_to_cm), self.initpos[2]+(pos_val[2]*self.m_to_cm), None)
+        self.drones_pos_list[drone_id] = drone_pos(pos_header.stamp.secs, self.takeofpos[0]+(pos_val[0]*self.m_to_cm), self.takeofpos[1]+(pos_val[1]*self.m_to_cm), self.takeofpos[2]+(pos_val[2]*self.m_to_cm), None)
+        # rospy.loginfo("Pos")
+        # rospy.loginfo(drone_id)
         i, j = self.xy_to_ij(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
         if self.matrix[i][j] == 0:
             self.change_tail_to_empty(i, j)
@@ -201,12 +201,9 @@ class Grid:
         self.empty_idxs = []
         self.wall_idxs = []
 
-        # rospy.loginfo("Point cloud")
         for elem in current_pc.pc_sens:
             if abs(elem[0]) < self.pc_lim and abs(elem[1]) < self.pc_lim and np.linalg.norm(elem) > 0:
-                # sensing_pos = [[current_pos.x+elem[0], current_pos.y+elem[1]]]
                 sensing_pos = [[self.initpos[0]+elem[0], self.initpos[1]+elem[1]]]
-                # rospy.loginfo(elem)
                 self.update_with_tof_sensor([[current_pos.x, current_pos.y]], sensing_pos)
 
                 ###################################### Only for debug ##################################################
