@@ -1,0 +1,562 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="d0a11fd4-31a1-4a87-a47f-8a1f5f7c2601" name="Default Changelist" comment="With occupancy grid data (for publish purposes).">
+      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/crazyflie_demo/launch/indoors_multi_drone_with_point_cloud_publishing.launch" beforeDir="false" afterPath="$PROJECT_DIR$/crazyflie_demo/launch/indoors_multi_drone_with_point_cloud_publishing.launch" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Display.py" beforeDir="false" afterPath="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Display.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Grid.py" beforeDir="false" afterPath="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Grid.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/GridPOI.py" beforeDir="false" afterPath="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/GridPOI.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/main.py" afterDir="false" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Grid.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="262">
+              <caret line="82" column="16" selection-start-line="82" selection-start-column="13" selection-end-line="82" selection-end-column="16" />
+              <folding>
+                <element signature="e#22#40#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Display.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="101">
+              <caret line="214" column="71" selection-start-line="214" selection-start-column="71" selection-end-line="214" selection-end-column="71" />
+              <folding>
+                <element signature="e#0#31#0" expanded="true" />
+                <element signature="e#4786#4999#0" />
+                <element signature="e#4906#4999#0" />
+                <element signature="e#5066#5258#0" />
+                <element signature="e#5171#5258#0" />
+                <element signature="e#5336#5419#0" />
+                <element signature="e#5487#5565#0" />
+                <element signature="e#5602#5729#0" />
+                <element signature="e#5769#5924#0" />
+                <element signature="e#5808#5924#0" />
+                <element signature="e#6843#6880#0" />
+                <element signature="e#6932#6968#0" />
+                <element signature="e#7019#7055#0" />
+                <element signature="e#7121#7194#0" />
+                <element signature="e#7266#7464#0" />
+                <element signature="e#7330#7437#0" />
+                <element signature="e#7504#7629#0" />
+                <element signature="e#7669#7784#0" />
+                <element signature="e#8588#8892#0" />
+                <element signature="e#8683#8830#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/GridPOI.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="345">
+              <caret line="23" selection-start-line="23" selection-end-line="23" />
+              <folding>
+                <element signature="e#0#17#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/main.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="131">
+              <caret line="65" column="41" selection-start-line="65" selection-start-column="41" selection-end-line="65" selection-end-column="41" />
+              <folding>
+                <element signature="e#44#75#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/crazyflie_demo/launch/indoors_multi_drone_with_point_cloud_publishing.launch">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="229">
+              <caret line="147" lean-forward="true" selection-start-line="147" selection-end-line="147" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>self.border</find>
+      <find>self.obs</find>
+      <find>self.x_li</find>
+      <find>self.m_to_cm</find>
+      <find>empty_i</find>
+      <find>Occ</find>
+      <find>grid</find>
+      <find>indoo</find>
+      <find>res</find>
+      <find>world</find>
+      <find>parse</find>
+      <find>pu</find>
+      <find>handel</find>
+      <find>m_to</find>
+      <find>parser</find>
+      <find>initpos</find>
+      <find>takeof</find>
+      <find>initpo</find>
+      <find>update_drone_plot</find>
+      <find>plot</find>
+      <find>pars</find>
+      <find>drones_pos_list</find>
+      <find>t</find>
+      <find>is_time_equal</find>
+      <find>loginf</find>
+      <find>-1</find>
+      <find>print</find>
+      <find>set</find>
+      <find>drone_pos</find>
+      <find>fig</find>
+    </findStrings>
+    <replaceStrings>
+      <replace>handle</replace>
+      <replace>m_to_cm</replace>
+    </replaceStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="ROOT_SYNC" value="DONT_SYNC" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="dc6958b1d8cad19c17423a7cb1a8d827cc5d8635" />
+      </map>
+    </option>
+    <favorite-branches>
+      <branch-storage>
+        <map>
+          <entry type="REMOTE">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="origin/crazyflie_IndoorSimTest" />
+              </list>
+            </value>
+          </entry>
+        </map>
+      </branch-storage>
+    </favorite-branches>
+    <excluded-from-favorite>
+      <branch-storage>
+        <map>
+          <entry type="REMOTE">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="origin/master" />
+              </list>
+            </value>
+          </entry>
+        </map>
+      </branch-storage>
+    </excluded-from-favorite>
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/GridPOI.py" />
+        <option value="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/main.py" />
+        <option value="$PROJECT_DIR$/crazyflie_demo/launch/indoors_multi_drone_with_point_cloud_publishing.launch" />
+        <option value="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Grid.py" />
+        <option value="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Display.py" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="75" />
+    <option name="y" value="16" />
+    <option name="width" value="1281" />
+    <option name="height" value="732" />
+  </component>
+  <component name="ProjectView">
+    <navigator proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="Scope" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="crazyflie_ros" type="b2602c69:ProjectViewProjectNode" />
+              <item name="crazyflie_ros" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="crazyflie_ros" type="b2602c69:ProjectViewProjectNode" />
+              <item name="crazyflie_ros" type="462c0819:PsiDirectoryNode" />
+              <item name="crazyflie_demo" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="crazyflie_ros" type="b2602c69:ProjectViewProjectNode" />
+              <item name="crazyflie_ros" type="462c0819:PsiDirectoryNode" />
+              <item name="crazyflie_demo" type="462c0819:PsiDirectoryNode" />
+              <item name="launch" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="crazyflie_ros" type="b2602c69:ProjectViewProjectNode" />
+              <item name="crazyflie_ros" type="462c0819:PsiDirectoryNode" />
+              <item name="crazyflie_demo" type="462c0819:PsiDirectoryNode" />
+              <item name="scripts" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="crazyflie_ros" type="b2602c69:ProjectViewProjectNode" />
+              <item name="crazyflie_ros" type="462c0819:PsiDirectoryNode" />
+              <item name="crazyflie_demo" type="462c0819:PsiDirectoryNode" />
+              <item name="scripts" type="462c0819:PsiDirectoryNode" />
+              <item name="Indoor" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="Git.Branch.Popup.ShowAllRemotes" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../indoor" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Python.Display">
+    <configuration name="Display" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="crazyflie_ros" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Display.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="crazyflie_ros" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.Display" />
+        <item itemvalue="Python.main" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="d0a11fd4-31a1-4a87-a47f-8a1f5f7c2601" name="Default Changelist" comment="" />
+      <created>1555003654413</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1555003654413</updated>
+    </task>
+    <task id="LOCAL-00001" summary="With bug fixing, comments and drone position drawing (for debugging purposes only).">
+      <created>1555020251275</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1555020251275</updated>
+    </task>
+    <task id="LOCAL-00002" summary="With bug fixing, comments and drone position drawing (for debugging purposes only).">
+      <created>1555052268508</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1555052268508</updated>
+    </task>
+    <task id="LOCAL-00003" summary="With occupancy grid data (for publish purposes).">
+      <created>1555413378515</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1555413378515</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
+    <servers />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="64" y="-11" width="1303" height="780" extended-state="6" />
+    <editor active="true" />
+    <layout>
+      <window_info content_ui="combo" id="Project" order="0" weight="0.17214398" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="bottom" id="Run" order="2" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Version Control" order="7" weight="0.32868218" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="8" sideWeight="0.49921754" visible="true" weight="0.32868218" />
+      <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.5007825" side_tool="true" weight="0.32868218" />
+      <window_info anchor="bottom" id="Python Console" order="10" weight="0.32868218" />
+      <window_info anchor="bottom" id="Messages" order="11" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+    </layout>
+    <layout-to-restore>
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.17214398" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="bottom" id="Run" order="2" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Version Control" order="7" weight="0.32868218" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="8" sideWeight="0.49921754" visible="true" weight="0.32868218" />
+      <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.5007825" side_tool="true" weight="0.32868218" />
+      <window_info anchor="bottom" id="Python Console" order="10" weight="0.32868218" />
+      <window_info anchor="bottom" id="Messages" order="11" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+    </layout-to-restore>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="With bug fixing, comments and drone position drawing (for debugging purposes only)." />
+    <MESSAGE value="With occupancy grid publisher." />
+    <MESSAGE value="With occupancy grid data (for publish purposes)." />
+    <option name="LAST_COMMIT_MESSAGE" value="With occupancy grid data (for publish purposes)." />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/main.py</url>
+          <line>39</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/main.py</url>
+          <line>23</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Display.py</url>
+          <line>246</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Display.py</url>
+          <line>28</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="debuggerHistoryManager">
+    <expressions id="evaluateCodeFragment">
+      <expression>
+        <expression-string>agents = list()
+drones = list()
+drones_pos_list = list()
+for i in range(0, num_of_agents):
+    drone_pos = [[-10000, -10000]]
+    while (env.is_in_obs(drone_pos)) or not(env.is_in_border_polygon(drone_pos)):
+        drone_pos = env.enterence + 30 * 2 * ([[0.5, 0.5]] - np.random.rand(1, 2))
+    # drones.append(Drone(i, drone_pos, 0, env))
+    # agents.append(Agent(i, drone_pos, grid.res, grid.x_lim, grid.y_lim))
+    drones_pos_list.append(list(drone_pos[0]))</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>agents = list()
+drones = list()
+drones_pos_list = list()
+for i in range(0, num_of_agents):
+    drone_pos = [[-10000, -10000]]
+    while (env.is_in_obs(drone_pos)) or not(env.is_in_border_polygon(drone_pos)):
+        drone_pos = env.enterence + 30 * 2 * ([[0.5, 0.5]] - np.random.rand(1, 2))
+    drones.append(Drone(i, drone_pos, 0, env))
+    agents.append(Agent(i, drone_pos, grid.res, grid.x_lim, grid.y_lim))
+    drones_pos_list.append(list(drone_pos[0]))</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>agents = list()
+drones = list()
+drones_pos_list = list()
+for i in range(0, num_of_agents):
+    drone_pos = [[-10000, -10000]]
+    while (env.is_in_obs(drone_pos)) or not(env.is_in_border_polygon(drone_pos)):
+        drone_pos = env.enterence + 30 * 2 * ([[0.5, 0.5]] - np.random.rand(1, 2))</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
+    </expressions>
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/crazyflie_demo/launch/rotem.launch">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="124">
+          <caret line="43" column="44" selection-start-line="43" selection-start-column="44" selection-end-line="43" selection-end-column="44" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/lib/python2.7/dist-packages/matplotlib/pyplot.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="134">
+          <caret line="243" selection-start-line="243" selection-end-line="243" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///opt/ros/kinetic/lib/python2.7/dist-packages/nav_msgs/msg/_OccupancyGrid.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="89">
+          <caret line="101" column="46" selection-start-line="101" selection-start-column="46" selection-end-line="101" selection-end-column="46" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Drone.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="16" column="19" selection-start-line="16" selection-start-column="19" selection-end-line="16" selection-end-column="19" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/EnvSim.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-529">
+          <caret line="109" column="8" selection-start-line="109" selection-start-column="8" selection-end-line="109" selection-end-column="8" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/GridPOI.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="345">
+          <caret line="23" selection-start-line="23" selection-end-line="23" />
+          <folding>
+            <element signature="e#0#17#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/crazyflie_demo/launch/indoors_multi_drone_with_point_cloud_publishing.launch">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="229">
+          <caret line="147" lean-forward="true" selection-start-line="147" selection-end-line="147" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="131">
+          <caret line="65" column="41" selection-start-line="65" selection-start-column="41" selection-end-line="65" selection-end-column="41" />
+          <folding>
+            <element signature="e#44#75#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Grid.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="262">
+          <caret line="82" column="16" selection-start-line="82" selection-start-column="13" selection-end-line="82" selection-end-column="16" />
+          <folding>
+            <element signature="e#22#40#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Display.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="101">
+          <caret line="214" column="71" selection-start-line="214" selection-start-column="71" selection-end-line="214" selection-end-column="71" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+            <element signature="e#4786#4999#0" />
+            <element signature="e#4906#4999#0" />
+            <element signature="e#5066#5258#0" />
+            <element signature="e#5171#5258#0" />
+            <element signature="e#5336#5419#0" />
+            <element signature="e#5487#5565#0" />
+            <element signature="e#5602#5729#0" />
+            <element signature="e#5769#5924#0" />
+            <element signature="e#5808#5924#0" />
+            <element signature="e#6843#6880#0" />
+            <element signature="e#6932#6968#0" />
+            <element signature="e#7019#7055#0" />
+            <element signature="e#7121#7194#0" />
+            <element signature="e#7266#7464#0" />
+            <element signature="e#7330#7437#0" />
+            <element signature="e#7504#7629#0" />
+            <element signature="e#7669#7784#0" />
+            <element signature="e#8588#8892#0" />
+            <element signature="e#8683#8830#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>

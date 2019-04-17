@@ -14,16 +14,18 @@ import time
 import threading
 from geometry_msgs.msg import Pose
 
+m_to_cm = 100
 
 # Drone position
 class drone_pos:
-    def __init__(self, time = None, x = None, y = None, z = None, w = None):
+    def __init__(self, time = None, x = None, y = None, z = None, w = None, index = -1):
 
         self.time = time
         self.x = x
         self.y = y
         self.z = z
         self.w = w
+        self.index = index
 
 
 # Drone point cloud (from range sensors)
@@ -54,7 +56,6 @@ class Grid:
         self.wall_idxs = []
         self.nDrones = 1
         self.eps = 1 # Allowed time difference between messages
-        self.m_to_cm = 100
         self.min_rng = 20 # Range which indicates equal positions
         self.drones_pos_list = dict()
         self.drones_pc_list = dict()
@@ -119,14 +120,13 @@ class Grid:
         # Read data from all sensors (probably 4)
         for i in range(len(point_cloud)):
             point = point_cloud[i]
-            sens.append([point.x*self.m_to_cm, point.y*self.m_to_cm, point.z*self.m_to_cm])
+            sens.append([point.x*m_to_cm, point.y*m_to_cm, point.z*m_to_cm])
             # drone_id = point_cloud_last_timestamp.frame_id # need to change frame_id from "world" to cf6
             drone_id = "cf6"
-            # rospy.loginfo("PC")
-            # rospy.loginfo(drone_id)
-            self.drones_pc_list[drone_id] = drone_pc(point_cloud_last_timestamp.stamp.secs, sens)
-            # Update grid using the new data
-            self.update_from_tof_sensing_list(drone_id)
+            if sens and drone_id in list(self.drones_pos_list.keys()):
+                self.drones_pc_list[drone_id] = drone_pc(point_cloud_last_timestamp.stamp.secs, sens)
+                # Update grid using the new data
+                self.update_from_tof_sensing_list(drone_id)
 
 
     def pos_parser(self, msg):
@@ -135,9 +135,11 @@ class Grid:
 
         drone_id = pos_header.frame_id.split("/")[0] # Extract drone name from topic name
         # Store drone position and convert it from [m] to [cm]
-        self.drones_pos_list[drone_id] = drone_pos(pos_header.stamp.secs, self.takeofpos[0]+(pos_val[0]*self.m_to_cm), self.takeofpos[1]+(pos_val[1]*self.m_to_cm), self.takeofpos[2]+(pos_val[2]*self.m_to_cm), None)
-        # rospy.loginfo("Pos")
-        # rospy.loginfo(drone_id)
+        self.drones_pos_list[drone_id] = drone_pos(pos_header.stamp.secs,
+                                                   self.takeofpos[0]+(pos_val[0]*m_to_cm),
+                                                   self.takeofpos[1]+(pos_val[1]*m_to_cm),
+                                                   self.takeofpos[2]+(pos_val[2]*m_to_cm), None)
+        # rospy.loginfo("x: {},     y: {}".format(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y))
         i, j = self.xy_to_ij(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
         if self.matrix[i][j] == 0:
             self.change_tail_to_empty(i, j)
@@ -163,8 +165,8 @@ class Grid:
             occ_grid_msg.header.stamp = rospy.Time.now()
             occ_grid_msg.header.frame_id = "/indoor/occupancy_grid"
 
-            # Convert the matrix from 2D fload64 to 1D uin8 list
-            occ_grid_msg.data = list(np.asarray(self.matrix.flatten(), dtype=np.uint8))
+            # Convert the matrix from 2D fload64 to 1D int8 list
+            occ_grid_msg.data = list(np.asarray(self.matrix.flatten(), dtype=np.int8))
 
             # Publish the message
             self.grid_publisher.publish(occ_grid_msg)

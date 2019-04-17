@@ -1,6 +1,8 @@
+import matplotlib
 import numpy as np
 import rospy
 from std_msgs.msg import String
+from nav_msgs.msg import OccupancyGrid
 
 class GridPOI:
 
@@ -14,6 +16,11 @@ class GridPOI:
         self.corner_points_list_xy = []
         self.wall_idxs_ij = []
         self.wall_idxs_xy = []
+
+        self.grid_sub = rospy.Subscriber('/indoor/occupancy_grid_topic', OccupancyGrid, self.grid_parser)
+
+    def grid_parser(self, msg):
+        rospy.loginfo(msg)
 
     def find_POI(self, matrix):
         self.interesting_points_list_ij, self.interesting_points_list_xy = self.find_interesting_points(matrix)
@@ -177,3 +184,11 @@ class GridPOI:
         return wall_idxs_ij
 
 
+
+if __name__ == "__main__":
+
+    rospy.init_node("grid_insights")
+
+    grid = GridPOI()
+
+    rospy.spin()

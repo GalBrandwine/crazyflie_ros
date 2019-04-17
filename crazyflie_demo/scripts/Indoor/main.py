@@ -9,7 +9,7 @@ from Agent import Agent
 from Drone import Drone
 import PathBuilder
 from GridPOI import GridPOI
-from Display import Display
+from Display import Display_manager
 import copy
 import rospy
 from std_msgs.msg import String
