@@ -88,9 +88,8 @@ A few notes:
 <!--        <node name="drone_data_parser" pkg="crazyflie_demo" type="rotem.py" output="screen">-->
 <!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
 <!--        </node>-->
-        <node name="grid_publisher" pkg="crazyflie_demo" type="Grid.py" output="screen">
-
-        </node>
+<!--        <node name="grid_publisher" pkg="crazyflie_demo" type="Grid.py" output="screen">-->
+<!--        </node>-->
 
     </group>
 
@@ -140,6 +139,9 @@ A few notes:
 <!--        <node name="drone_data_parser" pkg="crazyflie_demo" type="rotem.py" output="screen">-->
 <!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
 <!--        </node>-->
+        <node name="grid_publisher" pkg="crazyflie_demo" type="Grid.py" output="screen">
+        </node>-->
+
     </group>
 
 </launch>
