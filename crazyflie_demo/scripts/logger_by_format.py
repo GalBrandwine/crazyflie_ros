@@ -53,8 +53,6 @@ def get_sensors(msg):
     deltaX = msg.values[0]
     deltaY = msg.values[1]
 
-
-
 def get_imu(msg):
     global accX, accY, accZ, gyroX, gyroY, gyroZ
     accX = msg.linear_acceleration.x
@@ -107,23 +105,22 @@ def logger_handler(tf_prefix):
         t.deltaY=deltaY
 
         try:  # if optitrack message exists
-            trans = tfBuffer.lookup_transform('world', tf_prefix +'_vrpn', rospy.Time(0))
+            trans = tfBuffer.lookup_transform('world', tf_prefix +'_fixed', rospy.Time(0))
 
             q = (trans.transform.rotation.x,
                  trans.transform.rotation.y,
                  trans.transform.rotation.z,
                  trans.transform.rotation.w)
 
-            euler = euler_from_quaternion(q, axes='sxzy')
+            euler = euler_from_quaternion(q, axes='sxyz')
 
-            # translation : x, z, y
-            # rotation : x, -z , y
-            t.ref_x = -1 * trans.transform.translation.z
-            t.ref_y = trans.transform.translation.x
-            t.ref_z = trans.transform.translation.y
+
+            t.ref_x = trans.transform.translation.x
+            t.ref_y = trans.transform.translation.y
+            t.ref_z = trans.transform.translation.z
             t.ref_roll = euler[0]
-            t.ref_pitch = -1 * euler[2]
-            t.ref_yaw = euler[1]
+            t.ref_pitch = euler[1]
+            t.ref_yaw = euler[2]
 
         except:
             t.ref_x = 0
@@ -143,6 +140,6 @@ def logger_handler(tf_prefix):
 if __name__ == '__main__':
     rospy.init_node("logger")
 
-    tf_prefix = rospy.get_param("~tf_prefix")
+    tf_prefix = 'cf3' #rospy.get_param("~tf_prefix")
 
     logger_handler(tf_prefix)

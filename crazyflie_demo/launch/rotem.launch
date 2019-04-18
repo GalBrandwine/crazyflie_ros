@@ -22,8 +22,8 @@ This is test for building the python CF data wrapper.
     <arg name="frame1" default="cf3"/>
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
 <!-- first CF launch coordinates relative to world coordinate origin   -->
-    <arg name="initX1" default="1"/>
-    <arg name="initY1" default="1"/>
+    <arg name="initX1" default="0"/>
+    <arg name="initY1" default="0"/>
     <arg name="initZ1" default="0"/>
 
 
@@ -54,6 +54,12 @@ This is test for building the python CF data wrapper.
         </rosparam>
     </node>
 
+<!--            fix vrpn axes - broadcasts tf frame "cf#_fixed" -->
+
+        <node name="explorer" pkg="crazyflie_demo" type="tf_fixer.py" output="screen">
+            <param name="tf_prefix" value="$(arg frame1)"/>
+        </node>
+
 <!--    Set the name space of the CF_x to be its name-->
 <!--    Future develop: instead of : each group is one CF, make each group flock.-->
     <group ns="$(arg frame1)">
@@ -80,7 +86,7 @@ This is test for building the python CF data wrapper.
             </rosparam>
         </node>
 
-        <!--            The node for flying drone -->
+<!--            The node for flying drone -->
         <node name="explorer" pkg="crazyflie_demo" type="test_high_level.py" output="screen">
             <param name="tf_prefix" value="$(arg frame1)"/>
         </node>
@@ -99,14 +105,14 @@ This is test for building the python CF data wrapper.
              <param name="tf_prefix" value="$(arg frame1)"/>
         </node>
 
-        <node name="drone_data_parser" pkg="crazyflie_demo" type="rotem.py" output="screen">
-             <param name="tf_prefix" value="$(arg frame1)"/>
-        </node>
+        <!--<node name="drone_data_parser" pkg="crazyflie_demo" type="rotem.py" output="screen">-->
+             <!--<param name="tf_prefix" value="$(arg frame1)"/>-->
+        <!--</node>-->
 
 <!--        Logger - consetrate all cf's data under one topic, for debugging. -->
-        <node name="debug_logger" pkg="crazyflie_demo" type="logger_by_format.py" output="screen">
-             <param name="tf_prefix" value="$(arg frame1)"/>
-        </node>
+        <!--<node name="debug_logger" pkg="crazyflie_demo" type="logger_by_format.py" output="screen">-->
+             <!--<param name="tf_prefix" value="$(arg frame1)"/>-->
+        <!--</node>-->
     </group>
 
 
