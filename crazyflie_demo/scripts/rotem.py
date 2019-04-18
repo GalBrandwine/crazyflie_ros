@@ -1,14 +1,11 @@
 #!/usr/bin/env python
 """This scrips capture's all "ross" data of a specific CF, and contain it in a pythonize object, for later use. """
 
-import sensor_msgs.point_cloud2 as pc2
 import rospy
-from sensor_msgs.msg import PointCloud2
-from crazyflie_driver.msg import GenericLogData
-
+import sensor_msgs.point_cloud2 as pc2
 import tf2_ros
+from sensor_msgs.msg import PointCloud2
 from tf.transformations import euler_from_quaternion
-import math
 
 """
 P*j - position vector (after filtering / conditioning . transformations) as ROS  structure - TransformStamped
@@ -64,41 +61,46 @@ class CrazyflieFlightData:
         self.pc_sub = rospy.Subscriber("/" + prefix + "/point_cloud", PointCloud2,
                                        self.point_cloud_parser)
 
-
+        self.tfBuffer = tf2_ros.Buffer()
+        self.listener = tf2_ros.TransformListener(self.tfBuffer)
 
     def point_cloud_parser(self, msg):
-        """Each publicitation, theres' an array of 1-4 points in 3D space (x,y,z)"""
+        """Each publication, we do a lookup for where the drone currently is, in x,y,z, r,p,y. """
         self.point_cloud_last_timestamp = msg.header
         self.point_cloud = pc2.read_points_list(msg, skip_nans=True)
 
-        """Each publicitation, we do a lookup for where the drone currently is, in x,y,z, r,p,y """
 
-    #     try:
-    #         trans = tfBuffer.lookup_transform('world', prefix, rospy.Time(0))
-    #
-    #         q = (trans.transform.rotation.x,
-    #              trans.transform.rotation.y,
-    #              trans.transform.rotation.z,
-    #              trans.transform.rotation.w)
-    #
-    #         euler = euler_from_quaternion(q, axes='sxyz')
-    #
-    #         x = trans.transform.translation.x
-    #         y = trans.transform.translation.y
-    #         z = trans.transform.translation.z
-    #         roll = euler[0]
-    #         pitch = euler[1]
-    #         yaw = euler[2]
-    #
-    #     except:
-    #         rospy.loginfo("tf lookup -- {} not found".format(prefix))
+
+        try:
+            trans = self.tfBuffer.lookup_transform('world', prefix, rospy.Time(0))
+
+            q = (trans.transform.rotation.x,
+                 trans.transform.rotation.y,
+                 trans.transform.rotation.z,
+                 trans.transform.rotation.w)
+
+            euler = euler_from_quaternion(q, axes='sxyz')
+
+            x = trans.transform.translation.x
+            y = trans.transform.translation.y
+            z = trans.transform.translation.z
+            roll = euler[0]
+            pitch = euler[1]
+            yaw = euler[2]
+
+            self.pos = [x, y, z, roll, pitch, yaw]
+
+            rospy.loginfo("pos: {}\n\n\n".format(self.pos))
+
+        except:
+            rospy.logdebug("tf lookup -- {} not found".format(prefix))
 
 
 if __name__ == '__main__':
     rospy.init_node("drone_data_parser")
 
     # get cf name
-    prefix = 'cf6'#rospy.get_param("~tf_prefix")
+    prefix = rospy.get_param("~tf_prefix")
     CrazyflieFlightData(prefix)
 
     rospy.spin()

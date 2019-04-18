@@ -1,44 +1,33 @@
 #!/usr/bin/env python
 
-import rospy
-from crazyflie_driver.msg import GenericLogData
-
 import geometry_msgs.msg
-import tf_conversions
+import rospy
 import tf2_ros
-from tf.transformations import euler_from_quaternion
-from math import radians, pi
-
-from geometry_msgs.msg import Pose
-from geometry_msgs.msg import Quaternion
-
 
 
 def handle_pose():
-
-
     r = rospy.Rate(40)
     prev_x = prev_y = prev_yaw = 0
 
     tfBuffer = tf2_ros.Buffer()
     listener = tf2_ros.TransformListener(tfBuffer)
 
-    first_trans_cf=None
+    first_trans_cf = None
     first_trans_vrpn = None
 
     rospy.loginfo("waiting for initial transform from {} to world".format(tf_prefix))
 
-    while (first_trans_cf==None):
+    while (first_trans_cf == None):
         try:
-            first_trans_cf = tfBuffer.lookup_transform('world' , tf_prefix, rospy.Time(0))
+            first_trans_cf = tfBuffer.lookup_transform('world', tf_prefix, rospy.Time(0))
         except:
             pass
 
     rospy.loginfo("waiting for initial transform from {} vrpn to world".format(tf_prefix))
 
-    while (first_trans_vrpn==None):
+    while (first_trans_vrpn == None):
         try:
-            first_trans_vrpn = tfBuffer.lookup_transform('world', tf_prefix+'_vrpn', rospy.Time(0))
+            first_trans_vrpn = tfBuffer.lookup_transform('world', tf_prefix + '_vrpn', rospy.Time(0))
         except:
             pass
 
@@ -49,10 +38,10 @@ def handle_pose():
 
     while not rospy.is_shutdown():
 
-        trans=None
+        trans = None
 
         try:  # if optitrack message exists
-            trans = tfBuffer.lookup_transform('world', tf_prefix +'_vrpn', rospy.Time(0))
+            trans = tfBuffer.lookup_transform('world', tf_prefix + '_vrpn', rospy.Time(0))
 
             q = (trans.transform.rotation.x,
                  trans.transform.rotation.y,
@@ -60,11 +49,9 @@ def handle_pose():
                  trans.transform.rotation.w)
 
         except:
-            rospy.loginfo("tf lookup -- {} not found".format(tf_prefix+'_vrpn'))
+            rospy.loginfo("tf lookup -- {} not found".format(tf_prefix + '_vrpn'))
 
-        if (trans!=None):
-
-
+        if (trans != None):
             br = tf2_ros.TransformBroadcaster()
             t = geometry_msgs.msg.TransformStamped()
 
@@ -94,5 +81,5 @@ def handle_pose():
 
 if __name__ == '__main__':
     rospy.init_node('tf_fixer')
-    tf_prefix='cf3' ##rospy.get_param("~tf_prefix")
+    tf_prefix = rospy.get_param("~tf_prefix")
     handle_pose()
