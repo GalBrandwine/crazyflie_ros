@@ -7,31 +7,32 @@ This is test for building the python CF data wrapper.
 -->
 
 <launch>
-    <!--If working with VRPN (e.g optitrack):
-        arg name="server" default="169.254.148.86"/>   Need to be the same as "Local Interface" in MOTIVE streaming settings. and "Multicast Interface" should be set to this leptop IP -
-        <arg name="port" default="3883"/>
-    -->
+    <!--  VRPN settings (optitrack):  -->
+    <arg name="ip" default="169.254.148.86"/>   <!-- Need to be the same as "Local Interface" in MOTIVE streaming settings. and "Multicast Interface" should be set to this leptop IP -->
+    <arg name="port" default="3883"/>
 
-<!--    Trajectory's-->
+
+<!--    Trajectory settings -->
     <arg name="traj1" default="/home/galbra/catkin_ws/src/crazyflie_ros/crazyflie_demo/scripts/takeoff.csv" />
     <arg name="traj2" default="/home/galbra/catkin_ws/src/crazyflie_ros/crazyflie_demo/scripts/figure8.csv" />
 
 
-<!-- for CF num 4   THIS IS WORLD'S (0,0,0) AND ALL OTHER DRONES ARE RELATIVE TO THIS ONE-->
-    <arg name="uri1" default="radio://0/120/2M/E7E7E7E704"/>
-    <arg name="frame1" default="cf4"/>
+<!-- first CF address   -->
+    <arg name="uri1" default="radio://0/120/2M/E7E7E7E703"/>
+    <arg name="frame1" default="cf3"/>
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
+<!-- first CF launch coordinates relative to world coordinate origin   -->
     <arg name="initX1" default="0"/>
     <arg name="initY1" default="0"/>
     <arg name="initZ1" default="0"/>
 
 
-<!-- for CF num 6   -->
-    <arg name="uri2" default="radio://0/120/2M/E7E7E7E706"/>
-    <arg name="frame2" default="cf6"/>
+<!-- second CF address   -->
+    <arg name="uri2" default="radio://0/120/2M/E7E7E7E704"/>
+    <arg name="frame2" default="cf4"/>
     <arg name="traj_list2" default="[$(arg traj1),$(arg traj2)]"/>
-    <arg name="initX2" default="0"/>
-    <arg name="initY2" default="1"/>
+    <arg name="initX2" default="1"/>
+    <arg name="initY2" default="2"/>
     <arg name="initZ2" default="0"/>
 
 
@@ -39,6 +40,25 @@ This is test for building the python CF data wrapper.
     <include file="$(find crazyflie_driver)/launch/crazyflie_server.launch">
     </include>
 
+
+        <!-- run a single vrpn client -->
+    <node pkg="vrpn_client_ros" type="vrpn_client_node" name="vrpn_client_node" output="screen">
+        <rosparam subst_value="true">
+            server: $(arg ip)
+            port: $(arg port)
+            update_frequency: 100.0
+            frame_id: world
+            use_server_time: false
+            broadcast_tf: true
+            refresh_tracker_frequency: 1.0 <!-- VRPN will add all trackers found on connection -->
+        </rosparam>
+    </node>
+
+<!--            fix vrpn axes - broadcasts tf frame "cf#_fixed" -->
+
+        <node name="explorer" pkg="crazyflie_demo" type="tf_fixer.py" output="screen">
+            <param name="tf_prefix" value="$(arg frame1)"/>
+        </node>
 
 <!--    Set the name space of the CF_x to be its name-->
 <!--    Future develop: instead of : each group is one CF, make each group flock.-->
@@ -56,27 +76,28 @@ This is test for building the python CF data wrapper.
             <param name="enable_logging_battery" value="False"/>
 
             <rosparam>
-                genericLogTopics: ["log_pos" , "log_rpy" , "log_ranges" ]
-                genericLogTopicFrequencies: [20 , 20 , 20 ]
+                genericLogTopics: ["log_pos" , "log_rpy" , "log_ranges" ,"log_sensors" ]
+                genericLogTopicFrequencies: [20 , 20 , 20 , 20 ]
                 genericLogTopic_log_pos_Variables: ["stateEstimate.x", "stateEstimate.y", "stateEstimate.z"]
                 genericLogTopic_log_rpy_Variables: ["stabilizer.roll" , "stabilizer.pitch" , "stabilizer.yaw"]
                 genericLogTopic_log_ranges_Variables: ["range.front", "range.back", "range.up", "range.left",
                 "range.right" , "range.zrange" ]
+                genericLogTopic_log_sensors_Variables: ["motion.deltaX" , "motion.deltaY" , "motion.outlierCount" ]
             </rosparam>
         </node>
-<!--            The node for actually running desired python code -->
-        <node name="crazyflie_demo_hover" pkg="crazyflie_demo" type="hl_traj_arg.py" output="screen">
+
+<!--            The node for flying drone -->
+        <node name="explorer" pkg="crazyflie_demo" type="test_high_level.py" output="screen">
             <param name="tf_prefix" value="$(arg frame1)"/>
-<!--            Pass a 'list' as ros param-->
-            <rosparam param="traj_list" subst_value="True">$(arg traj_list)</rosparam>
         </node>
+
+<!--        Tf_broadcast a static transform with offset between drone 1 launch point and world-->
+
+        <node pkg="tf" type="static_transform_publisher" name="world_to_$(arg frame1)_takeoff" args="$(arg initX1) $(arg initY1) 0 0 0 0 1 world $(arg frame1)_takeoff 100"/>
 
 <!--        Tf_broadcast a specific drone with world-->
         <node name="tf_broadcast" pkg="crazyflie_demo" type="tf_broadcaster.py" output="screen">
             <param name="tf_prefix" value="$(arg frame1)"/>
-            <param name="initX" value="$(arg initX1)"/>
-            <param name="initY" value="$(arg initY1)"/>
-            <param name="initZ" value="$(arg initZ1)"/>
         </node>
 
 <!--        Publish TOF sensors readings as pointcloud-->
@@ -84,14 +105,14 @@ This is test for building the python CF data wrapper.
              <param name="tf_prefix" value="$(arg frame1)"/>
         </node>
 
-        <node name="drone_data_parser" pkg="crazyflie_demo" type="rotem.py" output="screen">
-             <param name="tf_prefix" value="$(arg frame1)"/>
-        </node>
+        <!--<node name="drone_data_parser" pkg="crazyflie_demo" type="rotem.py" output="screen">-->
+             <!--<param name="tf_prefix" value="$(arg frame1)"/>-->
+        <!--</node>-->
 
 <!--        Logger - consetrate all cf's data under one topic, for debugging. -->
-        <node name="debug_logger" pkg="crazyflie_demo" type="logger_by_format.py" output="screen">
-             <param name="tf_prefix" value="$(arg frame1)"/>
-        </node>
+        <!--<node name="debug_logger" pkg="crazyflie_demo" type="logger_by_format.py" output="screen">-->
+             <!--<param name="tf_prefix" value="$(arg frame1)"/>-->
+        <!--</node>-->
     </group>
 
 
