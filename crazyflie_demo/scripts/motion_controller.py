@@ -15,10 +15,11 @@ from threading import Thread
 import crazyflie
 import rospy
 # from crazyflie_driver.msg import Hover
+import tf
+import tf2_ros
 from crazyflie_driver.msg import GenericLogData
-
-from crazyflie_driver.msg import Hover #imports for hover message
-from std_msgs.msg import Empty #imports for hover message
+from crazyflie_driver.msg import Hover  # imports for hover message
+from geometry_msgs.msg import PoseStamped
 
 # TODO: move all this shit into a class MotionController
 
@@ -26,19 +27,29 @@ from std_msgs.msg import Empty #imports for hover message
 speed = 0.25
 initialZ = 0.35
 
-global front, back, up, left, right, zrange
+global front, back, up, left, right, zrange, cj_injection_flag, cj_injection_message
 front = back = up = left = right = zrange = 0.0
+cj_injection_flag = False
+cj_injection_message = None
+
+
+def Cj_injector(msg):
+    global cj_injection_message, cj_injection_flag
+    rospy.loginfo("Cj_recieved...")
+    cj_injection_flag = True
+    cj_injection_message = msg
+    # rospy.loginfo(msg)
 
 
 def avoid_collision():
-    global msg,pub_hover
+    global msg, pub_hover
     rate = rospy.Rate(10)
     msg.header.frame_id = 'world'
     msg.yawrate = 0
     msg.zDistance = 0.4
-    vx=-0.15
-    vy=0
-    duration=0.7
+    vx = -0.15
+    vy = 0
+    duration = 0.7
     start = rospy.get_time()
     while not rospy.is_shutdown():
         msg.vx = vx
@@ -59,6 +70,7 @@ def avoid_collision():
     msg.vy = 0
     msg.header.stamp = rospy.Time.now()
     pub_hover.publish(msg)
+
 
 def get_ranges(msg):
     global front, back, up, left, right, zrange
@@ -97,9 +109,14 @@ def handler(cf_handler):
 
     global key
     key = None
+    global cj_injection_message, cj_injection_flag
     global front, back, up, left, right, zrange
     dist_threshold = 0.15
     def_duration = 1.8
+
+    # finding transform for Cj_injection
+    tfBuffer = tf2_ros.Buffer()
+    listener = tf2_ros.TransformListener(tfBuffer)
 
     try:
         rospy.loginfo("keyboard controller.\n")
@@ -114,6 +131,45 @@ def handler(cf_handler):
         rospy.loginfo("press 'q','e' for yaw +-45 deg.\n")
 
         while not rospy.is_shutdown():
+
+            # If Cj injection recieved:
+            if cj_injection_flag is True:
+                cj_injection_flag = False
+                cj_injection_message
+
+                quaternion = (
+                    cj_injection_message.orientation.x,
+                    cj_injection_message.orientation.y,
+                    cj_injection_message.orientation.z,
+                    cj_injection_message.orientation.w)
+                euler = tf.transformations.euler_from_quaternion(quaternion)
+
+                x = cj_injection_message.position.x
+                y = cj_injection_message.position.y
+                z = cj_injection_message.position.z
+                roll = euler[0]
+                pitch = euler[1]
+                yaw = euler[2]
+
+                rospy.loginfo("goTo: [{},{},{}] ysw: {}".format(x, y, z, yaw))
+                cf_handler.goTo(goal=[x, y, z], yaw=yaw, duration=def_duration, relative=True)
+
+                # q = (trans.transform.rotation.x,
+                #      trans.transform.rotation.y,
+                #      trans.transform.rotation.z,
+                #      trans.transform.rotation.w)
+                #
+                # euler = euler_from_quaternion(q, axes='sxzy')
+                #
+                # # translation : x, z, y
+                # # rotation : x, -z , y
+                # t.ref_x = -1 * trans.transform.translation.z
+                # t.ref_y = trans.transform.translation.x
+                # t.ref_z = trans.transform.translation.y
+                # t.ref_roll = euler[0]
+                # t.ref_pitch = -1 * euler[2]
+                # t.ref_yaw = euler[1]
+
             if front > 0:
                 if front < dist_threshold:
                     rospy.loginfo("forward collision avoidance")
@@ -209,8 +265,9 @@ if __name__ == '__main__':
 
     prefix = rospy.get_param("~tf_prefix")
     rospy.Subscriber('/' + prefix + '/log_ranges', GenericLogData, get_ranges)
+    rospy.Subscriber('/' + prefix + '/Cj_injcetor', PoseStamped, Cj_injector)
 
-    pub_hover = rospy.Publisher('/' + prefix + "/cmd_hover", Hover, queue_size=1) #hover message publisher
+    pub_hover = rospy.Publisher('/' + prefix + "/cmd_hover", Hover, queue_size=1)  # hover message publisher
     msg = Hover()
     msg.header.seq = 0
 

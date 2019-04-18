@@ -2,19 +2,36 @@
 """This is a simple Cj_injector for emulating"""
 from math import radians
 
-import geometry_msgs.msg
 import rospy
-import tf2_ros
-import tf_conversions
+import tf
+from geometry_msgs.msg import PoseStamped
+
+
+def to_pose_stamped(x, y, z, roll, pitch, yaw):
+    pose = PoseStamped()
+    pose.header.stamp = rospy.Time.now()
+    pose.header.frame_id = "world"
+    pose.pose.position.x = x
+    pose.pose.position.y = y
+    pose.pose.position.z = z
+
+    quaternion = tf.transformations.quaternion_from_euler(radians(roll), radians(pitch), radians(yaw))
+    pose.pose.orientation.x = quaternion[0]
+    pose.pose.orientation.y = quaternion[1]
+    pose.pose.orientation.z = quaternion[2]
+    pose.pose.orientation.w = quaternion[3]
+
+    return pose
+
+
 
 if __name__ == '__main__':
-    rospy.init_node("mynode")
+    rospy.init_node("incjetor")
 
-    # prefix = rospy.get_param("~tf_prefix")
-    prefix = "drone"
+    prefix = rospy.get_param("~tf_prefix")
+    Cj_injector_pub = rospy.Publisher('/' + prefix + "/Cj_injcetor", PoseStamped,
+                                      queue_size=1)  # hover message publisher
 
-    br = tf2_ros.TransformBroadcaster()
-    t = geometry_msgs.msg.TransformStamped()
 
     x = 0
     y = 0
@@ -23,112 +40,34 @@ if __name__ == '__main__':
     pitch = 0
     yaw = 0
 
-    time_delay = 2 # seconds
+    time_delay = 2  # seconds
     while not rospy.is_shutdown():
         """Simple rectangle. """
-        t.header.stamp = rospy.Time.now()
-        # t.header.frame_id = rospy.get_param("~tf_prefix") + '_takeoff'
-        t.header.frame_id = 'world'
-        # t.child_frame_id = rospy.get_param("~tf_prefix")
-        t.child_frame_id = prefix
-        t.transform.translation.x = x
-        t.transform.translation.y = y
-        t.transform.translation.z = z
-        q = tf_conversions.transformations.quaternion_from_euler(radians(roll), radians(pitch), radians(yaw))
-        t.transform.rotation.x = q[0]
-        t.transform.rotation.y = q[1]
-        t.transform.rotation.z = q[2]
-        t.transform.rotation.w = q[3]
-        br.sendTransform(t)
+        pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
+        Cj_injector_pub.publish(pose)
         rospy.sleep(time_delay)
 
         [x, y, z, roll, pitch, yaw] = [1, 0, 0, 0, 0, 0]
-
-        t.header.stamp = rospy.Time.now()
-        # t.header.frame_id = rospy.get_param("~tf_prefix") + '_takeoff'
-        t.header.frame_id = 'world'
-        # t.child_frame_id = rospy.get_param("~tf_prefix")
-        t.child_frame_id = prefix
-        t.transform.translation.x = x
-        t.transform.translation.y = y
-        t.transform.translation.z = z
-        q = tf_conversions.transformations.quaternion_from_euler(radians(roll), radians(pitch), radians(yaw))
-        t.transform.rotation.x = q[0]
-        t.transform.rotation.y = q[1]
-        t.transform.rotation.z = q[2]
-        t.transform.rotation.w = q[3]
-        br.sendTransform(t)
+        pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
+        Cj_injector_pub.publish(pose)
         rospy.sleep(time_delay)
 
         [x, y, z, roll, pitch, yaw] = [1, 1, 0, 0, 0, 0]
-
-        t.header.stamp = rospy.Time.now()
-        # t.header.frame_id = rospy.get_param("~tf_prefix") + '_takeoff'
-        t.header.frame_id = 'world'
-        # t.child_frame_id = rospy.get_param("~tf_prefix")
-        t.child_frame_id = prefix
-        t.transform.translation.x = x
-        t.transform.translation.y = y
-        t.transform.translation.z = z
-        q = tf_conversions.transformations.quaternion_from_euler(radians(roll), radians(pitch), radians(yaw))
-        t.transform.rotation.x = q[0]
-        t.transform.rotation.y = q[1]
-        t.transform.rotation.z = q[2]
-        t.transform.rotation.w = q[3]
-        br.sendTransform(t)
+        pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
+        Cj_injector_pub.publish(pose)
         rospy.sleep(time_delay)
 
         [x, y, z, roll, pitch, yaw] = [0, 1, 0, 0, 0, 0]
-
-        t.header.stamp = rospy.Time.now()
-        # t.header.frame_id = rospy.get_param("~tf_prefix") + '_takeoff'
-        t.header.frame_id = 'world'
-        # t.child_frame_id = rospy.get_param("~tf_prefix")
-        t.child_frame_id = prefix
-        t.transform.translation.x = x
-        t.transform.translation.y = y
-        t.transform.translation.z = z
-        q = tf_conversions.transformations.quaternion_from_euler(radians(roll), radians(pitch), radians(yaw))
-        t.transform.rotation.x = q[0]
-        t.transform.rotation.y = q[1]
-        t.transform.rotation.z = q[2]
-        t.transform.rotation.w = q[3]
-        br.sendTransform(t)
+        pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
+        Cj_injector_pub.publish(pose)
         rospy.sleep(time_delay)
 
         [x, y, z, roll, pitch, yaw] = [0, 0, 0, 0, 0, 6.28318530718]  # 2pi
-
-        t.header.stamp = rospy.Time.now()
-        # t.header.frame_id = rospy.get_param("~tf_prefix") + '_takeoff'
-        t.header.frame_id = 'world'
-        # t.child_frame_id = rospy.get_param("~tf_prefix")
-        t.child_frame_id = prefix
-        t.transform.translation.x = x
-        t.transform.translation.y = y
-        t.transform.translation.z = z
-        q = tf_conversions.transformations.quaternion_from_euler(radians(roll), radians(pitch), radians(yaw))
-        t.transform.rotation.x = q[0]
-        t.transform.rotation.y = q[1]
-        t.transform.rotation.z = q[2]
-        t.transform.rotation.w = q[3]
-        br.sendTransform(t)
+        pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
+        Cj_injector_pub.publish(pose)
         rospy.sleep(time_delay)
 
         [x, y, z, roll, pitch, yaw] = [0, 0, 0, 0, 0, 0]  # 0 pi
-    # goal.header.seq = 1
-    # goal.header.stamp = rospy.Time.now()
-    # goal.header.frame_id = "map"
-    #
-    # goal.pose.position.x = 1.0
-    # goal.pose.position.y = 2.0
-    # goal.pose.position.z = 0.0
-    #
-    # goal.pose.orientation.x = 0.0
-    # goal.pose.orientation.y = 0.0
-    # goal.pose.orientation.z = 0.0
-    # goal.pose.orientation.w = 1.0
-    #
-    # rospy.sleep(1)
-    # goal_publisher.publish(goal)
-
-    # rospy.spin()
+        pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
+        Cj_injector_pub.publish(pose)
+        rospy.sleep(time_delay)
