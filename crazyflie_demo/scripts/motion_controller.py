@@ -141,11 +141,11 @@ def handler(cf_handler):
                     cf_handler.goTo(goal=[0.0, 0.0, -0.05], yaw=0, duration=def_duration, relative=True)
                 elif key == 'q':
                     # 45 degrees CW
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=1.5708, duration=def_duration+0.5 ,
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=4*1.5708, duration=def_duration+2.5 ,
                                     relative=True)  # slow down yaw rotation
                 elif key == 'e':
                     # 45 degrees CCW
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=-1.5708, duration=def_duration+0.5 ,
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=4*-1.5708, duration=def_duration+2.5 ,
                                     relative=True)  # slow down yaw rotation
 
                 # todo add number for trajectorys
