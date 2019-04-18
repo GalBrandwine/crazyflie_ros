@@ -24,14 +24,13 @@ def to_pose_stamped(x, y, z, roll, pitch, yaw):
     return pose
 
 
-
+# todo: motion controller is not working properly becayuse of Cj_injection's we need to make that work
 if __name__ == '__main__':
     rospy.init_node("incjetor")
 
     prefix = rospy.get_param("~tf_prefix")
     Cj_injector_pub = rospy.Publisher('/' + prefix + "/Cj_injcetor", PoseStamped,
                                       queue_size=1)  # hover message publisher
-
 
     x = 0
     y = 0
