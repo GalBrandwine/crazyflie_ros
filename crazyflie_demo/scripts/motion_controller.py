@@ -21,7 +21,7 @@ from crazyflie_driver.msg import GenericLogData
 
 
 speed = 0.25
-initialZ = 0.4 #fixed flight height
+initialZ = 0.35
 
 global front, back, up, left, right, zrange
 front = back = up = left = right = zrange = 0.0
@@ -66,7 +66,7 @@ def handler(cf_handler):
     key = None
     global front, back, up, left, right, zrange
     dist_threshold = 0.1
-    def_duration = 1.5
+    def_duration = 1.8
 
     try:
         rospy.loginfo("keyboard controller.\n")
@@ -141,11 +141,11 @@ def handler(cf_handler):
                     cf_handler.goTo(goal=[0.0, 0.0, -0.05], yaw=0, duration=def_duration, relative=True)
                 elif key == 'q':
                     # 45 degrees CW
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=4*1.5708, duration=def_duration+2.5 ,
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=1.5708, duration=def_duration + 1.0,
                                     relative=True)  # slow down yaw rotation
                 elif key == 'e':
                     # 45 degrees CCW
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=4*-1.5708, duration=def_duration+2.5 ,
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=-1.5708, duration=def_duration + 1.0,
                                     relative=True)  # slow down yaw rotation
 
                 # todo add number for trajectorys
