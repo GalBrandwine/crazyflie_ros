@@ -17,6 +17,9 @@ import rospy
 # from crazyflie_driver.msg import Hover
 from crazyflie_driver.msg import GenericLogData
 
+from crazyflie_driver.msg import Hover #imports for hover message
+from std_msgs.msg import Empty #imports for hover message
+
 # TODO: move all this shit into a class MotionController
 
 
@@ -26,6 +29,36 @@ initialZ = 0.35
 global front, back, up, left, right, zrange
 front = back = up = left = right = zrange = 0.0
 
+
+def avoid_collision():
+    global msg,pub_hover
+    rate = rospy.Rate(10)
+    msg.header.frame_id = 'world'
+    msg.yawrate = 0
+    msg.zDistance = 0.4
+    vx=-0.15
+    vy=0
+    duration=0.7
+    start = rospy.get_time()
+    while not rospy.is_shutdown():
+        msg.vx = vx
+        msg.vy = vy
+        now = rospy.get_time()
+        if (now - start > duration):
+            break
+        msg.header.seq += 1
+        msg.header.stamp = rospy.Time.now()
+        rospy.loginfo("sending...")
+        rospy.loginfo(msg.vx)
+        rospy.loginfo(now - start)
+        pub_hover.publish(msg)
+        rate.sleep()
+
+    msg.header.seq += 1
+    msg.vx = 0
+    msg.vy = 0
+    msg.header.stamp = rospy.Time.now()
+    pub_hover.publish(msg)
 
 def get_ranges(msg):
     global front, back, up, left, right, zrange
@@ -55,7 +88,7 @@ def keypress():
 
 def handler(cf_handler):
     r = rospy.Rate(5)
-    time.sleep(1)
+    time.sleep(0.5)
     cf_handler.takeoff(targetHeight=initialZ, duration=5.0)
     time.sleep(5.0)
 
@@ -65,7 +98,7 @@ def handler(cf_handler):
     global key
     key = None
     global front, back, up, left, right, zrange
-    dist_threshold = 0.1
+    dist_threshold = 0.15
     def_duration = 1.8
 
     try:
@@ -84,22 +117,23 @@ def handler(cf_handler):
             if front > 0:
                 if front < dist_threshold:
                     rospy.loginfo("forward collision avoidance")
-                    cf_handler.goTo(goal=[-0.1, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+                    avoid_collision()
                     time.sleep(def_duration)
 
                 elif back < dist_threshold:
                     rospy.loginfo("back collision avoidance")
-                    cf_handler.goTo(goal=[0.1, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
                     time.sleep(def_duration)
 
                 elif right < dist_threshold:
                     rospy.loginfo("right collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.1, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
                     time.sleep(def_duration)
 
                 elif left < dist_threshold:
                     rospy.loginfo("left collision avoidance")
-                    cf_handler.goTo(goal=[0.0, -0.1, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
                     time.sleep(def_duration)
 
                 elif up < dist_threshold:
@@ -176,6 +210,11 @@ if __name__ == '__main__':
 
     prefix = rospy.get_param("~tf_prefix")
     rospy.Subscriber('/' + prefix + '/log_ranges', GenericLogData, get_ranges)
+
+    pub_hover = rospy.Publisher('/' + prefix + "/cmd_hover", Hover, queue_size=1) #hover message publisher
+    msg = Hover()
+    msg.header.seq = 0
+
     cf = crazyflie.Crazyflie("/" + prefix, "world")
 
     rospy.wait_for_service("/" + prefix + '/update_params')
@@ -195,9 +234,11 @@ if __name__ == '__main__':
     cf.setParam("kalman/initialZ", 0)
     cf.setParam("kalman/resetEstimation", 1)
     ########
-
+    time.sleep(0.2)
+    cf.setParam("kalman/resetEstimation", 0)
+    time.sleep(0.2)
     cf.setParam("stabilizer/controller", 2)  # 2=Use mellinger controller
-    time.sleep(1.0)
+    time.sleep(0.2)
 
     rospy.loginfo("launching threads")
     t1 = Thread(target=handler, args=(cf,))
