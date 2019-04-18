@@ -157,7 +157,7 @@ A few notes:
             <param name="tf_prefix" value="$(arg frame2)"/>
         </node>
 
-        <!--        Tf_broadcast a static transform with offset between drone 2 launch point and world-->
+        <!--        Tf_broadcast a static transform with offset between a drone launch point and world-->
         <node pkg="tf" type="static_transform_publisher" name="world_to_$(arg frame2)_takeoff"
               args="$(arg initX2) $(arg initY2) 0 0 0 0 1 world $(arg frame2)_takeoff 100"/>
 
