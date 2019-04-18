@@ -52,6 +52,8 @@ def get_sensors(msg):
     global deltaX, deltaY, outlierCount
     deltaX = msg.values[0]
     deltaY = msg.values[1]
+    outlierCount = msg.values[2]
+
 
 def get_imu(msg):
     global accX, accY, accZ, gyroX, gyroY, gyroZ
@@ -63,7 +65,7 @@ def get_imu(msg):
     gyroZ = msg.angular_velocity.z
 
 
-def logger_handler(tf_prefix):
+def logger_handler(tf_prefix, tf_ref):
     global x, y, z, roll, pitch, yaw
     pub = rospy.Publisher('/' + tf_prefix + '/debug_logger', crazyflie_sensors, queue_size=1)
     rospy.Subscriber('/' + tf_prefix + '/log_pos', GenericLogData, get_pose)
@@ -101,37 +103,36 @@ def logger_handler(tf_prefix):
         t.gyroX = gyroX
         t.gyroY = gyroY
         t.gyroZ = gyroZ
-        t.deltaX=deltaX
-        t.deltaY=deltaY
 
-        try:  # if optitrack message exists
-            trans = tfBuffer.lookup_transform('world', tf_prefix +'_fixed', rospy.Time(0))
+        """working, but Remember: there's a buf with tf_ref-wold coordinate's. """
+        if tf_ref is not None:
+            try:  # if optitrack message exists
+                trans = tfBuffer.lookup_transform('world', tf_ref, rospy.Time(0))
 
-            q = (trans.transform.rotation.x,
-                 trans.transform.rotation.y,
-                 trans.transform.rotation.z,
-                 trans.transform.rotation.w)
+                q = (trans.transform.rotation.x,
+                     trans.transform.rotation.y,
+                     trans.transform.rotation.z,
+                     trans.transform.rotation.w)
 
-            euler = euler_from_quaternion(q, axes='sxyz')
+                euler = euler_from_quaternion(q, axes='sxzy')
 
+                # translation : x, z, y
+                # rotation : x, -z , y
+                t.ref_x = -1 * trans.transform.translation.z
+                t.ref_y = trans.transform.translation.x
+                t.ref_z = trans.transform.translation.y
+                t.ref_roll = euler[0]
+                t.ref_pitch = -1 * euler[2]
+                t.ref_yaw = euler[1]
 
-            t.ref_x = trans.transform.translation.x
-            t.ref_y = trans.transform.translation.y
-            t.ref_z = trans.transform.translation.z
-            t.ref_roll = euler[0]
-            t.ref_pitch = euler[1]
-            t.ref_yaw = euler[2]
-
-        except:
-            t.ref_x = 0
-            t.ref_y = 0
-            t.ref_z = 0
-            t.ref_roll = 0
-            t.ref_pitch = 0
-            t.ref_yaw = 0
-            rospy.loginfo("tf lookup -- {} not found".format(tf_prefix+'_vrpn'))
-
-
+            except:
+                t.ref_x = 0
+                t.ref_y = 0
+                t.ref_z = 0
+                t.ref_roll = 0
+                t.ref_pitch = 0
+                t.ref_yaw = 0
+                rospy.logerr("tf lookup -- {} not found".format(tf_prefix))
 
         pub.publish(t)
 
@@ -142,6 +143,13 @@ def logger_handler(tf_prefix):
 if __name__ == '__main__':
     rospy.init_node("logger")
 
-    tf_prefix = 'cf3' #rospy.get_param("~tf_prefix")
+    tf_prefix = rospy.get_param("~tf_prefix")
 
-    logger_handler(tf_prefix)
+    # Try getting reference from optitrack
+    try:
+        tf_ref = rospy.get_param("~tf_ref")
+    except AttributeError as err:
+        tf_ref = None
+        print (err)
+
+    logger_handler(tf_prefix, tf_ref)

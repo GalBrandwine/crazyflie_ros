@@ -3,22 +3,15 @@
 
 from __future__ import absolute_import, division, unicode_literals, print_function
 
-import rospy
-import crazyflie
-import uav_trajectory
 import time
-# import tf
 
-
-# from crazyflie_driver.msg import Hover
+import crazyflie
+import rospy
+import uav_trajectory
 from std_msgs.msg import Empty
-from crazyflie_driver.srv import UpdateParams
-from crazyflie_driver.msg import GenericLogData
 
-# from threading import Thread
-# import tty, termios
 
-import sys
+# Todo change to trajectory planner only without creating a CF object!!!!
 
 # Globals
 traj_container = []
@@ -27,20 +20,8 @@ traj_container = []
 def launcher(msg):
     rospy.loginfo("******************* launching  --- ".format(prefix))
 
-    # # takeoff
-    # cf.startTrajectory(0, timescale=1.0)
-    # time.sleep(traj1.duration * 1.6)
-    #
-    # # figure8
-    # cf.startTrajectory(1, timescale=1.3)
-    # time.sleep(traj2.duration * 1.7)
-    #
-    # # land
-    # cf.startTrajectory(0, timescale=0.7, reverse=True)
-    # time.sleep(1.1)
-    #
     # Loop on all trajectory's in traj_container:
-    for i,traj in enumerate(traj_container):
+    for i, traj in enumerate(traj_container):
         cf.startTrajectory(i, timescale=1.0)
         time.sleep(traj.duration * 1.6)
 
@@ -53,7 +34,7 @@ def launcher(msg):
 
 if __name__ == '__main__':
     # Create a ros node
-    rospy.init_node('highlevel_trajectory_manager',anonymous=True)
+    rospy.init_node('highlevel_trajectory_manager', anonymous=True)
 
     # prefix = sys.argv[1]
     # prefix = "/" + prefix
@@ -85,15 +66,6 @@ if __name__ == '__main__':
 
     rospy.loginfo("******************* uploading to {0}".format(prefix))
 
-    # traj1 = uav_trajectory.Trajectory()
-    # traj1.loadcsv("/src/crazyflie_ros/crazyflie_demo/scripts/takeoff.csv")
-    #
-    # traj2 = uav_trajectory.Trajectory()
-    # traj2.loadcsv("/src/crazyflie_ros/crazyflie_demo/scripts/figure8.csv")
-
-    # cf.uploadTrajectory(0, 0, traj1)
-    # cf.uploadTrajectory(1, len(traj1.polynomials), traj2)
-
     trajectory_list = rospy.get_param("~traj_list")
 
     # A simple loop for uploading all trajectory's to CF.
@@ -115,7 +87,7 @@ if __name__ == '__main__':
 
         rospy.loginfo("\n\n******************* traj {} uploaded".format(i))
 
-    rospy.Subscriber("/swarm_launch", Empty, launcher)
+    rospy.Subscriber("swarm_launch", Empty, launcher)
 
     rospy.loginfo("******************* ready to fly  --- {0} ".format(prefix))
 
