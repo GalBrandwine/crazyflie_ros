@@ -28,8 +28,7 @@ def get_ranges(msg):
     right = msg.values[4] / 1000
 
     inf = float('inf')
-    scan.ranges = [inf, inf, inf, inf]  # if there is no reading will publish inf
-    # scan.ranges = [0, 0, 0, 0]
+    scan.ranges = [inf, inf, inf, inf]
 
     new_data = False
     transform = None
@@ -38,7 +37,7 @@ def get_ranges(msg):
     except Exception as e:
         rospy.loginfo(e)
 
-    if (front != prev_front):
+    if front is not prev_front:
         scan.ranges[2] = front
         new_data = True
 
@@ -54,12 +53,12 @@ def get_ranges(msg):
         prev_front = front
         #
         # ##publish another point in world coordinates
-        # if (transform != None):
+        # if (transform is not None):
         #     front_WC = tf2_geometry_msgs.do_transform_point(point_front, transform)
         #     front_WC.header.frame_id = "world"
         #     pub_front_WC.publish(front_WC)
 
-    if (back != prev_back):
+    if back is not prev_back:
         scan.ranges[0] = back
         new_data = True
         # point_back = PointStamped()
@@ -73,12 +72,12 @@ def get_ranges(msg):
         prev_back = back
         #
         # ##publish another point in world coordinates
-        # if (transform != None):
+        # if (transform is not None):
         #     back_WC = tf2_geometry_msgs.do_transform_point(point_back, transform)
         #     back_WC.header.frame_id = "world"
         #     pub_back_WC.publish(back_WC)
 
-    if (left != prev_left):
+    if left is not prev_left:
         scan.ranges[3] = left
         new_data = True
         # point_left = PointStamped()
@@ -92,12 +91,12 @@ def get_ranges(msg):
         prev_left = left
         #
         # ##publish another point in world coordinates
-        # if (transform != None):
+        # if (transform is not None):
         #     left_WC = tf2_geometry_msgs.do_transform_point(point_left, transform)
         #     left_WC.header.frame_id = "world"
         #     pub_left_WC.publish(left_WC)
 
-    if (right != prev_right):
+    if right is not prev_right:
         scan.ranges[1] = right
         new_data = True
         # point_right = PointStamped()
@@ -111,7 +110,7 @@ def get_ranges(msg):
         prev_right = right
         #
         # ##publish another point in world coordinates
-        # if (transform != None):
+        # if (transform is not None):
         #     right_WC = tf2_geometry_msgs.do_transform_point(point_right, transform)
         #     right_WC.header.frame_id = "world"
         #     pub_right_WC.publish(right_WC)
@@ -119,7 +118,7 @@ def get_ranges(msg):
     scan.header.stamp = rospy.Time.now()
     scan_pub.publish(scan)  # publish LaserScan message in LOCAL (drone) coordinates
 
-    if (transform != None and new_data == True):
+    if transform is not None and new_data is True:
         pc2_msg_LC = lp.projectLaser(scan)  # convert the message of type LaserScan to a PointCloud2
         pc2_msg_WC = do_transform_cloud(pc2_msg_LC, transform)  # transform pointcloud to world coordinates
         pc2_pub.publish(pc2_msg_WC)  # publish pointcloud
