@@ -24,7 +24,7 @@ A few notes:
     <!-- for CF num 4   THIS IS WORLD'S (0,0,0) AND ALL OTHER DRONES ARE RELATIVE TO THIS ONE-->
     <arg name="uri1" default="radio://0/120/2M/E7E7E7E704"/>
     <arg name="frame1" default="cf4"/>
-    <arg name="frame_ref1" default="cf4_ref"/>
+    <!--    <arg name="frame_ref1" default="cf4_ref"/>-->
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX1" default="0"/>
     <arg name="initY1" default="0"/>
@@ -34,8 +34,8 @@ A few notes:
     <!-- for CF num 6   -->
     <arg name="uri2" default="radio://0/120/2M/E7E7E7E706"/>
     <arg name="frame2" default="cf6"/>
-    <arg name="frame_ref2"
-         default="cf6_ref"/>          <!-- REMEMBER TO NAME IT LIKE THIS IN THE OPTITRACK SOFWTWARE -->
+    <!--    <arg name="frame_ref2"-->
+    <!--         default="cf6_ref"/>          &lt;!&ndash; REMEMBER TO NAME IT LIKE THIS IN THE OPTITRACK SOFWTWARE &ndash;&gt;-->
     <arg name="traj_list2" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX2" default="0"/>
     <arg name="initY2" default="0"/>                    <!-- REMEMBER!!!!!!         -->
@@ -87,6 +87,13 @@ A few notes:
                 genericLogTopic_log_sensors_Variables: ["motion.deltaX" , "motion.deltaY" , "motion.outlierCount" ]
             </rosparam>
         </node>
+
+        <!--            Fix vrpn axes - broadcasts tf frame "cf#_fixed" FOR IT TO WORK THE RIGID BODY NAME MUST BE CF#_VRPN -->
+
+        <node name="explorer" pkg="crazyflie_demo" type="tf_fixer.py" output="screen">
+            <param name="tf_prefix" value="$(arg frame1)"/>
+        </node>
+
         <!--            The node for actually running desired python code -->
         <!--        <node name="crazyflie_demo_hover" pkg="crazyflie_demo" type="traj_planner.py" output="screen">-->
         <!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
@@ -146,6 +153,15 @@ A few notes:
                 genericLogTopic_log_sensors_Variables: ["motion.deltaX" , "motion.deltaY" , "motion.outlierCount" ]
             </rosparam>
         </node>
+
+        <!--        Fix vrpn axes - broadcasts tf frame "cf#_fixed" FOR IT TO WORK THE RIGID BODY NAME MUST BE CF#_VRPN -->
+        <node name="explorer" pkg="crazyflie_demo" type="tf_fixer.py" output="screen">
+            <param name="tf_prefix" value="$(arg frame2)"/>
+        </node>
+
+        <!--        Tf_broadcast a static transform with offset between drone 2 launch point and world-->
+        <node pkg="tf" type="static_transform_publisher" name="world_to_$(arg frame2)_takeoff"
+              args="$(arg initX2) $(arg initY2) 0 0 0 0 1 world $(arg frame2)_takeoff 100"/>
 
         <!--            The node for actually running desired python code -->
         <node name="crazyflie_demo_hover" pkg="crazyflie_demo" type="hl_traj_arg.py" output="screen">
