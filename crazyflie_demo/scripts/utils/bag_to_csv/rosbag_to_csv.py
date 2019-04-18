@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import sys
 from PyQt4 import QtGui
-from datetime import datetime
 from optparse import OptionParser
 
 import rosbag
@@ -53,7 +52,7 @@ def format_csv_filename(form, topic_name):
     return ret
 
 
-def bag_to_csv(options, fname):
+def bag_to_csv(options, fname, file_path):
     try:
         bag = rosbag.Bag(fname)
         streamdict = dict()
@@ -83,8 +82,69 @@ def bag_to_csv(options, fname):
                     stream.write('\n')
 
                     # Add units:
+                    stream.write('[nsec],')
+                    stream.write('[meter],')
+                    stream.write('[meter],')
+                    stream.write('[meter],')
+                    stream.write('[rad],')
+                    stream.write('[rad],')
+                    stream.write('[rad],')
+                    stream.write('[mm],')
+                    stream.write('[mm],')
+                    stream.write('[mm],')
+                    stream.write('[mm],')
+                    stream.write('[mm],')
+                    stream.write('[mm],')
+                    stream.write('[pixel],')
+                    stream.write('[pixel],')
+                    stream.write('[unitless],')
+                    stream.write('[m/s^2],')
+                    stream.write('[m/s^2],')
+                    stream.write('[m/s^2],')
+                    stream.write('[rad/s],')
+                    stream.write('[rad/s],')
+                    stream.write('[rad/s],')
+                    stream.write('[meter],')
+                    stream.write('[meter],')
+                    stream.write('[meter],')
+                    stream.write('[radian],')
+                    stream.write('[radian],')
+                    stream.write('[radian],')
+                    stream.write('\n')
 
-            rospy.loginfo(time.to_time())
+                    # Add coordination relations
+                    stream.write(',')
+                    stream.write('world coord,')
+                    stream.write('world coord,')
+                    stream.write('world coord,')
+                    stream.write('world coord,')
+                    stream.write('world coord,')
+                    stream.write('world coord,')
+                    stream.write('world coord,')
+
+                    # todo: note that in the futore the point_cloud will be in WC
+                    stream.write('LC,')
+                    stream.write('LC,')
+                    stream.write('LC,')
+                    stream.write('LC,')
+                    stream.write('LC,')
+                    stream.write('LC,')
+                    stream.write('LC,')
+                    stream.write('LC,')
+                    stream.write('LC,')
+                    stream.write('LC,')
+                    stream.write('LC,')
+                    stream.write('LC,')
+                    stream.write('LC,')
+                    stream.write('LC,')
+                    stream.write('LC,')
+                    stream.write('WC,')
+                    stream.write('WC,')
+                    stream.write('WC,')
+                    stream.write('LC,')
+                    stream.write('LC,')
+                    stream.write('\n')
+
             stream.write(str(time.to_time()))
             message_to_csv(stream, msg, flatten=not options.header)
             stream.write('\n')
@@ -136,7 +196,7 @@ def main(options):
     options.output_file_format = "%t.csv"
 
     print("Converting....")
-    bag_to_csv(options, files[0])
+    bag_to_csv(options, files[0], files)
 
     QtGui.QMessageBox.information(QtGui.QWidget(), "Message", "Finish Convert!!")
 
