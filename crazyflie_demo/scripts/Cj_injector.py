@@ -23,7 +23,8 @@ if __name__ == '__main__':
     pitch = 0
     yaw = 0
 
-    while True:
+    time_delay = 2 # seconds
+    while not rospy.is_shutdown():
         """Simple rectangle. """
         t.header.stamp = rospy.Time.now()
         # t.header.frame_id = rospy.get_param("~tf_prefix") + '_takeoff'
@@ -39,7 +40,7 @@ if __name__ == '__main__':
         t.transform.rotation.z = q[2]
         t.transform.rotation.w = q[3]
         br.sendTransform(t)
-        rospy.sleep(1)
+        rospy.sleep(time_delay)
 
         [x, y, z, roll, pitch, yaw] = [1, 0, 0, 0, 0, 0]
 
@@ -57,7 +58,7 @@ if __name__ == '__main__':
         t.transform.rotation.z = q[2]
         t.transform.rotation.w = q[3]
         br.sendTransform(t)
-        rospy.sleep(1)
+        rospy.sleep(time_delay)
 
         [x, y, z, roll, pitch, yaw] = [1, 1, 0, 0, 0, 0]
 
@@ -75,7 +76,7 @@ if __name__ == '__main__':
         t.transform.rotation.z = q[2]
         t.transform.rotation.w = q[3]
         br.sendTransform(t)
-        rospy.sleep(1)
+        rospy.sleep(time_delay)
 
         [x, y, z, roll, pitch, yaw] = [0, 1, 0, 0, 0, 0]
 
@@ -93,7 +94,7 @@ if __name__ == '__main__':
         t.transform.rotation.z = q[2]
         t.transform.rotation.w = q[3]
         br.sendTransform(t)
-        rospy.sleep(1)
+        rospy.sleep(time_delay)
 
         [x, y, z, roll, pitch, yaw] = [0, 0, 0, 0, 0, 6.28318530718]  # 2pi
 
@@ -111,7 +112,7 @@ if __name__ == '__main__':
         t.transform.rotation.z = q[2]
         t.transform.rotation.w = q[3]
         br.sendTransform(t)
-        rospy.sleep(1)
+        rospy.sleep(time_delay)
 
         [x, y, z, roll, pitch, yaw] = [0, 0, 0, 0, 0, 0]  # 0 pi
     # goal.header.seq = 1

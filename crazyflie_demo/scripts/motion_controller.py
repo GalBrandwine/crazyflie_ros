@@ -82,7 +82,7 @@ def getch():
 
 
 def keypress():
-    global key
+    global keyC
     key = getch()
 
 
