@@ -19,6 +19,10 @@ from crazyflie_driver.srv import UpdateParams
 from crazyflie_driver.msg import GenericLogData
 from geometry_msgs.msg import PointStamped, TransformStamped, PoseStamped  # PoseStamped added to support vrpn_client
 
+
+from crazyflie_driver.msg import Hover
+from std_msgs.msg import Empty
+
 from threading import Thread
 
 import tty, termios
@@ -29,6 +33,33 @@ initialZ = 0.4 #fixed flight height
 
 global front, back, up, left, right, zrange
 front = back = up = left = right = zrange = 0.0
+
+#
+# def avoid_collision():
+#     global msg,pub_hover
+#     rate = rospy.Rate(10)
+#     msg.header.frame_id = 'world'
+#     msg.yawrate = 0
+#     msg.zDistance = 0.4
+#     vx=-0.15
+#     vy=0
+#     duration=2.0
+#     start = rospy.get_time()
+#     while not rospy.is_shutdown():
+#         msg.vx = vx
+#         msg.vy = vy
+#         now = rospy.get_time()
+#         if (now - start > duration):
+#             break
+#         msg.header.seq += 1
+#         msg.header.stamp = rospy.Time.now()
+#         rospy.loginfo("sending...")
+#         rospy.loginfo(msg.vx)
+#         rospy.loginfo(msg.header.seq)
+#         pub_hover.publish(msg)
+#         rate.sleep()
+#     # stop_msg = Empty()
+#     # pub_stop.publish(stop_msg)
 
 
 def get_ranges(msg):
@@ -88,22 +119,22 @@ def handler(cf_handler):
             if front > 0:
                 if front < dist_threshold:
                     rospy.loginfo("forward collision avoidance")
-                    cf_handler.goTo(goal=[-0.1, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[-0.1, 0.0, 0.0], yaw=0, duration=def_duration-0.5, relative=True)
                     time.sleep(def_duration)
 
                 elif back < dist_threshold:
                     rospy.loginfo("back collision avoidance")
-                    cf_handler.goTo(goal=[0.1, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[0.1, 0.0, 0.0], yaw=0, duration=def_duration-0.5, relative=True)
                     time.sleep(def_duration)
 
                 elif right < dist_threshold:
                     rospy.loginfo("right collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.1, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[0.0, 0.1, 0.0], yaw=0, duration=def_duration-0.5, relative=True)
                     time.sleep(def_duration)
 
                 elif left < dist_threshold:
                     rospy.loginfo("left collision avoidance")
-                    cf_handler.goTo(goal=[0.0, -0.1, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[0.0, -0.1, 0.0], yaw=0, duration=def_duration-0.5, relative=True)
                     time.sleep(def_duration)
 
                 elif up < dist_threshold:
@@ -178,6 +209,12 @@ if __name__ == '__main__':
 
     prefix = rospy.get_param("~tf_prefix")
     rospy.Subscriber('/' + prefix + '/log_ranges', GenericLogData, get_ranges)
+
+    pub_hover = rospy.Publisher(prefix + "/cmd_hover", Hover, queue_size=1)
+    pub_stop = rospy.Publisher(prefix + "/cmd_stop", Empty, queue_size=1)
+    msg = Hover()
+    msg.header.seq = 0
+
     cf = crazyflie.Crazyflie("/" + prefix, "world")
 
     rospy.wait_for_service("/" + prefix + '/update_params')
