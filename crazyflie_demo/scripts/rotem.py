@@ -90,7 +90,7 @@ class CrazyflieFlightData:
 
             self.pos = [x, y, z, roll, pitch, yaw]
 
-            rospy.loginfo("pos: {}\n\n\n".format(self.pos))
+            #rospy.loginfo("pos: {}\n\n\n".format(self.pos))
 
         except:
             rospy.logdebug("tf lookup -- {} not found".format(prefix))

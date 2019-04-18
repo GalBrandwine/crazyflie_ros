@@ -38,7 +38,7 @@ def avoid_collision():
     msg.zDistance = 0.4
     vx=-0.15
     vy=0
-    duration=0.7
+    duration=2.5
     start = rospy.get_time()
     while not rospy.is_shutdown():
         msg.vx = vx
@@ -50,15 +50,9 @@ def avoid_collision():
         msg.header.stamp = rospy.Time.now()
         rospy.loginfo("sending...")
         rospy.loginfo(msg.vx)
-        rospy.loginfo(now - start)
+        rospy.loginfo(msg.header.seq)
         pub_hover.publish(msg)
         rate.sleep()
-
-    msg.header.seq += 1
-    msg.vx = 0
-    msg.vy = 0
-    msg.header.stamp = rospy.Time.now()
-    pub_hover.publish(msg)
 
 def get_ranges(msg):
     global front, back, up, left, right, zrange
@@ -98,7 +92,7 @@ def handler(cf_handler):
     global key
     key = None
     global front, back, up, left, right, zrange
-    dist_threshold = 0.15
+    dist_threshold = 0.1
     def_duration = 1.8
 
     try:
@@ -117,23 +111,23 @@ def handler(cf_handler):
             if front > 0:
                 if front < dist_threshold:
                     rospy.loginfo("forward collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+                    #cf_handler.goTo(goal=[-0.1, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
                     avoid_collision()
                     time.sleep(def_duration)
 
                 elif back < dist_threshold:
                     rospy.loginfo("back collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[0.1, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
                     time.sleep(def_duration)
 
                 elif right < dist_threshold:
                     rospy.loginfo("right collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[0.0, 0.1, 0.0], yaw=0, duration=def_duration, relative=True)
                     time.sleep(def_duration)
 
                 elif left < dist_threshold:
                     rospy.loginfo("left collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[0.0, -0.1, 0.0], yaw=0, duration=def_duration, relative=True)
                     time.sleep(def_duration)
 
                 elif up < dist_threshold:
@@ -211,7 +205,7 @@ if __name__ == '__main__':
     prefix = rospy.get_param("~tf_prefix")
     rospy.Subscriber('/' + prefix + '/log_ranges', GenericLogData, get_ranges)
 
-    pub_hover = rospy.Publisher('/' + prefix + "/cmd_hover", Hover, queue_size=1) #hover message publisher
+    pub_hover = rospy.Publisher(prefix + "/cmd_hover", Hover, queue_size=1) #hover message publisher
     msg = Hover()
     msg.header.seq = 0
 
