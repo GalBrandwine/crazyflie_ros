@@ -131,6 +131,8 @@ def logger_handler(tf_prefix):
             t.ref_yaw = 0
             rospy.loginfo("tf lookup -- {} not found".format(tf_prefix+'_vrpn'))
 
+
+
         pub.publish(t)
 
         # rospy.loginfo(t)

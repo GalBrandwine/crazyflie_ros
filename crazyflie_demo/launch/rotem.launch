@@ -1,10 +1,7 @@
 <?xml version="1.0"?>
 <!--This is suppose to be a Well docomunted .launch file so we could take it as granted when working with other launch files.
 
-This is test for building the python CF data wrapper.
-
-
--->
+This is test for building the python CF data wrapper.  -->
 
 <launch>
     <!--  VRPN settings (optitrack):  -->
