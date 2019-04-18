@@ -10,8 +10,10 @@ A few notes:
 
 <launch>
     <!--If working with VRPN (e.g optitrack): -->
-        <arg name="server" default="169.254.148.86"/>   Need to be the same as "Local Interface" in MOTIVE streaming settings. and "Multicast Interface" should be set to this leptop IP -
-        <arg name="port" default="3883"/>
+    <arg name="server" default="169.254.148.86"/>
+    Need to be the same as "Local Interface" in MOTIVE streaming settings. and "Multicast Interface" should be set to
+    this leptop IP -
+    <arg name="port" default="3883"/>
 
 
     <!--    Trajectory's-->
@@ -32,7 +34,8 @@ A few notes:
     <!-- for CF num 6   -->
     <arg name="uri2" default="radio://0/120/2M/E7E7E7E706"/>
     <arg name="frame2" default="cf6"/>
-    <arg name="frame_ref2" default="cf6_ref"/>          <!-- REMEMBER TO NAME IT LIKE THIS IN THE OPTITRACK SOFWTWARE -->
+    <arg name="frame_ref2"
+         default="cf6_ref"/>          <!-- REMEMBER TO NAME IT LIKE THIS IN THE OPTITRACK SOFWTWARE -->
     <arg name="traj_list2" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX2" default="0"/>
     <arg name="initY2" default="0"/>                    <!-- REMEMBER!!!!!!         -->
@@ -45,7 +48,7 @@ A few notes:
             port: $(arg port)
             update_frequency: 100.0
             frame_id: world
-<!--            child_frame_id: $(arg frame_ref1)-->
+            <!--            child_frame_id: $(arg frame_ref1)-->
             child_frame_id: $(arg frame_ref2)
             use_server_time: true
             broadcast_tf: true
@@ -75,29 +78,30 @@ A few notes:
             <param name="enable_logging_battery" value="False"/>
 
             <rosparam>
-                genericLogTopics: ["log_pos" , "log_rpy" , "log_ranges" ]
-                genericLogTopicFrequencies: [20 , 20 , 20 ]
+                genericLogTopics: ["log_pos" , "log_rpy" , "log_ranges", "log_sensors" ]
+                genericLogTopicFrequencies: [20 , 20 , 20 , 20 ]
                 genericLogTopic_log_pos_Variables: ["stateEstimate.x", "stateEstimate.y", "stateEstimate.z"]
                 genericLogTopic_log_rpy_Variables: ["stabilizer.roll" , "stabilizer.pitch" , "stabilizer.yaw"]
                 genericLogTopic_log_ranges_Variables: ["range.front", "range.back", "range.up", "range.left",
                 "range.right" , "range.zrange" ]
+                genericLogTopic_log_sensors_Variables: ["motion.deltaX" , "motion.deltaY" , "motion.outlierCount" ]
             </rosparam>
         </node>
         <!--            The node for actually running desired python code -->
-<!--        <node name="crazyflie_demo_hover" pkg="crazyflie_demo" type="traj_planner.py" output="screen">-->
-<!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
-<!--            &lt;!&ndash;            Pass a 'list' as ros param&ndash;&gt;-->
-<!--            <rosparam param="traj_list" subst_value="True">$(arg traj_list)</rosparam>-->
-<!--        </node>-->
+        <!--        <node name="crazyflie_demo_hover" pkg="crazyflie_demo" type="traj_planner.py" output="screen">-->
+        <!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
+        <!--            &lt;!&ndash;            Pass a 'list' as ros param&ndash;&gt;-->
+        <!--            <rosparam param="traj_list" subst_value="True">$(arg traj_list)</rosparam>-->
+        <!--        </node>-->
 
         <!--        Start keyboard controller. -->
-<!--        <node name="keyboard_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">-->
-<!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
-<!--        </node>-->
+        <!--        <node name="keyboard_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">-->
+        <!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
+        <!--        </node>-->
 
-<!--        <node name="keyboard_controller" pkg="crazyflie_demo" type="goal_publisher.py" output="screen">-->
-<!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
-<!--        </node>-->
+        <!--        <node name="keyboard_controller" pkg="crazyflie_demo" type="goal_publisher.py" output="screen">-->
+        <!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
+        <!--        </node>-->
 
         <!--        Tf_broadcast a specific drone with world-->
         <node name="tf_broadcast" pkg="crazyflie_demo" type="tf_broadcaster.py" output="screen">
@@ -133,12 +137,13 @@ A few notes:
             <param name="enable_logging_battery" value="False"/>
 
             <rosparam>
-                genericLogTopics: ["log_pos" , "log_rpy" , "log_ranges" ]
-                genericLogTopicFrequencies: [20 , 20 , 20 ]
+                genericLogTopics: ["log_pos" , "log_rpy" , "log_ranges", "log_sensors" ]
+                genericLogTopicFrequencies: [20 , 20 , 20 , 20 ]
                 genericLogTopic_log_pos_Variables: ["stateEstimate.x", "stateEstimate.y", "stateEstimate.z"]
                 genericLogTopic_log_rpy_Variables: ["stabilizer.roll" , "stabilizer.pitch" , "stabilizer.yaw"]
                 genericLogTopic_log_ranges_Variables: ["range.front", "range.back", "range.up", "range.left",
                 "range.right" , "range.zrange" ]
+                genericLogTopic_log_sensors_Variables: ["motion.deltaX" , "motion.deltaY" , "motion.outlierCount" ]
             </rosparam>
         </node>
 
@@ -149,7 +154,7 @@ A few notes:
             <rosparam param="traj_list" subst_value="True">$(arg traj_list2)</rosparam>
         </node>
 
-                <!--        Start keyboard controller. -->
+        <!--        Start keyboard controller. -->
         <node name="keyboard_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">
             <param name="tf_prefix" value="$(arg frame2)"/>
         </node>
