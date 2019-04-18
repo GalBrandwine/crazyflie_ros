@@ -65,11 +65,11 @@ class CrazyflieFlightData:
         self.listener = tf2_ros.TransformListener(self.tfBuffer)
 
     def point_cloud_parser(self, msg):
-        """Each publicitation, theres' an array of 1-4 points in 3D space (x,y,z)"""
+        """Each publication, we do a lookup for where the drone currently is, in x,y,z, r,p,y. """
         self.point_cloud_last_timestamp = msg.header
         self.point_cloud = pc2.read_points_list(msg, skip_nans=True)
 
-        """Each publicitation, we do a lookup for where the drone currently is, in x,y,z, r,p,y """
+
 
         try:
             trans = self.tfBuffer.lookup_transform('world', prefix, rospy.Time(0))
@@ -90,7 +90,7 @@ class CrazyflieFlightData:
 
             self.pos = [x, y, z, roll, pitch, yaw]
 
-            rospy.logdebug("pos: {}".format(self.pos))
+            rospy.loginfo("pos: {}\n\n\n".format(self.pos))
 
         except:
             rospy.logdebug("tf lookup -- {} not found".format(prefix))
@@ -100,7 +100,7 @@ if __name__ == '__main__':
     rospy.init_node("drone_data_parser")
 
     # get cf name
-    prefix = 'cf6'  # rospy.get_param("~tf_prefix")
+    prefix = rospy.get_param("~tf_prefix")
     CrazyflieFlightData(prefix)
 
     rospy.spin()
