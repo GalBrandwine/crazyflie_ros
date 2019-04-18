@@ -51,7 +51,7 @@ This is test for building the python CF data wrapper.  -->
         </rosparam>
     </node>
 
-<!--            fix vrpn axes - broadcasts tf frame "cf#_fixed" -->
+<!--            fix vrpn axes - broadcasts tf frame "cf#_fixed" FOR IT TO WORK THE RIGID BODY NAME MUST BE CF#_VRPN -->
 
         <node name="explorer" pkg="crazyflie_demo" type="tf_fixer.py" output="screen">
             <param name="tf_prefix" value="$(arg frame1)"/>
@@ -137,7 +137,7 @@ This is test for building the python CF data wrapper.  -->
 <!--            </rosparam>-->
 <!--        </node>-->
 <!--&lt;!&ndash;            The node for actually running desired python code &ndash;&gt;-->
-<!--        <node name="crazyflie_demo_hover" pkg="crazyflie_demo" type="hl_traj_arg.py" output="screen">-->
+<!--        <node name="crazyflie_demo_hover" pkg="crazyflie_demo" type="traj_planner.py" output="screen">-->
 <!--            <param name="tf_prefix" value="$(arg frame2)"/>-->
 <!--&lt;!&ndash;            Pass a list as ros param&ndash;&gt;-->
 <!--            <rosparam param="traj_list" subst_value="True">$(arg traj_list2)</rosparam>-->

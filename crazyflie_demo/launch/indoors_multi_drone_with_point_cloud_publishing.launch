@@ -9,10 +9,12 @@ A few notes:
 -->
 
 <launch>
-    <!--If working with VRPN (e.g optitrack):
-        arg name="server" default="169.254.148.86"/>   Need to be the same as "Local Interface" in MOTIVE streaming settings. and "Multicast Interface" should be set to this leptop IP -
-        <arg name="port" default="3883"/>
-    -->
+    <!--If working with VRPN (e.g optitrack): -->
+    <arg name="server" default="169.254.148.86"/>
+    Need to be the same as "Local Interface" in MOTIVE streaming settings. and "Multicast Interface" should be set to
+    this leptop IP -
+    <arg name="port" default="3883"/>
+
 
     <!--    Trajectory's-->
     <arg name="traj1" default="/home/galbra/catkin_ws/src/crazyflie_ros/crazyflie_demo/scripts/takeoff.csv"/>
@@ -22,6 +24,7 @@ A few notes:
     <!-- for CF num 4   THIS IS WORLD'S (0,0,0) AND ALL OTHER DRONES ARE RELATIVE TO THIS ONE-->
     <arg name="uri1" default="radio://0/120/2M/E7E7E7E704"/>
     <arg name="frame1" default="cf4"/>
+    <!--    <arg name="frame_ref1" default="cf4_ref"/>-->
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX1" default="0"/>
     <arg name="initY1" default="0"/>
@@ -29,11 +32,13 @@ A few notes:
 
 
     <!-- for CF num 6   -->
-    <arg name="uri2" default="radio://0/120/2M/E7E7E7E706"/>
-    <arg name="frame2" default="cf6"/>
+    <arg name="uri2" default="radio://0/120/2M/E7E7E7E703"/>
+    <arg name="frame2" default="cf3"/>
+    <!--    <arg name="frame_ref2"-->
+    <!--         default="cf6_ref"/>          &lt;!&ndash; REMEMBER TO NAME IT LIKE THIS IN THE OPTITRACK SOFWTWARE &ndash;&gt;-->
     <arg name="traj_list2" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX2" default="0"/>
-    <arg name="initY2" default="1"/>
+    <arg name="initY2" default="0"/>                    <!-- REMEMBER!!!!!!         -->
     <arg name="initZ2" default="0"/>
 
     <!--run vrpn client -->
@@ -43,11 +48,9 @@ A few notes:
             port: $(arg port)
             update_frequency: 100.0
             frame_id: world
-<!--            child_frame_id: $(arg frame_ref1)-->
-            child_frame_id: $(arg frame_ref2)
-            use_server_time: true
+            use_server_time: false
             broadcast_tf: true
-            refresh_tracker_frequency: 1.0
+            refresh_tracker_frequency: 1.0 <!-- VRPN will add all trackers found on connection -->
         </rosparam>
     </node>
 
@@ -73,29 +76,37 @@ A few notes:
             <param name="enable_logging_battery" value="False"/>
 
             <rosparam>
-                genericLogTopics: ["log_pos" , "log_rpy" , "log_ranges" ]
-                genericLogTopicFrequencies: [20 , 20 , 20 ]
+                genericLogTopics: ["log_pos" , "log_rpy" , "log_ranges", "log_sensors" ]
+                genericLogTopicFrequencies: [20 , 20 , 20 , 20 ]
                 genericLogTopic_log_pos_Variables: ["stateEstimate.x", "stateEstimate.y", "stateEstimate.z"]
                 genericLogTopic_log_rpy_Variables: ["stabilizer.roll" , "stabilizer.pitch" , "stabilizer.yaw"]
                 genericLogTopic_log_ranges_Variables: ["range.front", "range.back", "range.up", "range.left",
                 "range.right" , "range.zrange" ]
+                genericLogTopic_log_sensors_Variables: ["motion.deltaX" , "motion.deltaY" , "motion.outlierCount" ]
             </rosparam>
         </node>
+
+        <!--            Fix vrpn axes - broadcasts tf frame "cf#_fixed" FOR IT TO WORK THE RIGID BODY NAME MUST BE CF#_VRPN -->
+
+        <node name="explorer" pkg="crazyflie_demo" type="tf_fixer.py" output="screen">
+            <param name="tf_prefix" value="$(arg frame1)"/>
+        </node>
+
         <!--            The node for actually running desired python code -->
-<!--        <node name="crazyflie_demo_hover" pkg="crazyflie_demo" type="hl_traj_arg.py" output="screen">-->
-<!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
-<!--            &lt;!&ndash;            Pass a 'list' as ros param&ndash;&gt;-->
-<!--            <rosparam param="traj_list" subst_value="True">$(arg traj_list)</rosparam>-->
-<!--        </node>-->
+        <!--        <node name="crazyflie_demo_hover" pkg="crazyflie_demo" type="traj_planner.py" output="screen">-->
+        <!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
+        <!--            &lt;!&ndash;            Pass a 'list' as ros param&ndash;&gt;-->
+        <!--            <rosparam param="traj_list" subst_value="True">$(arg traj_list)</rosparam>-->
+        <!--        </node>-->
 
         <!--        Start keyboard controller. -->
-<!--        <node name="keyboard_controller" pkg="crazyflie_demo" type="test_high_level.py" output="screen">-->
-<!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
-<!--        </node>-->
+        <!--        <node name="keyboard_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">-->
+        <!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
+        <!--        </node>-->
 
-<!--        <node name="keyboard_controller" pkg="crazyflie_demo" type="goal_publisher.py" output="screen">-->
-<!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
-<!--        </node>-->
+        <!--        <node name="keyboard_controller" pkg="crazyflie_demo" type="goal_publisher.py" output="screen">-->
+        <!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
+        <!--        </node>-->
 
         <!--        Tf_broadcast a specific drone with world-->
         <node name="tf_broadcast" pkg="crazyflie_demo" type="tf_broadcaster.py" output="screen">
@@ -131,23 +142,33 @@ A few notes:
             <param name="enable_logging_battery" value="False"/>
 
             <rosparam>
-                genericLogTopics: ["log_pos" , "log_rpy" , "log_ranges" ]
-                genericLogTopicFrequencies: [20 , 20 , 20 ]
+                genericLogTopics: ["log_pos" , "log_rpy" , "log_ranges", "log_sensors" ]
+                genericLogTopicFrequencies: [20 , 20 , 20 , 20 ]
                 genericLogTopic_log_pos_Variables: ["stateEstimate.x", "stateEstimate.y", "stateEstimate.z"]
                 genericLogTopic_log_rpy_Variables: ["stabilizer.roll" , "stabilizer.pitch" , "stabilizer.yaw"]
                 genericLogTopic_log_ranges_Variables: ["range.front", "range.back", "range.up", "range.left",
                 "range.right" , "range.zrange" ]
+                genericLogTopic_log_sensors_Variables: ["motion.deltaX" , "motion.deltaY" , "motion.outlierCount" ]
             </rosparam>
         </node>
 
-        <!--            The node for actually running desired python code -->
-        <node name="crazyflie_demo_hover" pkg="crazyflie_demo" type="hl_traj_arg.py" output="screen">
+        <!--        Fix vrpn axes - broadcasts tf frame "cf#_fixed" FOR IT TO WORK THE RIGID BODY NAME MUST BE CF#_VRPN -->
+        <node name="explorer" pkg="crazyflie_demo" type="tf_fixer.py" output="screen">
             <param name="tf_prefix" value="$(arg frame2)"/>
-            <!--            Pass a list as ros param-->
-            <rosparam param="traj_list" subst_value="True">$(arg traj_list2)</rosparam>
         </node>
 
-                <!--        Start keyboard controller. -->
+        <!--        Tf_broadcast a static transform with offset between a drone launch point and world-->
+        <node pkg="tf" type="static_transform_publisher" name="world_to_$(arg frame2)_takeoff"
+              args="$(arg initX2) $(arg initY2) 0 0 0 0 1 world $(arg frame2)_takeoff 100"/>
+
+        <!--            The node for actually running desired python code -->
+<!--        <node name="crazyflie_demo_hover" pkg="crazyflie_demo" type="traj_planner.py" output="screen">-->
+<!--            <param name="tf_prefix" value="$(arg frame2)"/>-->
+<!--            &lt;!&ndash;            Pass a list as ros param&ndash;&gt;-->
+<!--            <rosparam param="traj_list" subst_value="True">$(arg traj_list2)</rosparam>-->
+<!--        </node>-->
+
+        <!--        Start keyboard controller. -->
         <node name="keyboard_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">
             <param name="tf_prefix" value="$(arg frame2)"/>
         </node>
@@ -171,7 +192,6 @@ A few notes:
         <!--        logger_by_format.py capture all topics relevant for looging into predesignd SCV.-->
         <node name="logger_by_format" pkg="crazyflie_demo" type="logger_by_format.py" output="screen">
             <param name="tf_prefix" value="$(arg frame2)"/>
-            <param name="tf_ref" value="$(arg frame_ref2)"/>
         </node>
     </group>
 
