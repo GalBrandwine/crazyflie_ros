@@ -169,7 +169,7 @@ A few notes:
 <!--        </node>-->
 
         <!--        Start keyboard controller. -->
-        <node name="keyboard_controller" pkg="crazyflie_demo" type="motiontf_controller.py" output="screen">
+        <node name="keyboard_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">
             <param name="tf_prefix" value="$(arg frame2)"/>
         </node>
 
