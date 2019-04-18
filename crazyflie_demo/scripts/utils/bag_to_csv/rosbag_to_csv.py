@@ -78,11 +78,14 @@ def bag_to_csv(options, fname):
                 streamdict[topic] = stream
                 # header
                 if options.header:
-                    stream.write("time")
+                    stream.write("rosbagTimestamp")
                     message_type_to_csv(stream, msg)
                     stream.write('\n')
 
-            stream.write(datetime.fromtimestamp(time.to_time()).strftime('%Y/%m/%d/%H:%M:%S.%f'))
+                    # Add units:
+
+            rospy.loginfo(time.to_time())
+            stream.write(str(time.to_time()))
             message_to_csv(stream, msg, flatten=not options.header)
             stream.write('\n')
         [s.close for s in streamdict.values()]
