@@ -5,25 +5,20 @@
 # publishes laserscan in 'drone' frame, and converts it to PointCloud2 too.
 
 
-import rospy
-import tf
-from geometry_msgs.msg import PointStamped
-from crazyflie_driver.msg import GenericLogData
-import tf_conversions
-import tf2_ros
-import tf2_geometry_msgs
-from sensor_msgs.msg import PointCloud2, LaserScan
-import sensor_msgs.point_cloud2 as pc2
-
-from time import sleep
 from math import pi
 
 import laser_geometry.laser_geometry as lg
+import rospy
+import tf2_ros
+from crazyflie_driver.msg import GenericLogData
+from sensor_msgs.msg import PointCloud2, LaserScan
 from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
+
+global scan, seq
 
 
 def get_ranges(msg):
-    global pub_front, pub_back, pub_left, pub_right, seq , scan
+    global scan, seq  # pub_front, pub_back, pub_left, pub_right, ,
     global prev_front, prev_back, prev_left, prev_right
     global tfBuffer, listener
 
@@ -32,11 +27,11 @@ def get_ranges(msg):
     left = msg.values[3] / 1000
     right = msg.values[4] / 1000
 
-    inf=float('inf')
-    scan.ranges = [inf,inf,inf,inf] #if there is no reading will publish inf
-    #scan.ranges = [0, 0, 0, 0]
+    inf = float('inf')
+    scan.ranges = [inf, inf, inf, inf]  # if there is no reading will publish inf
+    # scan.ranges = [0, 0, 0, 0]
 
-    new_data=False
+    new_data = False
     transform = None
     try:
         transform = tfBuffer.lookup_transform('world', rospy.get_param("~tf_prefix"), rospy.Time(0))
@@ -44,9 +39,8 @@ def get_ranges(msg):
         rospy.loginfo(e)
 
     if (front != prev_front):
-
         scan.ranges[2] = front
-        new_data=True
+        new_data = True
 
         ##publish point in local coordinates
         # point_front = PointStamped()
@@ -66,7 +60,6 @@ def get_ranges(msg):
         #     pub_front_WC.publish(front_WC)
 
     if (back != prev_back):
-
         scan.ranges[0] = back
         new_data = True
         # point_back = PointStamped()
@@ -86,7 +79,6 @@ def get_ranges(msg):
         #     pub_back_WC.publish(back_WC)
 
     if (left != prev_left):
-
         scan.ranges[3] = left
         new_data = True
         # point_left = PointStamped()
@@ -106,7 +98,6 @@ def get_ranges(msg):
         #     pub_left_WC.publish(left_WC)
 
     if (right != prev_right):
-
         scan.ranges[1] = right
         new_data = True
         # point_right = PointStamped()
@@ -126,14 +117,15 @@ def get_ranges(msg):
         #     pub_right_WC.publish(right_WC)
 
     scan.header.stamp = rospy.Time.now()
-    scan_pub.publish(scan) #publish LaserScan message in LOCAL (drone) coordinates
+    scan_pub.publish(scan)  # publish LaserScan message in LOCAL (drone) coordinates
 
-    if (transform != None and new_data==True):
-        pc2_msg_LC = lp.projectLaser(scan) # convert the message of type LaserScan to a PointCloud2
-        pc2_msg_WC = do_transform_cloud(pc2_msg_LC, transform) #transform pointcloud to world coordinates
-        pc2_pub.publish(pc2_msg_WC) # publish pointcloud
+    if (transform != None and new_data == True):
+        pc2_msg_LC = lp.projectLaser(scan)  # convert the message of type LaserScan to a PointCloud2
+        pc2_msg_WC = do_transform_cloud(pc2_msg_LC, transform)  # transform pointcloud to world coordinates
+        pc2_pub.publish(pc2_msg_WC)  # publish pointcloud
 
     seq += 1
+
 
 if __name__ == '__main__':
     rospy.init_node('publish_point', anonymous=False)
