@@ -65,7 +65,7 @@ def get_imu(msg):
     gyroZ = msg.angular_velocity.z
 
 
-def logger_handler(tf_prefix, tf_ref):
+def logger_handler(tf_prefix):
     global x, y, z, roll, pitch, yaw
     pub = rospy.Publisher('/' + tf_prefix + '/debug_logger', crazyflie_sensors, queue_size=1)
     rospy.Subscriber('/' + tf_prefix + '/log_pos', GenericLogData, get_pose)
@@ -107,7 +107,7 @@ def logger_handler(tf_prefix, tf_ref):
         """working, but Remember: there's a buf with tf_ref-wold coordinate's. """
 
         try:  # if optitrack message exists
-            trans = tfBuffer.lookup_transform('world', tf_ref + '_takeoff', rospy.Time(0))
+            trans = tfBuffer.lookup_transform('world', tf_prefix + '_takeoff', rospy.Time(0))
 
             q = (trans.transform.rotation.x,
                  trans.transform.rotation.y,
