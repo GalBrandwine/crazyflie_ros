@@ -48,11 +48,9 @@ A few notes:
             port: $(arg port)
             update_frequency: 100.0
             frame_id: world
-            <!--            child_frame_id: $(arg frame_ref1)-->
-            child_frame_id: $(arg frame_ref2)
-            use_server_time: true
+            use_server_time: false
             broadcast_tf: true
-            refresh_tracker_frequency: 1.0
+            refresh_tracker_frequency: 1.0 <!-- VRPN will add all trackers found on connection -->
         </rosparam>
     </node>
 
@@ -194,7 +192,6 @@ A few notes:
         <!--        logger_by_format.py capture all topics relevant for looging into predesignd SCV.-->
         <node name="logger_by_format" pkg="crazyflie_demo" type="logger_by_format.py" output="screen">
             <param name="tf_prefix" value="$(arg frame2)"/>
-            <param name="tf_ref" value="$(arg frame_ref2)"/>
         </node>
     </group>
 
