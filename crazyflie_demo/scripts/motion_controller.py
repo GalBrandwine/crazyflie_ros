@@ -118,7 +118,6 @@ def handler(cf_handler):
                 if front < dist_threshold:
                     rospy.loginfo("forward collision avoidance")
                     cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
-                    avoid_collision()
                     time.sleep(def_duration)
 
                 elif back < dist_threshold:
