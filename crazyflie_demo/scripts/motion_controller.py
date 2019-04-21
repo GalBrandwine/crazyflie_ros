@@ -21,6 +21,7 @@ import tf2_ros
 from crazyflie_driver.msg import GenericLogData
 from crazyflie_driver.msg import Hover  # imports for hover message
 from geometry_msgs.msg import PoseStamped
+from tf.transformations import euler_from_quaternion
 
 # TODO: move all this shit into a class MotionController
 
@@ -186,7 +187,7 @@ def handler(cf_handler):
                     cj_injection_message.pose.orientation.y,
                     cj_injection_message.pose.orientation.z,
                     cj_injection_message.pose.orientation.w)
-                euler = tf2_ros.transformations.euler_from_quaternion(quaternion)
+                euler = euler_from_quaternion(quaternion)
 
                 x = cj_injection_message.pose.position.x
                 y = cj_injection_message.pose.position.y
@@ -196,6 +197,7 @@ def handler(cf_handler):
                 yaw = euler[2]
 
                 cf_handler.goTo(goal=[x, y, z], yaw=yaw, duration=def_duration, relative=False)
+
 
             elif key is not None:
 

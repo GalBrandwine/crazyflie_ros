@@ -39,17 +39,17 @@ A few notes:
     <arg name="initZ2" default="0"/>
 
     <!--run vrpn client -->
-    <node pkg="vrpn_client_ros" name="vrpn" output="screen" type="vrpn_client_node" required="true">
-        <rosparam subst_value="true">
-            server: $(arg server)
-            port: $(arg port)
-            update_frequency: 100.0
-            frame_id: world
-            use_server_time: false
-            broadcast_tf: true
-            refresh_tracker_frequency: 1.0 <!-- VRPN will add all trackers found on connection -->
-        </rosparam>
-    </node>
+    <!--    <node pkg="vrpn_client_ros" name="vrpn" output="screen" type="vrpn_client_node" required="true">-->
+    <!--        <rosparam subst_value="true">-->
+    <!--            server: $(arg server)-->
+    <!--            port: $(arg port)-->
+    <!--            update_frequency: 100.0-->
+    <!--            frame_id: world-->
+    <!--            use_server_time: false-->
+    <!--            broadcast_tf: true-->
+    <!--            refresh_tracker_frequency: 1.0 &lt;!&ndash; VRPN will add all trackers found on connection &ndash;&gt;-->
+    <!--        </rosparam>-->
+    <!--    </node>-->
 
 
     <!--    Activate the server.-->

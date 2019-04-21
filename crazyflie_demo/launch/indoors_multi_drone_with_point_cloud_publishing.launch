@@ -99,12 +99,12 @@ A few notes:
             </node>
 
 
-        <!--            The node for actually running desired python code -->
-                <node name="crazyflie_demo_hover" pkg="crazyflie_demo" type="traj_planner.py" output="screen">
-                    <param name="tf_prefix" value="$(arg frame1)"/>
-                    <!--            Pass a 'list' as ros param-->
-                    <rosparam param="traj_list" subst_value="True">$(arg traj_list)</rosparam>
-                </node>
+<!--        &lt;!&ndash;            The node for actually running desired python code &ndash;&gt;-->
+<!--                <node name="crazyflie_demo_hover" pkg="crazyflie_demo" type="traj_planner.py" output="screen">-->
+<!--                    <param name="tf_prefix" value="$(arg frame1)"/>-->
+<!--                    &lt;!&ndash;            Pass a 'list' as ros param&ndash;&gt;-->
+<!--                    <rosparam param="traj_list" subst_value="True">$(arg traj_list)</rosparam>-->
+<!--                </node>-->
 
         <!--        Start keyboard controller. -->
         <node name="keyboard_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">
@@ -158,11 +158,11 @@ A few notes:
               args="$(arg initX2) $(arg initY2) 0 0 0 0 1 world $(arg frame2)_takeoff 100"/>
 
         <!--            The node for actually running desired python code -->
-        <node name="crazyflie_demo_hover" pkg="crazyflie_demo" type="traj_planner.py" output="screen">
-            <param name="tf_prefix" value="$(arg frame2)"/>
-            <!--            Pass a list as ros param-->
-            <rosparam param="traj_list" subst_value="True">$(arg traj_list2)</rosparam>
-        </node>
+<!--        <node name="crazyflie_demo_hover" pkg="crazyflie_demo" type="traj_planner.py" output="screen">-->
+<!--            <param name="tf_prefix" value="$(arg frame2)"/>-->
+<!--            &lt;!&ndash;            Pass a list as ros param&ndash;&gt;-->
+<!--            <rosparam param="traj_list" subst_value="True">$(arg traj_list2)</rosparam>-->
+<!--        </node>-->
 
         <!--        Start keyboard controller. -->
         <node name="keyboard_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">

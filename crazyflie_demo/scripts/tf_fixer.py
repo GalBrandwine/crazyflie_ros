@@ -17,7 +17,7 @@ def handle_pose():
 
     rospy.loginfo("waiting for initial transform from {} to world".format(tf_prefix))
 
-    while (first_trans_cf == None):
+    while not rospy.is_shutdown() and (first_trans_cf == None):
         try:
             first_trans_cf = tfBuffer.lookup_transform('world', tf_prefix, rospy.Time(0))
         except:
@@ -25,7 +25,7 @@ def handle_pose():
 
     rospy.loginfo("waiting for initial transform from {} vrpn to world".format(tf_prefix))
 
-    while (first_trans_vrpn == None):
+    while not rospy.is_shutdown() and (first_trans_vrpn == None):
         try:
             first_trans_vrpn = tfBuffer.lookup_transform('world', tf_prefix + '_vrpn', rospy.Time(0))
         except:

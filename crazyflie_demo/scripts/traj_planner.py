@@ -22,9 +22,17 @@ def launcher(msg):
 
     # Loop on all trajectory's in traj_container:
     for i, traj in enumerate(traj_container):
-        cf.startTrajectory(i, timescale=1.0)
-        # todo: add go_to to move forwared
-        time.sleep(traj.duration * 1.6)
+        if i is 0:
+            # assuming first traj is takeoff traj
+            cf.startTrajectory(i, timescale=1.0)
+            # todo: add go_to to move forwared
+            time.sleep(traj.duration * 1.6)
+            cf.goTo(goal=[0.3, 0.0, 0.0], yaw=0, duration=0.3, relative=True)
+            time.sleep(0.3)
+        else:
+            cf.startTrajectory(i, timescale=1.0)
+            # todo: add go_to to move forwared
+            time.sleep(traj.duration * 1.6)
 
     # land (assuming first trajectory in container is "TakeOFF")
     cf.startTrajectory(0, timescale=0.7, reverse=True)
@@ -93,7 +101,7 @@ if __name__ == '__main__':
 
         rospy.loginfo("\n\n******************* traj {} uploaded".format(i))
 
-    rospy.Subscriber("swarm_launch", Empty, launcher)
+    rospy.Subscriber("/swarm_launch", Empty, launcher)
 
     rospy.loginfo("******************* ready to fly  --- {0} ".format(prefix))
 
