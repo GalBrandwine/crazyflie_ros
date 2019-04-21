@@ -10,7 +10,6 @@ import rospy
 import uav_trajectory
 from std_msgs.msg import Empty
 
-
 # Todo change to trajectory planner only without creating a CF object!!!!
 
 # Globals
@@ -22,19 +21,12 @@ def launcher(msg):
 
     # Loop on all trajectory's in traj_container:
     for i, traj in enumerate(traj_container):
-        if i is 0:
-            # assuming first traj is takeoff traj
-            cf.startTrajectory(i, timescale=1.0)
-            # todo: add go_to to move forwared
-            time.sleep(traj.duration * 1.6)
-            cf.goTo(goal=[0.3, 0.0, 0.0], yaw=0, duration=0.3, relative=True)
-            time.sleep(0.3)
-        else:
-            cf.startTrajectory(i, timescale=1.0)
-            # todo: add go_to to move forwared
-            time.sleep(traj.duration * 1.6)
+        cf.startTrajectory(i, timescale=1.0)
+        time.sleep(traj.duration * 1.6)
 
     # land (assuming first trajectory in container is "TakeOFF")
+    cf.goTo(goal=[-0.5, 0.0, 0.0], yaw=0, duration=2, relative=True)
+    time.sleep(2)
     cf.startTrajectory(0, timescale=0.7, reverse=True)
     time.sleep(1.1)
 
