@@ -15,6 +15,7 @@ from sensor_msgs.msg import PointCloud2, LaserScan
 from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
 
 global scan, seq
+scan = None
 
 
 def get_ranges(msg):

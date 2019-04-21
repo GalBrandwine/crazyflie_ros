@@ -23,6 +23,7 @@ def launcher(msg):
     # Loop on all trajectory's in traj_container:
     for i, traj in enumerate(traj_container):
         cf.startTrajectory(i, timescale=1.0)
+        # todo: add go_to to move forwared
         time.sleep(traj.duration * 1.6)
 
     # land (assuming first trajectory in container is "TakeOFF")
@@ -82,9 +83,9 @@ if __name__ == '__main__':
             cf.uploadTrajectory(i, 0, temp_traj)
             pieceOffset = pieceOffset + len(temp_traj.polynomials)
 
-            rospy.wait_for_service(prefix + "/upload_trajectory")
-            uploadTrajectoryService = rospy.ServiceProxy(prefix + "/upload_trajectory", UploadTrajectory)
-            uploadTrajectoryService(i, 0, temp_traj)
+            # rospy.wait_for_service(prefix + "/upload_trajectory")
+            # uploadTrajectoryService = rospy.ServiceProxy(prefix + "/upload_trajectory", UploadTrajectory)
+            # uploadTrajectoryService(i, 0, temp_traj)
 
         else:
             cf.uploadTrajectory(i, pieceOffset, temp_traj)

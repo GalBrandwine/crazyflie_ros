@@ -14,7 +14,9 @@ from threading import Thread
 
 import crazyflie
 import rospy
+# from crazyflie_driver.msg import Hover
 from crazyflie_driver.msg import GenericLogData
+
 from crazyflie_driver.msg import Hover #imports for hover message
 from std_msgs.msg import Empty #imports for hover message
 
@@ -29,10 +31,21 @@ from math import atan2
 speed = 0.25
 initialZ = 0.35
 
-global front, back, up, left, right, zrange
+global front, back, up, left, right, zrange, cj_injection_flag, cj_injection_message
 front = back = up = left = right = zrange = 0.0
 global ranges
 ranges=[]
+cj_injection_flag = False
+cj_injection_message = None
+
+
+def Cj_injector(msg):
+    global cj_injection_message, cj_injection_flag
+    rospy.loginfo("Cj_recieved...")
+    cj_injection_flag = True
+    cj_injection_message = msg
+    # rospy.loginfo(msg)
+
 
 def check_direction(cj_injection_message):
     global listener, tfBuffer
@@ -51,14 +64,14 @@ def check_direction(cj_injection_message):
 
 
 def avoid_collision():
-    global msg,pub_hover
+    global msg, pub_hover
     rate = rospy.Rate(10)
     msg.header.frame_id = 'world'
     msg.yawrate = 0
     msg.zDistance = 0.4
-    vx=-0.15
-    vy=0
-    duration=0.7
+    vx = -0.15
+    vy = 0
+    duration = 0.7
     start = rospy.get_time()
     while not rospy.is_shutdown():
         msg.vx = vx
@@ -79,6 +92,7 @@ def avoid_collision():
     msg.vy = 0
     msg.header.stamp = rospy.Time.now()
     pub_hover.publish(msg)
+
 
 def get_ranges(msg):
     global front, back, up, left, right, zrange, ranges
@@ -117,9 +131,9 @@ def handler(cf_handler):
 
     global key
     key = None
-
-    global front, back, up, left, right, zrange, ranges
-    dist_threshold = 0.2
+    global cj_injection_message, cj_injection_flag
+    global front, back, up, left, right, zrange
+    dist_threshold = 0.15
     def_duration = 1.8
 
     try:
@@ -165,7 +179,28 @@ def handler(cf_handler):
                     cf_handler.stop()
                     break
 
-            if key is not None:
+            # If Cj injection received:
+            if cj_injection_flag is True:
+                cj_injection_flag = False
+
+                quaternion = (
+                    cj_injection_message.pose.orientation.x,
+                    cj_injection_message.pose.orientation.y,
+                    cj_injection_message.pose.orientation.z,
+                    cj_injection_message.pose.orientation.w)
+                euler = tf.transformations.euler_from_quaternion(quaternion)
+
+                x = cj_injection_message.pose.position.x
+                y = cj_injection_message.pose.position.y
+                z = cj_injection_message.pose.position.z
+                roll = euler[0]
+                pitch = euler[1]
+                yaw = euler[2]
+
+                cf_handler.goTo(goal=[x, y, z], yaw=yaw, duration=def_duration, relative=False)
+
+
+            elif key is not None:
 
                 rospy.loginfo("************* Key pressed is " + key.decode('utf-8'))
 
@@ -207,6 +242,7 @@ def handler(cf_handler):
                 # elif key == 's':
                 # stop
 
+                # todo FIX this stupid thing!
                 key = None
                 t2 = Thread(target=keypress, )
                 t2.start()
@@ -231,11 +267,9 @@ if __name__ == '__main__':
 
     prefix = rospy.get_param("~tf_prefix")
     rospy.Subscriber('/' + prefix + '/log_ranges', GenericLogData, get_ranges)
+    rospy.Subscriber('/' + prefix + '/Cj_injcetor', PoseStamped, Cj_injector)
 
-    rospy.Subscriber('/' + prefix + '/cj', PoseStamped, check_direction)
-
-
-    pub_hover = rospy.Publisher('/' + prefix + "/cmd_hover", Hover, queue_size=1) #hover message publisher
+    pub_hover = rospy.Publisher('/' + prefix + "/cmd_hover", Hover, queue_size=1)  # hover message publisher
     msg = Hover()
     msg.header.seq = 0
 
@@ -250,7 +284,7 @@ if __name__ == '__main__':
     cf.setParam("commander/enHighLevel", 1)
     cf.setParam("stabilizer/estimator", 2)  # Use EKF
 
-    cf.setParam("ctrlMel/kp_z", 0.6)  # reduce z wobble - default 1.25
+    cf.setParam("ctrlMel/kp_z", 0.8)  # reduce z wobble - default 1.25
     # cf.setParam("ctrlMel/ki_z", 0.06) #reduce z wobble - default 0.05
     # cf.setParam("ctrlMel/kd_z", 0.2) #reduce z wobble - default 0.4
     # cf.setParam("ctrlMel/i_range_z", 0.2) #reduce z wobble
