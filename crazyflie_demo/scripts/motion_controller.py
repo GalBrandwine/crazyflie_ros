@@ -39,7 +39,7 @@ cj_injection_message = None
 
 def Cj_injector(msg):
     global cj_injection_message, cj_injection_flag
-    rospy.loginfo("Cj_recieved...")
+    rospy.logdebug("Cj_recieved...")
     cj_injection_flag = True
     cj_injection_message = msg
     # rospy.loginfo(msg)
@@ -79,9 +79,9 @@ def avoid_collision():
             break
         msg.header.seq += 1
         msg.header.stamp = rospy.Time.now()
-        rospy.loginfo("sending...")
-        rospy.loginfo(msg.vx)
-        rospy.loginfo(now - start)
+        rospy.logdebug("sending...")
+        rospy.logdebug(msg.vx)
+        rospy.logdebug(now - start)
         pub_hover.publish(msg)
         rate.sleep()
 
@@ -132,7 +132,16 @@ def handler(cf_handler):
     key = None
     global cj_injection_message, cj_injection_flag
     global front, back, up, left, right, zrange
-    dist_threshold = 0.15
+
+    # There's 2 levels of collision protections:
+    #   Low level:
+    #       The threshold for protecting drone before collision with walls
+    # High level:
+    #       avoid_collision(), a function that will be called every time theres a
+    #       Cj_injection and before that Cj order will go to drone,
+    #       we will check if theres a futoristic collision within that path.
+
+    dist_threshold = 0.25
     def_duration = 1.8
 
     try:
@@ -152,8 +161,10 @@ def handler(cf_handler):
             if min(ranges) > 0:
                 if front < dist_threshold:
                     rospy.loginfo("forward collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
+                    # cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
+                    cf_handler.stop()
                     time.sleep(def_duration)
+
 
                 elif back < dist_threshold:
                     rospy.loginfo("back collision avoidance")
@@ -262,7 +273,7 @@ def handler(cf_handler):
 
 
 if __name__ == '__main__':
-    rospy.init_node('keyboard_controller')
+    rospy.init_node('keyboard_controller',)# log_level=rospy.DEBUG
 
     prefix = rospy.get_param("~tf_prefix")
     rospy.Subscriber('/' + prefix + '/log_ranges', GenericLogData, get_ranges)
