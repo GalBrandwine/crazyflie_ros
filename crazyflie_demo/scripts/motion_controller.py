@@ -166,8 +166,6 @@ def handler(cf_handler):
             if cj_injection_flag is True:
                 cj_injection_flag = False
 
-                rospy.loginfo("Cj injection received: {}".format(cj_injection_message))
-
                 quaternion = (
                     cj_injection_message.pose.orientation.x,
                     cj_injection_message.pose.orientation.y,
@@ -182,24 +180,8 @@ def handler(cf_handler):
                 pitch = euler[1]
                 yaw = euler[2]
 
-                rospy.loginfo("goTo (Cj injection received): [{},{},{}] ysw: {}".format(x, y, z, yaw))
                 cf_handler.goTo(goal=[x, y, z], yaw=yaw, duration=def_duration, relative=False)
 
-                # q = (trans.transform.rotation.x,
-                #      trans.transform.rotation.y,
-                #      trans.transform.rotation.z,
-                #      trans.transform.rotation.w)
-                #
-                # euler = euler_from_quaternion(q, axes='sxzy')
-                #
-                # # translation : x, z, y
-                # # rotation : x, -z , y
-                # t.ref_x = -1 * trans.transform.translation.z
-                # t.ref_y = trans.transform.translation.x
-                # t.ref_z = trans.transform.translation.y
-                # t.ref_roll = euler[0]
-                # t.ref_pitch = -1 * euler[2]
-                # t.ref_yaw = euler[1]
 
             elif key is not None:
 
@@ -243,7 +225,7 @@ def handler(cf_handler):
                 # elif key == 's':
                 # stop
 
-                # todo FIX this stuped this stuped thing!
+                # todo FIX this stupid thing!
                 key = None
                 t2 = Thread(target=keypress, )
                 t2.start()
