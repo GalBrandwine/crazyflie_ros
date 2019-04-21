@@ -24,7 +24,7 @@ from geometry_msgs.msg import PoseStamped
 
 
 speed = 0.25
-initialZ = 0.35
+initialZ = 1.0
 
 global front, back, up, left, right, zrange, cj_injection_flag, cj_injection_message
 front = back = up = left = right = zrange = 0.0
@@ -119,7 +119,7 @@ def keypress():
 def handler(cf_handler):
     r = rospy.Rate(5)
     time.sleep(1)
-    cf_handler.takeoff(targetHeight=initialZ, duration=5.0)
+    cf_handler.takeoff(targetHeight=initialZ, duration=8.0)
     time.sleep(5.0)
 
     x, y, yaw = 0, 0, 0
@@ -147,22 +147,22 @@ def handler(cf_handler):
             if front > 0:
                 if front < dist_threshold:
                     rospy.loginfo("forward collision avoidance")
-                    cf_handler.goTo(goal=[-0.1, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[-0.15, 0.0, 0.0], yaw=0, duration=def_duration/100, relative=True)
                     time.sleep(def_duration)
 
                 elif back < dist_threshold:
                     rospy.loginfo("back collision avoidance")
-                    cf_handler.goTo(goal=[0.1, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[0.15, 0.0, 0.0], yaw=0, duration=def_duration/100, relative=True)
                     time.sleep(def_duration)
 
                 elif right < dist_threshold:
                     rospy.loginfo("right collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.1, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[0.0, 0.15, 0.0], yaw=0, duration=def_duration/100, relative=True)
                     time.sleep(def_duration)
 
                 elif left < dist_threshold:
                     rospy.loginfo("left collision avoidance")
-                    cf_handler.goTo(goal=[0.0, -0.1, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[0.0, -0.15, 0.0], yaw=0, duration=def_duration/100, relative=True)
                     time.sleep(def_duration)
 
                 elif up < dist_threshold:
@@ -173,49 +173,49 @@ def handler(cf_handler):
                     cf_handler.stop()
                     break
 
-            if key is not None:
-
-                rospy.loginfo("************* Key pressed is " + key.decode('utf-8'))
-
-                if key == ' ':
-                    # emergency land
-                    land_duration = z * 3
-                    cf_handler.land(targetHeight=0.0, duration=land_duration)
-                    time.sleep(land_duration - 0.5)
-                    cf_handler.stop()
-                    break
-                elif key == 'w':
-                    # move forward
-                    cf_handler.goTo(goal=[0.25, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
-                elif key == 'x':
-                    # move backward
-                    cf_handler.goTo(goal=[-0.25, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
-                elif key == 'd':
-                    # move right
-                    cf_handler.goTo(goal=[0.0, -0.25, 0.0], yaw=0, duration=def_duration, relative=True)
-                elif key == 'a':
-                    # move left
-                    cf_handler.goTo(goal=[0.0, 0.25, 0.0], yaw=0, duration=def_duration, relative=True)
-                elif key == 'i':
-                    # move up
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.05], yaw=0, duration=def_duration, relative=True)
-                elif key == 'k':
-                    # move down
-                    cf_handler.goTo(goal=[0.0, 0.0, -0.05], yaw=0, duration=def_duration, relative=True)
-                elif key == 'q':
-                    # 45 degrees CW
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=1.5708, duration=def_duration + 1.0,
-                            relative=True)  # slow down yaw rotation
-                elif key == 'e':
-                    # 45 degrees CCW
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=-1.5708, duration=def_duration + 1.0,
-                            relative=True)  # slow down yaw rotation
-                # elif key == 's':
-                # stop
-
-                key = None
-                t2 = Thread(target=keypress, )
-                t2.start()
+            # if key is not None:
+            #
+            #     rospy.loginfo("************* Key pressed is " + key.decode('utf-8'))
+            #
+            #     if key == ' ':
+            #         # emergency land
+            #         land_duration = z * 3
+            #         cf_handler.land(targetHeight=0.0, duration=land_duration)
+            #         time.sleep(land_duration - 0.5)
+            #         cf_handler.stop()
+            #         break
+            #     elif key == 'w':
+            #         # move forward
+            #         cf_handler.goTo(goal=[0.25, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+            #     elif key == 'x':
+            #         # move backward
+            #         cf_handler.goTo(goal=[-0.25, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+            #     elif key == 'd':
+            #         # move right
+            #         cf_handler.goTo(goal=[0.0, -0.25, 0.0], yaw=0, duration=def_duration, relative=True)
+            #     elif key == 'a':
+            #         # move left
+            #         cf_handler.goTo(goal=[0.0, 0.25, 0.0], yaw=0, duration=def_duration, relative=True)
+            #     elif key == 'i':
+            #         # move up
+            #         cf_handler.goTo(goal=[0.0, 0.0, 0.05], yaw=0, duration=def_duration, relative=True)
+            #     elif key == 'k':
+            #         # move down
+            #         cf_handler.goTo(goal=[0.0, 0.0, -0.05], yaw=0, duration=def_duration, relative=True)
+            #     elif key == 'q':
+            #         # 45 degrees CW
+            #         cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=1.5708, duration=def_duration + 1.0,
+            #                 relative=True)  # slow down yaw rotation
+            #     elif key == 'e':
+            #         # 45 degrees CCW
+            #         cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=-1.5708, duration=def_duration + 1.0,
+            #                 relative=True)  # slow down yaw rotation
+            #     # elif key == 's':
+            #     # stop
+            #
+            #     key = None
+            #     t2 = Thread(target=keypress, )
+            #     t2.start()
 
             r.sleep()
 
