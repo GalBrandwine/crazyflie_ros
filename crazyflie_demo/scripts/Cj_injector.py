@@ -24,14 +24,16 @@ def to_pose_stamped(x, y, z, roll, pitch, yaw):
     return pose
 
 
-# todo: motion controller is not working properly becayuse of Cj_injection's we need to make that work
+# todo: motion controller is not working properly because of Cj_injection's we need to make that work
+
+# todo change this to be an outside Node, that will receive N drones in a narray
 if __name__ == '__main__':
     rospy.init_node("incjetor")
 
     prefix = rospy.get_param("~tf_prefix")
     Cj_injector_pub = rospy.Publisher('/' + prefix + "/Cj_injcetor", PoseStamped,
                                       queue_size=1)  # hover message publisher
-
+    rospy.sleep(15)
     x = 0
     y = 0
     z = 0
