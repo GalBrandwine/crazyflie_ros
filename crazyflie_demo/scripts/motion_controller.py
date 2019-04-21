@@ -313,6 +313,6 @@ if __name__ == '__main__':
 
     rospy.loginfo("launching threads")
     t1 = Thread(target=handler, args=(cf,))
-    t2 = Thread(target=keypress)
+    # t2 = Thread(target=keypress)
     t1.start()
-    t2.start()
+    # t2.start()

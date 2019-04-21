@@ -291,7 +291,7 @@ A few notes:
     <!--    *************************************************************************************************************-->
     <group ns="$(arg frame4)">
         <node pkg="crazyflie_driver" type="crazyflie_add" name="crazyflie_add" output="screen">
-            <param name="uri" value="$(arg uri3)"/>
+            <param name="uri" value="$(arg uri4)"/>
             <param name="tf_prefix" value="$(arg frame4)"/>
 
             <!--            Logging params:-->
