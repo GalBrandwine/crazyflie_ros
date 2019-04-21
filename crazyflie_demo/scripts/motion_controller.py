@@ -10,7 +10,8 @@ import sys
 import termios
 import time
 import tty
-from math import atan2
+from math import atan2 , degrees, sqrt, pow, pi
+import numpy as np
 from threading import Thread
 
 import crazyflie
@@ -39,68 +40,46 @@ cj_injection_message = None
 
 def Cj_injector(msg):
     global cj_injection_message, cj_injection_flag
-    rospy.loginfo("Cj_recieved...")
+    rospy.loginfo("Cj_received...")
     cj_injection_flag = True
     cj_injection_message = msg
     # rospy.loginfo(msg)
 
-
-def check_direction(cj_injection_message):
-    global listener, tfBuffer
+def check_direction():
+    global listener, tfBuffer , cj_injection_message , heading
     trans = None
     try:
-        trans = tfBuffer.lookup_transform('world', prefix, rospy.Time(0))
-
+        trans = tfBuffer.lookup_transform(prefix ,'world', rospy.Time(0))
     except:
         rospy.logwarn("tf lookup -- {} not found".format(prefix))
     if trans != None:
-        cj_local_coord = PoseStamped()
         cj_local_coord = tf2_geometry_msgs.do_transform_pose(cj_injection_message, trans)
         rospy.loginfo(cj_local_coord)
         heading = atan2(cj_local_coord.pose.position.y, cj_local_coord.pose.position.x)
-        rospy.loginfo(heading)
+        distance= sqrt(pow(cj_local_coord.pose.position.x,2)+pow(cj_local_coord.pose.position.y,2))
+        return heading , distance
+    else:
+        return False
 
-
-def avoid_collision():
-    global msg, pub_hover
-    rate = rospy.Rate(10)
-    msg.header.frame_id = 'world'
-    msg.yawrate = 0
-    msg.zDistance = 0.4
-    vx = -0.15
-    vy = 0
-    duration = 0.7
-    start = rospy.get_time()
-    while not rospy.is_shutdown():
-        msg.vx = vx
-        msg.vy = vy
-        now = rospy.get_time()
-        if (now - start > duration):
-            break
-        msg.header.seq += 1
-        msg.header.stamp = rospy.Time.now()
-        rospy.loginfo("sending...")
-        rospy.loginfo(msg.vx)
-        rospy.loginfo(now - start)
-        pub_hover.publish(msg)
-        rate.sleep()
-
-    msg.header.seq += 1
-    msg.vx = 0
-    msg.vy = 0
-    msg.header.stamp = rospy.Time.now()
-    pub_hover.publish(msg)
+# def avoid_collision():
+#     global heading
+#     global ranges
+#     result = 0
+#     if -3/4*pi < heading and heading > -1/4*pi:
+#         if
 
 
 def get_ranges(msg):
-    global front, back, up, left, right, zrange, ranges
-    front = msg.values[0] / 1000
-    back = msg.values[1] / 1000
+    global front, back, up, left, right, zrange, ranges, ranges_smoothed
+    front = 0.8* front + 0.2 * msg.values[0] / 1000
+    back = 0.8 * back + 0.2 * msg.values[1] / 1000
     up = msg.values[2] / 1000
-    left = msg.values[3] / 1000
-    right = msg.values[4] / 1000
+    left = 0.8 * left + 0.2 * msg.values[3] / 1000
+    right = 0.8 * right + 0.2 * msg.values[4] / 1000
     zrange = msg.values[5] / 1000
-    ranges = [front, back, up, left, right, zrange]
+    ranges = [back, left, front, right, up, zrange]
+    # ranges_np = np.asarray(ranges)
+    # good_vals = np.nonzero(ranges_np)
 
 
 def getch():
@@ -122,7 +101,7 @@ def keypress():
 def handler(cf_handler):
     r = rospy.Rate(5)
     time.sleep(0.5)
-    cf_handler.takeoff(targetHeight=initialZ, duration=5.0)
+    cf_handler.takeoff(targetHeight=initialZ, duration=4.0)
     time.sleep(5.0)
 
     x, y, yaw = 0, 0, 0
@@ -133,7 +112,7 @@ def handler(cf_handler):
     global cj_injection_message, cj_injection_flag
     global front, back, up, left, right, zrange
     dist_threshold = 0.15
-    def_duration = 1.8
+    def_duration = 2.0
 
     try:
         rospy.loginfo("keyboard controller.\n")
@@ -196,7 +175,14 @@ def handler(cf_handler):
                 pitch = euler[1]
                 yaw = euler[2]
 
-                cf_handler.goTo(goal=[x, y, z], yaw=yaw, duration=def_duration, relative=False)
+                direction,distance = degrees(check_direction())
+                rospy.loginfo("DIRECTION", direction , "DISTANCE" , distance)
+                obstacle_free=avoid_collision()
+                if obstacle_free == True:
+                    cf_handler.goTo(goal=[x, y, z], yaw=yaw, duration=def_duration, relative=False)
+                else:
+                    rospy.logwarn("cannot move - obstacle in the way")
+
 
 
             elif key is not None:
@@ -212,16 +198,16 @@ def handler(cf_handler):
                     break
                 elif key == 'w':
                     # move forward
-                    cf_handler.goTo(goal=[0.25, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[0.3, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
                 elif key == 'x':
                     # move backward
-                    cf_handler.goTo(goal=[-0.25, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[-0.3, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
                 elif key == 'd':
                     # move right
-                    cf_handler.goTo(goal=[0.0, -0.25, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[0.0, -0.3, 0.0], yaw=0, duration=def_duration, relative=True)
                 elif key == 'a':
                     # move left
-                    cf_handler.goTo(goal=[0.0, 0.25, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[0.0, 0.3, 0.0], yaw=0, duration=def_duration, relative=True)
                 elif key == 'i':
                     # move up
                     cf_handler.goTo(goal=[0.0, 0.0, 0.05], yaw=0, duration=def_duration, relative=True)
@@ -257,7 +243,7 @@ def handler(cf_handler):
 
     except Exception as e:
         cf_handler.stop()
-        rospy.loginfo('*******keyboard input exception')
+        rospy.loginfo('******* exception thrown *********')
         rospy.loginfo(e)
 
 
