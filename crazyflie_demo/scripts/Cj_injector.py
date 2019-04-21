@@ -39,34 +39,39 @@ if __name__ == '__main__':
     pitch = 0
     yaw = 0
 
+    step_x = 0.5
+    step_y = 0.5
+    step_z = 0.3
+    step_yaw = 6.28318530718  # 2pi
+
     time_delay = 2  # seconds
     while not rospy.is_shutdown():
         """Simple rectangle. """
+        # pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
+        # Cj_injector_pub.publish(pose)
+        # rospy.sleep(time_delay)
+
+        [x, y, z, roll, pitch, yaw] = [step_x, 0, step_z, 0, 0, 0]
         pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
         Cj_injector_pub.publish(pose)
         rospy.sleep(time_delay)
 
-        [x, y, z, roll, pitch, yaw] = [1, 0, 0, 0, 0, 0]
+        [x, y, z, roll, pitch, yaw] = [step_x, step_y, step_z, 0, 0, 0]
         pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
         Cj_injector_pub.publish(pose)
         rospy.sleep(time_delay)
 
-        [x, y, z, roll, pitch, yaw] = [1, 1, 0, 0, 0, 0]
+        [x, y, z, roll, pitch, yaw] = [0, step_y, step_z, 0, 0, 0]
         pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
         Cj_injector_pub.publish(pose)
         rospy.sleep(time_delay)
 
-        [x, y, z, roll, pitch, yaw] = [0, 1, 0, 0, 0, 0]
-        pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
-        Cj_injector_pub.publish(pose)
-        rospy.sleep(time_delay)
+        # [x, y, z, roll, pitch, yaw] = [0, 0, 0, 0, 0, step_yaw]
+        # pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
+        # Cj_injector_pub.publish(pose)
+        # rospy.sleep(time_delay)
 
-        [x, y, z, roll, pitch, yaw] = [0, 0, 0, 0, 0, 6.28318530718]  # 2pi
-        pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
-        Cj_injector_pub.publish(pose)
-        rospy.sleep(time_delay)
-
-        [x, y, z, roll, pitch, yaw] = [0, 0, 0, 0, 0, 0]  # 0 pi
+        [x, y, z, roll, pitch, yaw] = [0, 0, step_z, 0, 0, 0]  # 0 pi
         pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
         Cj_injector_pub.publish(pose)
         rospy.sleep(time_delay)

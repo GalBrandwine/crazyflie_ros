@@ -132,44 +132,7 @@ def handler(cf_handler):
 
         while not rospy.is_shutdown():
 
-            # If Cj injection recieved:
-            if cj_injection_flag is True:
-                cj_injection_flag = False
-                cj_injection_message
-
-                quaternion = (
-                    cj_injection_message.orientation.x,
-                    cj_injection_message.orientation.y,
-                    cj_injection_message.orientation.z,
-                    cj_injection_message.orientation.w)
-                euler = tf.transformations.euler_from_quaternion(quaternion)
-
-                x = cj_injection_message.position.x
-                y = cj_injection_message.position.y
-                z = cj_injection_message.position.z
-                roll = euler[0]
-                pitch = euler[1]
-                yaw = euler[2]
-
-                rospy.loginfo("goTo: [{},{},{}] ysw: {}".format(x, y, z, yaw))
-                cf_handler.goTo(goal=[x, y, z], yaw=yaw, duration=def_duration, relative=True)
-
-                # q = (trans.transform.rotation.x,
-                #      trans.transform.rotation.y,
-                #      trans.transform.rotation.z,
-                #      trans.transform.rotation.w)
-                #
-                # euler = euler_from_quaternion(q, axes='sxzy')
-                #
-                # # translation : x, z, y
-                # # rotation : x, -z , y
-                # t.ref_x = -1 * trans.transform.translation.z
-                # t.ref_y = trans.transform.translation.x
-                # t.ref_z = trans.transform.translation.y
-                # t.ref_roll = euler[0]
-                # t.ref_pitch = -1 * euler[2]
-                # t.ref_yaw = euler[1]
-
+            # Collusion must be checked first before checking Cj_injection
             if front > 0:
                 if front < dist_threshold:
                     rospy.loginfo("forward collision avoidance")
@@ -199,7 +162,46 @@ def handler(cf_handler):
                     cf_handler.stop()
                     break
 
-            if key is not None:
+            # If Cj injection received:
+            if cj_injection_flag is True:
+                cj_injection_flag = False
+
+                rospy.loginfo("Cj injection received: {}".format(cj_injection_message))
+
+                quaternion = (
+                    cj_injection_message.pose.orientation.x,
+                    cj_injection_message.pose.orientation.y,
+                    cj_injection_message.pose.orientation.z,
+                    cj_injection_message.pose.orientation.w)
+                euler = tf.transformations.euler_from_quaternion(quaternion)
+
+                x = cj_injection_message.pose.position.x
+                y = cj_injection_message.pose.position.y
+                z = cj_injection_message.pose.position.z
+                roll = euler[0]
+                pitch = euler[1]
+                yaw = euler[2]
+
+                rospy.loginfo("goTo (Cj injection received): [{},{},{}] ysw: {}".format(x, y, z, yaw))
+                cf_handler.goTo(goal=[x, y, z], yaw=yaw, duration=def_duration, relative=False)
+
+                # q = (trans.transform.rotation.x,
+                #      trans.transform.rotation.y,
+                #      trans.transform.rotation.z,
+                #      trans.transform.rotation.w)
+                #
+                # euler = euler_from_quaternion(q, axes='sxzy')
+                #
+                # # translation : x, z, y
+                # # rotation : x, -z , y
+                # t.ref_x = -1 * trans.transform.translation.z
+                # t.ref_y = trans.transform.translation.x
+                # t.ref_z = trans.transform.translation.y
+                # t.ref_roll = euler[0]
+                # t.ref_pitch = -1 * euler[2]
+                # t.ref_yaw = euler[1]
+
+            elif key is not None:
 
                 rospy.loginfo("************* Key pressed is " + key.decode('utf-8'))
 
@@ -241,6 +243,7 @@ def handler(cf_handler):
                 # elif key == 's':
                 # stop
 
+                # todo FIX this stuped this stuped thing!
                 key = None
                 t2 = Thread(target=keypress, )
                 t2.start()
