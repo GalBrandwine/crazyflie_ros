@@ -10,20 +10,17 @@ import sys
 import termios
 import time
 import tty
+from math import atan2
 from threading import Thread
 
 import crazyflie
 import rospy
+import tf2_geometry_msgs
+import tf2_ros
 # from crazyflie_driver.msg import Hover
 from crazyflie_driver.msg import GenericLogData
-
-from crazyflie_driver.msg import Hover #imports for hover message
-from std_msgs.msg import Empty #imports for hover message
-
-import tf2_ros
+from crazyflie_driver.msg import Hover  # imports for hover message
 from geometry_msgs.msg import PoseStamped
-import tf2_geometry_msgs
-from math import atan2
 
 # TODO: move all this shit into a class MotionController
 
@@ -34,7 +31,7 @@ initialZ = 0.35
 global front, back, up, left, right, zrange, cj_injection_flag, cj_injection_message
 front = back = up = left = right = zrange = 0.0
 global ranges
-ranges=[]
+ranges = []
 cj_injection_flag = False
 cj_injection_message = None
 
@@ -57,9 +54,9 @@ def check_direction(cj_injection_message):
         rospy.logwarn("tf lookup -- {} not found".format(prefix))
     if trans != None:
         cj_local_coord = PoseStamped()
-        cj_local_coord=tf2_geometry_msgs.do_transform_pose(cj_injection_message,trans)
+        cj_local_coord = tf2_geometry_msgs.do_transform_pose(cj_injection_message, trans)
         rospy.loginfo(cj_local_coord)
-        heading=atan2(cj_local_coord.pose.position.y, cj_local_coord.pose.position.x)
+        heading = atan2(cj_local_coord.pose.position.y, cj_local_coord.pose.position.x)
         rospy.loginfo(heading)
 
 
@@ -102,7 +99,8 @@ def get_ranges(msg):
     left = msg.values[3] / 1000
     right = msg.values[4] / 1000
     zrange = msg.values[5] / 1000
-    ranges=[front,back,up,left,right,zrange]
+    ranges = [front, back, up, left, right, zrange]
+
 
 def getch():
     fd = sys.stdin.fileno()
@@ -188,7 +186,7 @@ def handler(cf_handler):
                     cj_injection_message.pose.orientation.y,
                     cj_injection_message.pose.orientation.z,
                     cj_injection_message.pose.orientation.w)
-                euler = tf.transformations.euler_from_quaternion(quaternion)
+                euler = tf2_ros.transformations.euler_from_quaternion(quaternion)
 
                 x = cj_injection_message.pose.position.x
                 y = cj_injection_message.pose.position.y
@@ -198,7 +196,6 @@ def handler(cf_handler):
                 yaw = euler[2]
 
                 cf_handler.goTo(goal=[x, y, z], yaw=yaw, duration=def_duration, relative=False)
-
 
             elif key is not None:
 
@@ -273,7 +270,7 @@ if __name__ == '__main__':
     msg = Hover()
     msg.header.seq = 0
 
-    tfBuffer = tf2_ros.Buffer() #initialize tf buffer for transform lookup
+    tfBuffer = tf2_ros.Buffer()  # initialize tf buffer for transform lookup
     listener = tf2_ros.TransformListener(tfBuffer)
 
     cf = crazyflie.Crazyflie("/" + prefix, "world")
