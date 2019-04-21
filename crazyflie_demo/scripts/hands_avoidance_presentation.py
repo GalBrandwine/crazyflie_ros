@@ -1,10 +1,5 @@
 #!/usr/bin/env python
-# source - https://github.com/whoenig/crazyflie_ros/commit/b048c1f2fd3ee34f899fa0e2f6c58a4885a39405#diff-970be3522034ff436332d391db26982a
 
-# initializes drone initial position 0,0,0
-# launch drone to fixed height initialZ [m]
-# collision avoidance #todo fix coordinate system currently works only without rotation
-# command drone using KB in WORLD coordinatesz
 
 import sys
 import termios
@@ -20,7 +15,7 @@ import tf2_geometry_msgs
 from crazyflie_driver.msg import GenericLogData
 from geometry_msgs.msg import PoseStamped
 
-# TODO: move all this shit into a class MotionController
+# TODO: move all this code to be OOP, and fix this ugly thing with the threads. than add the thread solution to rother branches (or master)
 
 
 speed = 0.25
@@ -147,22 +142,22 @@ def handler(cf_handler):
             if front > 0:
                 if front < dist_threshold:
                     rospy.loginfo("forward collision avoidance")
-                    cf_handler.goTo(goal=[-0.15, 0.0, 0.0], yaw=0, duration=def_duration/100, relative=True)
+                    cf_handler.goTo(goal=[-0.15, 0.0, 0.0], yaw=0, duration=def_duration / 100, relative=True)
                     time.sleep(def_duration)
 
                 elif back < dist_threshold:
                     rospy.loginfo("back collision avoidance")
-                    cf_handler.goTo(goal=[0.15, 0.0, 0.0], yaw=0, duration=def_duration/100, relative=True)
+                    cf_handler.goTo(goal=[0.15, 0.0, 0.0], yaw=0, duration=def_duration / 100, relative=True)
                     time.sleep(def_duration)
 
                 elif right < dist_threshold:
                     rospy.loginfo("right collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.15, 0.0], yaw=0, duration=def_duration/100, relative=True)
+                    cf_handler.goTo(goal=[0.0, 0.15, 0.0], yaw=0, duration=def_duration / 100, relative=True)
                     time.sleep(def_duration)
 
                 elif left < dist_threshold:
                     rospy.loginfo("left collision avoidance")
-                    cf_handler.goTo(goal=[0.0, -0.15, 0.0], yaw=0, duration=def_duration/100, relative=True)
+                    cf_handler.goTo(goal=[0.0, -0.15, 0.0], yaw=0, duration=def_duration / 100, relative=True)
                     time.sleep(def_duration)
 
                 elif up < dist_threshold:
