@@ -31,25 +31,25 @@ A few notes:
 
 
     <!-- for second CF    -->
-    <arg name="uri2" default="radio://0/120/2M/E7E7E7E706"/>
-    <arg name="frame2" default="cf6"/>
+    <arg name="uri2" default="radio://0/120/2M/E7E7E7E709"/>
+    <arg name="frame2" default="cf9"/>
     <arg name="traj_list2" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX2" default="0"/>
-    <arg name="initY2" default="0"/>                    <!-- REMEMBER!!!!!!         -->
+    <arg name="initY2" default="0"/>
     <arg name="initZ2" default="0"/>
 
     <!--run vrpn client -->
-    <node pkg="vrpn_client_ros" name="vrpn" output="screen" type="vrpn_client_node" required="true">
-        <rosparam subst_value="true">
-            server: $(arg server)
-            port: $(arg port)
-            update_frequency: 100.0
-            frame_id: world
-            use_server_time: false
-            broadcast_tf: true
-            refresh_tracker_frequency: 1.0 <!-- VRPN will add all trackers found on connection -->
-        </rosparam>
-    </node>
+    <!--<node pkg="vrpn_client_ros" name="vrpn" output="screen" type="vrpn_client_node" required="true">-->
+        <!--<rosparam subst_value="true">-->
+            <!--server: $(arg server)-->
+            <!--port: $(arg port)-->
+            <!--update_frequency: 100.0-->
+            <!--frame_id: world-->
+            <!--use_server_time: false-->
+            <!--broadcast_tf: true-->
+            <!--refresh_tracker_frequency: 1.0 &lt;!&ndash; VRPN will add all trackers found on connection &ndash;&gt;-->
+        <!--</rosparam>-->
+    <!--</node>-->
 
 
     <!--    Activate the server.-->

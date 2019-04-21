@@ -3,3 +3,4 @@
 */catkin_generated/*
 *.cmake
 */Makefile
+*/.idea/*

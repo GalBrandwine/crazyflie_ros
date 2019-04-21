@@ -14,11 +14,14 @@ from threading import Thread
 
 import crazyflie
 import rospy
-# from crazyflie_driver.msg import Hover
 from crazyflie_driver.msg import GenericLogData
-
 from crazyflie_driver.msg import Hover #imports for hover message
 from std_msgs.msg import Empty #imports for hover message
+
+import tf2_ros
+from geometry_msgs.msg import PoseStamped
+import tf2_geometry_msgs
+from math import atan2
 
 # TODO: move all this shit into a class MotionController
 
@@ -28,6 +31,23 @@ initialZ = 0.35
 
 global front, back, up, left, right, zrange
 front = back = up = left = right = zrange = 0.0
+global ranges
+ranges=[]
+
+def check_direction(cj_injection_message):
+    global listener, tfBuffer
+    trans = None
+    try:
+        trans = tfBuffer.lookup_transform('world', prefix, rospy.Time(0))
+
+    except:
+        rospy.logwarn("tf lookup -- {} not found".format(prefix))
+    if trans != None:
+        cj_local_coord = PoseStamped()
+        cj_local_coord=tf2_geometry_msgs.do_transform_pose(cj_injection_message,trans)
+        rospy.loginfo(cj_local_coord)
+        heading=atan2(cj_local_coord.pose.position.y, cj_local_coord.pose.position.x)
+        rospy.loginfo(heading)
 
 
 def avoid_collision():
@@ -61,14 +81,14 @@ def avoid_collision():
     pub_hover.publish(msg)
 
 def get_ranges(msg):
-    global front, back, up, left, right, zrange
+    global front, back, up, left, right, zrange, ranges
     front = msg.values[0] / 1000
     back = msg.values[1] / 1000
     up = msg.values[2] / 1000
     left = msg.values[3] / 1000
     right = msg.values[4] / 1000
     zrange = msg.values[5] / 1000
-
+    ranges=[front,back,up,left,right,zrange]
 
 def getch():
     fd = sys.stdin.fileno()
@@ -97,8 +117,9 @@ def handler(cf_handler):
 
     global key
     key = None
-    global front, back, up, left, right, zrange
-    dist_threshold = 0.15
+
+    global front, back, up, left, right, zrange, ranges
+    dist_threshold = 0.2
     def_duration = 1.8
 
     try:
@@ -114,26 +135,26 @@ def handler(cf_handler):
         rospy.loginfo("press 'q','e' for yaw +-45 deg.\n")
 
         while not rospy.is_shutdown():
-            if front > 0:
+
+            if min(ranges) > 0:
                 if front < dist_threshold:
                     rospy.loginfo("forward collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
-                    avoid_collision()
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
                     time.sleep(def_duration)
 
                 elif back < dist_threshold:
                     rospy.loginfo("back collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
                     time.sleep(def_duration)
 
                 elif right < dist_threshold:
                     rospy.loginfo("right collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
                     time.sleep(def_duration)
 
                 elif left < dist_threshold:
                     rospy.loginfo("left collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
                     time.sleep(def_duration)
 
                 elif up < dist_threshold:
@@ -211,9 +232,15 @@ if __name__ == '__main__':
     prefix = rospy.get_param("~tf_prefix")
     rospy.Subscriber('/' + prefix + '/log_ranges', GenericLogData, get_ranges)
 
+    rospy.Subscriber('/' + prefix + '/cj', PoseStamped, check_direction)
+
+
     pub_hover = rospy.Publisher('/' + prefix + "/cmd_hover", Hover, queue_size=1) #hover message publisher
     msg = Hover()
     msg.header.seq = 0
+
+    tfBuffer = tf2_ros.Buffer() #initialize tf buffer for transform lookup
+    listener = tf2_ros.TransformListener(tfBuffer)
 
     cf = crazyflie.Crazyflie("/" + prefix, "world")
 
@@ -223,7 +250,7 @@ if __name__ == '__main__':
     cf.setParam("commander/enHighLevel", 1)
     cf.setParam("stabilizer/estimator", 2)  # Use EKF
 
-    cf.setParam("ctrlMel/kp_z", 0.8)  # reduce z wobble - default 1.25
+    cf.setParam("ctrlMel/kp_z", 0.6)  # reduce z wobble - default 1.25
     # cf.setParam("ctrlMel/ki_z", 0.06) #reduce z wobble - default 0.05
     # cf.setParam("ctrlMel/kd_z", 0.2) #reduce z wobble - default 0.4
     # cf.setParam("ctrlMel/i_range_z", 0.2) #reduce z wobble
@@ -236,7 +263,7 @@ if __name__ == '__main__':
     ########
     time.sleep(0.2)
     cf.setParam("kalman/resetEstimation", 0)
-    time.sleep(0.2)
+    time.sleep(0.5)
     cf.setParam("stabilizer/controller", 2)  # 2=Use mellinger controller
     time.sleep(0.2)
 

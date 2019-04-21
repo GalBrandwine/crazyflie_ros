@@ -107,7 +107,7 @@ def logger_handler(tf_prefix):
         """working, but Remember: there's a buf with tf_ref-wold coordinate's. """
 
         try:  # if optitrack message exists
-            trans = tfBuffer.lookup_transform('world', tf_prefix + '_takeoff', rospy.Time(0))
+            trans = tfBuffer.lookup_transform('world', tf_prefix + '_vrpn', rospy.Time(0))
 
             q = (trans.transform.rotation.x,
                  trans.transform.rotation.y,
