@@ -66,7 +66,7 @@ class Grid:
         self.initpos = [0, 0, 0]  # Reference point
         self.takeofpos = [100, 100, 0] # Take off position
         self.tail_handles = list()
-        self.drone_handel = []
+        self.drone_handle = []
         self.fig = plt.figure()
         ax = self.fig.subplots(1, 1)
         plt.axis([self.x_lim[0], self.x_lim[1], self.y_lim[0], self.y_lim[1]])
@@ -77,7 +77,7 @@ class Grid:
                 handles_list.append(self.plot_ij(i, j))
             self.tail_handles.append(handles_list)
 
-        self.drone_handel, = self.ax.plot(self.takeofpos[0], self.takeofpos[1], 'ob')
+        self.drone_handle, = self.ax.plot(self.takeofpos[0], self.takeofpos[1], 'ob')
 
         self.fig.show()
         self.fig.canvas.draw()
@@ -139,7 +139,8 @@ class Grid:
                                                    self.takeofpos[0]+(pos_val[0]*m_to_cm),
                                                    self.takeofpos[1]+(pos_val[1]*m_to_cm),
                                                    self.takeofpos[2]+(pos_val[2]*m_to_cm), None)
-        # rospy.loginfo("x: {},     y: {}".format(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y))
+
+        # Change tail to be empty if the drone is in that tail.
         i, j = self.xy_to_ij(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
         if self.matrix[i][j] == 0:
             self.change_tail_to_empty(i, j)
@@ -197,6 +198,9 @@ class Grid:
     def update_from_tof_sensing_list(self, drone_id):
         current_pos = self.drones_pos_list[drone_id]
         current_pc = self.drones_pc_list[drone_id]
+
+        # Check if the current point cloud was taken close enough to last position message time
+        # (i.e. was taken from the current position of the drone).
         if not self.is_time_equal(current_pos.time, current_pc.time):
             return
 
@@ -209,7 +213,7 @@ class Grid:
                 self.update_with_tof_sensor([[current_pos.x, current_pos.y]], sensing_pos)
 
                 ###################################### Only for debug ##################################################
-                self.drone_handel.set_data(current_pos.x, current_pos.y)
+                self.drone_handle.set_data(current_pos.x, current_pos.y)
                 self.fig.canvas.draw()
 
                 ########################################################################################################

@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d0a11fd4-31a1-4a87-a47f-8a1f5f7c2601" name="Default Changelist" comment="With occupancy grid data (for publish purposes).">
-      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/crazyflie_demo/launch/indoors_multi_drone_with_point_cloud_publishing.launch" beforeDir="false" afterPath="$PROJECT_DIR$/crazyflie_demo/launch/indoors_multi_drone_with_point_cloud_publishing.launch" afterDir="false" />
+    <list default="true" id="d0a11fd4-31a1-4a87-a47f-8a1f5f7c2601" name="Default Changelist" comment="Update display module to use matrix instead of empty_idxs and wall_idxs">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Display.py" beforeDir="false" afterPath="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Display.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Grid.py" beforeDir="false" afterPath="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Grid.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/GridPOI.py" beforeDir="false" afterPath="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/GridPOI.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/main.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -21,8 +17,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Grid.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="262">
-              <caret line="82" column="16" selection-start-line="82" selection-start-column="13" selection-end-line="82" selection-end-column="16" />
+            <state relative-caret-position="-198">
+              <caret line="76" column="41" selection-start-line="76" selection-start-column="41" selection-end-line="76" selection-end-column="41" />
               <folding>
                 <element signature="e#22#40#0" expanded="true" />
               </folding>
@@ -33,8 +29,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Display.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="101">
-              <caret line="214" column="71" selection-start-line="214" selection-start-column="71" selection-end-line="214" selection-end-column="71" />
+            <state relative-caret-position="173">
+              <caret line="137" column="34" lean-forward="true" selection-start-line="137" selection-start-column="34" selection-end-line="137" selection-end-column="34" />
               <folding>
                 <element signature="e#0#31#0" expanded="true" />
                 <element signature="e#4786#4999#0" />
@@ -47,15 +43,25 @@
                 <element signature="e#5769#5924#0" />
                 <element signature="e#5808#5924#0" />
                 <element signature="e#6843#6880#0" />
-                <element signature="e#6932#6968#0" />
                 <element signature="e#7019#7055#0" />
-                <element signature="e#7121#7194#0" />
                 <element signature="e#7266#7464#0" />
                 <element signature="e#7330#7437#0" />
                 <element signature="e#7504#7629#0" />
                 <element signature="e#7669#7784#0" />
                 <element signature="e#8588#8892#0" />
                 <element signature="e#8683#8830#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Agent.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="375">
+              <caret line="83" selection-start-line="83" selection-end-line="83" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -76,8 +82,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="131">
-              <caret line="65" column="41" selection-start-line="65" selection-start-column="41" selection-end-line="65" selection-end-column="41" />
+            <state relative-caret-position="252">
+              <caret line="64" column="55" selection-start-line="64" selection-start-column="55" selection-end-line="64" selection-end-column="55" />
               <folding>
                 <element signature="e#44#75#0" expanded="true" />
               </folding>
@@ -98,9 +104,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>self.border</find>
-      <find>self.obs</find>
-      <find>self.x_li</find>
       <find>self.m_to_cm</find>
       <find>empty_i</find>
       <find>Occ</find>
@@ -117,7 +120,6 @@
       <find>takeof</find>
       <find>initpo</find>
       <find>update_drone_plot</find>
-      <find>plot</find>
       <find>pars</find>
       <find>drones_pos_list</find>
       <find>t</find>
@@ -128,10 +130,14 @@
       <find>set</find>
       <find>drone_pos</find>
       <find>fig</find>
+      <find>login</find>
+      <find>plot_step</find>
+      <find>plot</find>
+      <find>empty</find>
     </findStrings>
     <replaceStrings>
-      <replace>handle</replace>
       <replace>m_to_cm</replace>
+      <replace>handle</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -139,7 +145,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="dc6958b1d8cad19c17423a7cb1a8d827cc5d8635" />
+        <entry key="$PROJECT_DIR$" value="crazyflie_IndoorSimTest" />
       </map>
     </option>
     <favorite-branches>
@@ -175,6 +181,7 @@
         <option value="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/GridPOI.py" />
         <option value="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/main.py" />
         <option value="$PROJECT_DIR$/crazyflie_demo/launch/indoors_multi_drone_with_point_cloud_publishing.launch" />
+        <option value="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Agent.py" />
         <option value="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Grid.py" />
         <option value="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Display.py" />
       </list>
@@ -203,12 +210,6 @@
               <item name="crazyflie_ros" type="b2602c69:ProjectViewProjectNode" />
               <item name="crazyflie_ros" type="462c0819:PsiDirectoryNode" />
               <item name="crazyflie_demo" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="crazyflie_ros" type="b2602c69:ProjectViewProjectNode" />
-              <item name="crazyflie_ros" type="462c0819:PsiDirectoryNode" />
-              <item name="crazyflie_demo" type="462c0819:PsiDirectoryNode" />
-              <item name="launch" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="crazyflie_ros" type="b2602c69:ProjectViewProjectNode" />
@@ -328,14 +329,27 @@
       <option name="project" value="LOCAL" />
       <updated>1555413378515</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="With messages to display module.">
+      <created>1555509568886</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1555509568886</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Fixed bug in agent.&#10;Agent moves in display module.">
+      <created>1555583422085</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1555583422085</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="64" y="-11" width="1303" height="780" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" weight="0.17214398" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.17214398" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -346,7 +360,7 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.32868218" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="8" sideWeight="0.49921754" visible="true" weight="0.32868218" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="8" sideWeight="0.49921754" visible="true" weight="0.32248062" />
       <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.5007825" side_tool="true" weight="0.32868218" />
       <window_info anchor="bottom" id="Python Console" order="10" weight="0.32868218" />
       <window_info anchor="bottom" id="Messages" order="11" />
@@ -379,7 +393,9 @@
     <MESSAGE value="With bug fixing, comments and drone position drawing (for debugging purposes only)." />
     <MESSAGE value="With occupancy grid publisher." />
     <MESSAGE value="With occupancy grid data (for publish purposes)." />
-    <option name="LAST_COMMIT_MESSAGE" value="With occupancy grid data (for publish purposes)." />
+    <MESSAGE value="With messages to display module." />
+    <MESSAGE value="Fixed bug in agent.&#10;Agent moves in display module." />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed bug in agent.&#10;Agent moves in display module." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -396,12 +412,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Display.py</url>
-          <line>246</line>
+          <line>274</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Display.py</url>
-          <line>28</line>
+          <line>29</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>
@@ -509,10 +525,20 @@ for i in range(0, num_of_agents):
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Agent.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="375">
+          <caret line="83" selection-start-line="83" selection-end-line="83" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="131">
-          <caret line="65" column="41" selection-start-line="65" selection-start-column="41" selection-end-line="65" selection-end-column="41" />
+        <state relative-caret-position="252">
+          <caret line="64" column="55" selection-start-line="64" selection-start-column="55" selection-end-line="64" selection-end-column="55" />
           <folding>
             <element signature="e#44#75#0" expanded="true" />
           </folding>
@@ -521,8 +547,8 @@ for i in range(0, num_of_agents):
     </entry>
     <entry file="file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Grid.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="262">
-          <caret line="82" column="16" selection-start-line="82" selection-start-column="13" selection-end-line="82" selection-end-column="16" />
+        <state relative-caret-position="-198">
+          <caret line="76" column="41" selection-start-line="76" selection-start-column="41" selection-end-line="76" selection-end-column="41" />
           <folding>
             <element signature="e#22#40#0" expanded="true" />
           </folding>
@@ -531,8 +557,8 @@ for i in range(0, num_of_agents):
     </entry>
     <entry file="file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Display.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="101">
-          <caret line="214" column="71" selection-start-line="214" selection-start-column="71" selection-end-line="214" selection-end-column="71" />
+        <state relative-caret-position="173">
+          <caret line="137" column="34" lean-forward="true" selection-start-line="137" selection-start-column="34" selection-end-line="137" selection-end-column="34" />
           <folding>
             <element signature="e#0#31#0" expanded="true" />
             <element signature="e#4786#4999#0" />
@@ -545,9 +571,7 @@ for i in range(0, num_of_agents):
             <element signature="e#5769#5924#0" />
             <element signature="e#5808#5924#0" />
             <element signature="e#6843#6880#0" />
-            <element signature="e#6932#6968#0" />
             <element signature="e#7019#7055#0" />
-            <element signature="e#7121#7194#0" />
             <element signature="e#7266#7464#0" />
             <element signature="e#7330#7437#0" />
             <element signature="e#7504#7629#0" />

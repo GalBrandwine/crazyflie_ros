@@ -18,6 +18,7 @@ class Display_manager:
         self.y_lim = y_lim
         self.res = res
         self.matrix = matrix
+        self.last_matrix = matrix
         self.border_polygon = border_polygon
         self.obs_array = obs_array
 
@@ -97,18 +98,21 @@ class Display_manager:
                                                    self.takeofpos[drone_id][0]+(pos_val[0]*m_to_cm),
                                                    self.takeofpos[drone_id][1]+(pos_val[1]*m_to_cm),
                                                    self.takeofpos[drone_id][2]+(pos_val[2]*m_to_cm), None, 0)
-        # print "x: {}             y: {}".format(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
         # There is no need to change matrix' values acoording to drones position,
         # because it is already done in Grid module.
+        # Drones plotting is done via the grid parser (in order to avoid calling the plot function too many times).
 
     def grid_parser(self, msg):
         grid_height = int(msg.info.height / msg.info.resolution)
         grid_width = int(msg.info.width / msg.info.resolution)
+        self.last_matrix = self.matrix
         self.matrix = np.array(msg.data).reshape((grid_height, grid_width))
         keys = list(self.drones_pos_list.keys())
         for iDrone in range(self.nDrones):
             curr_drone_key = keys[iDrone]
             pos = self.drones_pos_list[curr_drone_key]
+
+            # TODO: delete
             self.empty_idxs = []
             self.wall_idxs = []
             self.reduced_neigbours_pos_list = []
@@ -116,23 +120,40 @@ class Display_manager:
             interesting_points_list_ij = []
             corner_points_list_ij = []
             wall_idxs_ij = []
-            self.plot_step(next_pos, self.empty_idxs, self.wall_idxs, self.reduced_neigbours_pos_list,
-                              [pos.x, pos.y], pos.index, interesting_points_list_ij, corner_points_list_ij,
-                              wall_idxs_ij)
+            # self.plot_step(next_pos, self.empty_idxs, self.wall_idxs, self.reduced_neigbours_pos_list,
+            #                   [pos.x, pos.y], pos.index, interesting_points_list_ij, corner_points_list_ij,
+            #                   wall_idxs_ij)
 
+            virtual_target_pos = []
+            self.update_drone_plot([pos.x, pos.y], virtual_target_pos, pos.index)
 
+        self.update_grid_plot()
+
+    def update_grid_plot(self):
+        diff_matrix = np.subtract(self.matrix, self.last_matrix)
+        nonzero = np.nonzero(diff_matrix)
+        nonzero_rows = nonzero[0]
+        nonzero_cols = nonzero[1]
+        for i_nz in range(len(nonzero_rows)):
+            i = nonzero_rows[i_nz]
+            j = nonzero_cols[i_nz]
+            if self.matrix[i][j] == 1:
+                self.change_tail_to_empty(i, j)
+            elif self.matrix[i][j] == 2:
+                self.change_tail_to_wall(i, j)
+
+    # TODO: delete
     def plot_step(self, virtual_target_pos, empty_idxs, wall_idxs, neighbors_list, drone_pos, drone_idx, interesting_points_list_ij, corner_points_list_ij, wall_corner_idx):
-        # for tail in empty_idxs:
-        #     self.change_tail_to_empty(tail[0],tail[1])
-        # for tail in wall_idxs:
-        #     self.change_tail_to_wall(tail[0],tail[1])
+        for tail in empty_idxs:
+            self.change_tail_to_empty(tail[0],tail[1])
+        for tail in wall_idxs:
+            self.change_tail_to_wall(tail[0],tail[1])
         # for tail in wall_corner_idx:
         #     self.change_tail_to_wall(tail[0], tail[1])
         # self.plot_interesting_points(interesting_points_list_ij)
         # self.plot_corner_points(corner_points_list_ij)
         self.update_drone_plot(drone_pos, virtual_target_pos, drone_idx)
         # self.plot_edges(neighbors_list, drone_pos, drone_idx)
-
         self.fig.canvas.draw()
 
 
@@ -219,6 +240,7 @@ class Display_manager:
         # self.plot_handle_grids_vt[drone_idx].set_data(virtual_target[0][0], virtual_target[0][1])
         # self.plot_handle_envs_l2vt[drone_idx].set_data([real_target[0][0], virtual_target[0][0]], [real_target[0][1], virtual_target[0][1]])
         # self.plot_handle_grids_l2vt[drone_idx].set_data([real_target[0][0], virtual_target[0][0]], [real_target[0][1], virtual_target[0][1]])
+        self.fig.canvas.draw()
 
     def plot_edges(self, neighbors_list, d_pos, drone_idx):
         self.delete_edges(drone_idx)
@@ -244,6 +266,12 @@ if __name__ == "__main__":
     obs_array.append(Polygon([(200, 10), (190, 10), (190, 200), (200, 200), (200, 10)]))  # E
     obs_array.append(Polygon([(10, 200), (10, 190), (190, 190), (190, 200), (10, 200)]))  # N
     initial_pos_dict = {'cf6': [100, 100, 0]}
-    display_manager = Display_manager(border_polygon, obs_array, [0, 200], [0, 200], 10, [], initial_pos_dict, 1)
+    x_lim = [0, 200]
+    y_lim = [0, 200]
+    res = 10
+    matrix = np.zeros([np.int64(np.ceil((x_lim[1] - x_lim[0]) / res)),
+                            np.int64(np.ceil((y_lim[1] - y_lim[0]) / res))])
+
+    display_manager = Display_manager(border_polygon, obs_array, [0, 200], [0, 200], 10, matrix, initial_pos_dict, 1)
 
     plt.show(block=True)
