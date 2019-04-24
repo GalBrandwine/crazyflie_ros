@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """This is a simple Cj_injector for emulating. """
 from math import radians
+from threading import Thread
 
 import rospy
 import tf
@@ -36,6 +37,21 @@ class DroneCjInjector:
         # Init listeners
         self.Cj_injector_pub = rospy.Publisher('/' + self.tf_prefix + "/Cj_injcetor", PoseStamped,
                                                queue_size=1)  # hover message publisher
+
+
+def injector(drone_injector, path):
+    """Simple threaded function for publishing point of a drone """
+    for point in path:
+        time_delay = point[0]
+        x = point[1]
+        y = point[2]
+        z = point[3]
+        roll = 0
+        pitch = 0
+        yaw = point[4]
+        pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
+        drone_injector.Cj_injector_pub.publish(pose)
+        rospy.sleep(time_delay)
 
 
 class DroneInjector:
@@ -95,8 +111,31 @@ class DroneInjector:
         # x = 0
         # y = 0
         # z = 0
-        x = 0.6
-        y = 0.6
+        x = 0
+        y = 0
+        z = 0.35
+        roll = 0
+        pitch = 0
+        yaw = 0
+
+        step_x = 0.5
+        step_y = 0.5
+        step_z = 0.35
+        step_yaw = 90  # deg
+        for drone in self.cj_injector_container:
+            pose = to_pose_stamped(x, y, z, roll, pitch, step_yaw)
+            drone.Cj_injector_pub.publish(pose)
+            # rospy.sleep(time_delay)
+            rospy.logdebug("******************* {} rotated!".format(drone))
+
+    def simple_rotation_example(self, time_delay=None):
+        """Simple rotation example to make all drones rotate"""
+        time_delay = time_delay if time_delay is not None else 2  # seconds
+        # x = 0
+        # y = 0
+        # z = 0
+        x = 1.2
+        y = 1.2
         z = 0.35
         roll = 0
         pitch = 0
@@ -112,76 +151,64 @@ class DroneInjector:
             # rospy.sleep(time_delay)
             rospy.logdebug("******************* {} rotated!".format(drone))
 
-    def simple_rectangel_example(self):
+    def simple_rectangel_example(self, time_delay=None):
         """Make all drones in DroneInjector to fly in a rectangle.
 
         Very simple and stupid example for using the injcetor.
 
         """
-        x = 0
-        y = 0
-        z = 0
-        roll = 0
-        pitch = 0
-        yaw = 0
+        threads = []
+        # path = [[duration,x,y,z,yaw],]
+        path1 = [[2, 0.3, 0.6, 0.35, 0],
+                 [2, 0.3, 0.9, 0.35, 0],
+                 [2, 0.3, 1.2, 0.35, 0],
+                 [2, 0.3, 1.5, 0.35, 0],
+                 [2, 0.3, 1.8, 0.35, 0],
+                 # [3, 0.3, 1.8, 0.35, 90],
+                 [2, 0.6, 1.8, 0.35, 0],
+                 [2, 0.9, 1.8, 0.35, 0],
+                 [2, 1.2, 1.8, 0.35, 0],
+                 [2, 1.5, 1.8, 0.35, 0],
+                 [2, 1.8, 1.8, 0.35, 0],
+                 [2, 2.1, 1.8, 0.35, 0],
+                 # [3, 2.1, 1.8, 0.35, 0]
+                 ]
+        path2 = [[2, 2.1, 1.8, 0.35, 0],
+                 [2, 2.1, 1.5, 0.35, 0],
+                 [2, 2.1, 1.2, 0.35, 0],
+                 [2, 2.1, 0.9, 0.35, 0],
+                 [2, 2.1, 0.6, 0.35, 0],
+                 # [3, 2.1, 0.6, 0.35, 90],
+                 [2, 1.8, 0.6, 0.35, 0],
+                 [2, 1.5, 0.6, 0.35, 0],
+                 [2, 1.2, 0.6, 0.35, 0],
+                 [2, 0.9, 0.6, 0.35, 0],
+                 [2, 0.6, 0.6, 0.35, 0],
+                 [2, 0.3, 0.6, 0.35, 0],
 
-        step_x = 0.5
-        step_y = 0.5
-        step_z = 0.3
-        step_yaw = 90  # deg
+                 # [3, 0.3, 0.6, 0.35, 0]
+                 ]
+        t1 = Thread(target=injector, args=(self.cj_injector_container[0], path1,))
+        threads.append(t1)
 
-        time_delay = 2  # seconds
-        while not rospy.is_shutdown():
-            x = 0.6
-            y = 0.6
-            z = 0.3
-            """first point in path. """
-            for drone in self.cj_injector_container:
-                pose = to_pose_stamped(x, y, step_z, roll, pitch, step_yaw)
-                drone.Cj_injector_pub.publish(pose)
-                rospy.sleep(time_delay)
-                rospy.logdebug("******************* {} rotated!".format(drone))
+        t2 = Thread(target=injector, args=(self.cj_injector_container[3], path2,))
+        threads.append(t2)
 
+        # start all threads.
+        for t in threads:
+            t.start()
 
-
-            # [x, y, z, roll, pitch, yaw] = [step_x, 0, step_z, 0, 0, 0]
-            # pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
-            # Cj_injector_pub.publish(pose)
-            # rospy.sleep(time_delay)
-
-            # [x, y, z, roll, pitch, yaw] = [step_x, step_y, step_z, 0, 0, 0]
-            # pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
-            # Cj_injector_pub.publish(pose)
-            # rospy.sleep(time_delay)
-            #
-            # [x, y, z, roll, pitch, yaw] = [0, step_y, step_z, 0, 0, 0]
-            # pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
-            # Cj_injector_pub.publish(pose)
-            # rospy.sleep(time_delay)
-            #
-            # [x, y, z, roll, pitch, yaw] = [0, 0, step_z, 0, 0, 0]
-            # pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
-            # Cj_injector_pub.publish(pose)
-            # rospy.sleep(time_delay)
-            #
-            # [x, y, z, roll, pitch, yaw] = [0, 0, step_z, 0, 0, step_yaw]
-            # pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
-            # Cj_injector_pub.publish(pose)
-            # rospy.sleep(time_delay)
-            #
-            # [x, y, z, roll, pitch, yaw] = [0, 0, step_z, 0, 0, 0]  # 0 pi
-            # pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
-            # Cj_injector_pub.publish(pose)
-            # rospy.sleep(time_delay)
+        # stop workers
+        for t in threads:
+            t.join()
+        rospy.loginfo("********************************* Done ***************************")
 
     def launcher(self, msg):
         """A callback for simple_examples. """
-        self.simple_rotation_example()
+        # self.simple_rotation_example()
+        self.simple_rectangel_example()
 
 
-# todo: motion controller is not working properly because of Cj_injection's we need to make that work
-
-# todo change this to be an outside Node, that will receive N drones in a narray
 if __name__ == '__main__':
     rospy.init_node("incjetor", log_level=rospy.DEBUG)
     Cj_injectors = []
