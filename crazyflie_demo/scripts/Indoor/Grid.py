@@ -37,7 +37,7 @@ class drone_pc:
 
 class Grid:
 
-    def __init__(self, border_polygon, res):
+    def __init__(self, border_polygon, res, nDrones):
         self.x_lim = [border_polygon[0][0], border_polygon[0][0]]
         self.y_lim = [border_polygon[0][1], border_polygon[0][1]]
         for i in range(1, border_polygon.__len__()):
@@ -54,21 +54,21 @@ class Grid:
         self.matrix = np.zeros([np.int64(np.ceil((self.x_lim[1]-self.x_lim[0])/self.res)), np.int64(np.ceil((self.y_lim[1]-self.y_lim[0])/self.res))])
         self.empty_idxs = []
         self.wall_idxs = []
-        self.nDrones = 1
-        self.eps = 1 # Allowed time difference between messages
-        self.min_rng = 20 # Range which indicates equal positions
+        self.nDrones = nDrones
+        self.eps = 1  # Allowed time [sec] difference between messages
         self.drones_pos_list = dict()
         self.drones_pc_list = dict()
         # maximal limit for pc delta from drone reference in cm
         self.pc_lim = 200
-        self.takeofpos = [100, 100, 0] # Take off position
+        self.takeofpos = [100, 100, 0]  # Take off position
         self.initpos = [0, 0, 0]  # Reference point
 
         for iDrone in range(self.nDrones):
             # Init listeners
-            self.pos_sub = rospy.Subscriber("/cf6/log_pos", GenericLogData,
+            drone_name = rospy.get_param("~drone_name_{}".format(iDrone))
+            self.pos_sub = rospy.Subscriber("/{}/log_pos".format(drone_name), GenericLogData,
                                             self.pos_parser)
-            self.pc_sub = rospy.Subscriber("/cf6/point_cloud", PointCloud2,
+            self.pc_sub = rospy.Subscriber("/{}/point_cloud".format(drone_name), PointCloud2,
                                            self.point_cloud_parser)
 
 
@@ -86,7 +86,7 @@ class Grid:
         for i in range(len(point_cloud)):
             point = point_cloud[i]
             sens.append([point.x*m_to_cm, point.y*m_to_cm, point.z*m_to_cm])
-            # drone_id = point_cloud_last_timestamp.frame_id # need to change frame_id from "world" to cf6
+            # drone_id = point_cloud_last_timestamp.frame_id # TODO: change frame_id from "world" to cf6
             drone_id = "cf6"
             if sens and drone_id in list(self.drones_pos_list.keys()):
                 self.drones_pc_list[drone_id] = drone_pc(point_cloud_last_timestamp.stamp.secs, sens)
@@ -171,7 +171,8 @@ class Grid:
         self.wall_idxs = []
 
         for elem in current_pc.pc_sens:
-            if abs(elem[0]) < self.pc_lim and abs(elem[1]) < self.pc_lim and np.linalg.norm(elem) > 0:
+            if np.linalg.norm(np.subtract(elem[:1], [current_pos.x, current_pos.y])) < self.pc_lim and np.linalg.norm(elem) > 0:
+            # if abs(elem[0]) < self.pc_lim and abs(elem[1]) < self.pc_lim and np.linalg.norm(elem) > 0:
                 sensing_pos = [[self.initpos[0]+elem[0], self.initpos[1]+elem[1]]]
                 self.update_with_tof_sensor([[current_pos.x, current_pos.y]], sensing_pos)
 
@@ -200,4 +201,17 @@ if __name__ == "__main__":
     rospy.init_node("grid_builder")
 
     # grid = Grid([(0, 0), (570, 0), (570, 550), (0, 550), (0, 0)], 10)
-    grid = Grid([(0, 0), (200, 0), (200, 200), (0, 200), (0, 0)], 10)
+    env_lim = rospy.get_param("~env_lim")
+    env_space = rospy.get_param("~env_space")
+    resolution = rospy.get_param("~resolution")
+    nDrones = rospy.get_param("~nDrones")
+
+    exec("env_lim = {}".format(env_lim))
+
+    x_lim = (env_lim[0] - env_space, env_lim[1] + env_space)
+    y_lim = (env_lim[2] - env_space, env_lim[3] + env_space)
+
+    polygon_border = [(x_lim[0], y_lim[0]), (x_lim[1], y_lim[0]), (x_lim[1], y_lim[1]),
+                      (x_lim[0], y_lim[1]), (x_lim[0], y_lim[0])]
+
+    grid = Grid(polygon_border, res=resolution, nDrones=nDrones)

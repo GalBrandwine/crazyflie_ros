@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d0a11fd4-31a1-4a87-a47f-8a1f5f7c2601" name="Default Changelist" comment="Update display module to use matrix instead of empty_idxs and wall_idxs">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/crazyflie_demo/launch/indoors_multi_drone_with_point_cloud_publishing.launch" beforeDir="false" afterPath="$PROJECT_DIR$/crazyflie_demo/launch/indoors_multi_drone_with_point_cloud_publishing.launch" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Display.py" beforeDir="false" afterPath="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Display.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Grid.py" beforeDir="false" afterPath="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Grid.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -16,8 +17,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Grid.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2455">
-              <caret line="203" selection-start-line="203" selection-end-line="203" />
+            <state relative-caret-position="238">
+              <caret line="91" column="39" selection-start-line="91" selection-start-column="39" selection-end-line="91" selection-end-column="39" />
               <folding>
                 <element signature="e#22#40#0" expanded="true" />
               </folding>
@@ -28,8 +29,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Display.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="172">
-              <caret line="143" lean-forward="true" selection-start-line="143" selection-end-line="143" />
+            <state relative-caret-position="190">
+              <caret line="254" column="38" selection-start-line="254" selection-start-column="38" selection-end-line="254" selection-end-column="38" />
             </state>
           </provider>
         </entry>
@@ -61,7 +62,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="765">
+            <state relative-caret-position="252">
               <caret line="64" column="55" selection-start-line="64" selection-start-column="55" selection-end-line="64" selection-end-column="55" />
               <folding>
                 <element signature="e#44#75#0" expanded="true" />
@@ -73,8 +74,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/crazyflie_demo/launch/indoors_multi_drone_with_point_cloud_publishing.launch">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2205">
-              <caret line="147" selection-start-line="147" selection-end-line="147" />
+            <state relative-caret-position="133">
+              <caret line="32" column="35" selection-start-line="32" selection-start-column="32" selection-end-line="32" selection-end-column="35" />
             </state>
           </provider>
         </entry>
@@ -83,15 +84,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>self.m_to_cm</find>
-      <find>empty_i</find>
-      <find>Occ</find>
-      <find>grid</find>
-      <find>indoo</find>
-      <find>res</find>
-      <find>world</find>
-      <find>parse</find>
-      <find>pu</find>
       <find>handel</find>
       <find>m_to</find>
       <find>parser</find>
@@ -105,7 +97,6 @@
       <find>is_time_equal</find>
       <find>loginf</find>
       <find>-1</find>
-      <find>print</find>
       <find>set</find>
       <find>drone_pos</find>
       <find>fig</find>
@@ -113,6 +104,16 @@
       <find>plot_step</find>
       <find>plot</find>
       <find>empty</find>
+      <find>corn</find>
+      <find>crazyflie_add</find>
+      <find>frame2</find>
+      <find>200</find>
+      <find>print</find>
+      <find>cf</find>
+      <find>_id</find>
+      <find>world</find>
+      <find>corner</find>
+      <find>cf6</find>
     </findStrings>
     <replaceStrings>
       <replace>m_to_cm</replace>
@@ -159,18 +160,18 @@
       <list>
         <option value="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/GridPOI.py" />
         <option value="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/main.py" />
-        <option value="$PROJECT_DIR$/crazyflie_demo/launch/indoors_multi_drone_with_point_cloud_publishing.launch" />
         <option value="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Agent.py" />
         <option value="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Display.py" />
+        <option value="$PROJECT_DIR$/crazyflie_demo/launch/indoors_multi_drone_with_point_cloud_publishing.launch" />
         <option value="$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Grid.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="75" />
-    <option name="y" value="16" />
-    <option name="width" value="1281" />
-    <option name="height" value="732" />
+    <option name="x" value="65" />
+    <option name="y" value="117" />
+    <option name="width" value="1279" />
+    <option name="height" value="630" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -201,6 +202,13 @@
               <item name="crazyflie_demo" type="462c0819:PsiDirectoryNode" />
               <item name="scripts" type="462c0819:PsiDirectoryNode" />
               <item name="Indoor" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="crazyflie_ros" type="b2602c69:ProjectViewProjectNode" />
+              <item name="crazyflie_ros" type="462c0819:PsiDirectoryNode" />
+              <item name="crazyflie_demo" type="462c0819:PsiDirectoryNode" />
+              <item name="scripts" type="462c0819:PsiDirectoryNode" />
+              <item name="utils" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -326,7 +334,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="64" y="-11" width="1303" height="780" extended-state="6" />
+    <frame x="65" y="-4" width="1301" height="772" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.17214398" />
@@ -338,7 +346,7 @@
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.32868218" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.32868218" />
       <window_info active="true" anchor="bottom" id="Terminal" order="8" sideWeight="0.49921754" visible="true" weight="0.2511628" />
       <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.5007825" side_tool="true" weight="0.32868218" />
@@ -392,7 +400,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Display.py</url>
-          <line>274</line>
+          <line>271</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -508,9 +516,14 @@ for i in range(0, num_of_agents):
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/crazyflie_demo/scripts/publish_external_pose_vicon.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-457" />
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="765">
+        <state relative-caret-position="252">
           <caret line="64" column="55" selection-start-line="64" selection-start-column="55" selection-end-line="64" selection-end-column="55" />
           <folding>
             <element signature="e#44#75#0" expanded="true" />
@@ -520,15 +533,15 @@ for i in range(0, num_of_agents):
     </entry>
     <entry file="file://$PROJECT_DIR$/crazyflie_demo/launch/indoors_multi_drone_with_point_cloud_publishing.launch">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2205">
-          <caret line="147" selection-start-line="147" selection-end-line="147" />
+        <state relative-caret-position="133">
+          <caret line="32" column="35" selection-start-line="32" selection-start-column="32" selection-end-line="32" selection-end-column="35" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Grid.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2455">
-          <caret line="203" selection-start-line="203" selection-end-line="203" />
+        <state relative-caret-position="238">
+          <caret line="91" column="39" selection-start-line="91" selection-start-column="39" selection-end-line="91" selection-end-column="39" />
           <folding>
             <element signature="e#22#40#0" expanded="true" />
           </folding>
@@ -537,8 +550,8 @@ for i in range(0, num_of_agents):
     </entry>
     <entry file="file://$PROJECT_DIR$/crazyflie_demo/scripts/Indoor/Display.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="172">
-          <caret line="143" lean-forward="true" selection-start-line="143" selection-end-line="143" />
+        <state relative-caret-position="190">
+          <caret line="254" column="38" selection-start-line="254" selection-start-column="38" selection-end-line="254" selection-end-column="38" />
         </state>
       </provider>
     </entry>

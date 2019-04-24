@@ -112,23 +112,14 @@ class Display_manager:
             curr_drone_key = keys[iDrone]
             pos = self.drones_pos_list[curr_drone_key]
 
-            # TODO: delete
-            self.empty_idxs = []
-            self.wall_idxs = []
-            self.reduced_neigbours_pos_list = []
-            next_pos = []
-            interesting_points_list_ij = []
-            corner_points_list_ij = []
-            wall_idxs_ij = []
-            # self.plot_step(next_pos, self.empty_idxs, self.wall_idxs, self.reduced_neigbours_pos_list,
-            #                   [pos.x, pos.y], pos.index, interesting_points_list_ij, corner_points_list_ij,
-            #                   wall_idxs_ij)
-
             virtual_target_pos = []
             self.update_drone_plot([pos.x, pos.y], virtual_target_pos, pos.index)
 
         self.update_grid_plot()
 
+    # TODO: plot POI
+
+    # Update the grid plot using the last receive matrix (i.e. occupancy grid)
     def update_grid_plot(self):
         diff_matrix = np.subtract(self.matrix, self.last_matrix)
         nonzero = np.nonzero(diff_matrix)
@@ -141,20 +132,6 @@ class Display_manager:
                 self.change_tail_to_empty(i, j)
             elif self.matrix[i][j] == 2:
                 self.change_tail_to_wall(i, j)
-
-    # TODO: delete
-    def plot_step(self, virtual_target_pos, empty_idxs, wall_idxs, neighbors_list, drone_pos, drone_idx, interesting_points_list_ij, corner_points_list_ij, wall_corner_idx):
-        for tail in empty_idxs:
-            self.change_tail_to_empty(tail[0],tail[1])
-        for tail in wall_idxs:
-            self.change_tail_to_wall(tail[0],tail[1])
-        # for tail in wall_corner_idx:
-        #     self.change_tail_to_wall(tail[0], tail[1])
-        # self.plot_interesting_points(interesting_points_list_ij)
-        # self.plot_corner_points(corner_points_list_ij)
-        self.update_drone_plot(drone_pos, virtual_target_pos, drone_idx)
-        # self.plot_edges(neighbors_list, drone_pos, drone_idx)
-        self.fig.canvas.draw()
 
 
     def plot_interesting_points(self, interesting_points_list_ij):
@@ -259,19 +236,39 @@ if __name__ == "__main__":
 
     rospy.init_node("display_manager")
 
-    border_polygon = Polygon([(0, 0), (200, 0), (200, 200), (0, 200), (0, 0)])
-    obs_array = []
-    obs_array.append(Polygon([(0, 0), (10, 0), (10, 200), (0, 200), (0, 0)])) # W
-    obs_array.append(Polygon([(10, 0), (10, 10), (200, 10), (200, 0), (10, 0)]))  # S
-    obs_array.append(Polygon([(200, 10), (190, 10), (190, 200), (200, 200), (200, 10)]))  # E
-    obs_array.append(Polygon([(10, 200), (10, 190), (190, 190), (190, 200), (10, 200)]))  # N
-    initial_pos_dict = {'cf6': [100, 100, 0]}
-    x_lim = [0, 200]
-    y_lim = [0, 200]
-    res = 10
-    matrix = np.zeros([np.int64(np.ceil((x_lim[1] - x_lim[0]) / res)),
-                            np.int64(np.ceil((y_lim[1] - y_lim[0]) / res))])
+    env_lim = rospy.get_param("~env_lim")
+    env_space = rospy.get_param("~env_space")
+    resolution = rospy.get_param("~resolution")
 
-    display_manager = Display_manager(border_polygon, obs_array, [0, 200], [0, 200], 10, matrix, initial_pos_dict, 1)
+    exec ("env_lim = {}".format(env_lim))
+
+    x_lim = (env_lim[0] - env_space, env_lim[1] + env_space)
+    y_lim = (env_lim[2] - env_space, env_lim[3] + env_space)
+
+    polygon_border = [(x_lim[0], y_lim[0]), (x_lim[1], y_lim[0]), (x_lim[1], y_lim[1]),
+                      (x_lim[0], y_lim[1]), (x_lim[0], y_lim[0])]
+
+    obs_array = []
+
+    nObstacles = rospy.get_param("~nObstacles")
+    for iObstacle in range(nObstacles):
+        curr_polygon = rospy.get_param("~obs_{}".format(iObstacle))
+        exec("curr_polygon = {}".format(curr_polygon))
+        obs_array.append(Polygon(curr_polygon))
+
+    nDrones = rospy.get_param("~nDrones")
+    initial_pos_dict = dict()
+    for iDrone in range(nDrones):
+        curr_drone_name = rospy.get_param("~drone_name_{}".format(iDrone))
+        curr_drone_takeoff_pos = rospy.get_param("~drone_takeoff_position_{}".format(iDrone))
+        exec ("curr_drone_takeoff_pos = {}".format(curr_drone_takeoff_pos))
+        initial_pos_dict[curr_drone_name] = curr_drone_takeoff_pos
+
+    print initial_pos_dict
+
+    matrix = np.zeros([np.int64(np.ceil((x_lim[1] - x_lim[0]) / resolution)),
+                            np.int64(np.ceil((y_lim[1] - y_lim[0]) / resolution))])
+
+    display_manager = Display_manager(polygon_border, obs_array, x_lim, y_lim, resolution, matrix, initial_pos_dict, 1)
 
     plt.show(block=True)

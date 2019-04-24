@@ -37,6 +37,18 @@ A few notes:
     <arg name="initZ2" default="0"/>
 
 
+    <!-- arguments for indoor mapping  -->
+    <arg name="x_min" default="0"/>
+    <arg name="x_max" default="200"/>
+    <arg name="y_min" default="0"/>
+    <arg name="y_max" default="200"/>
+    <arg name="env_lim" default="[$(arg x_min), $(arg x_max), $(arg y_min), $(arg y_max)]"/>
+    <arg name="resolution" default="10"/>
+    <arg name="env_space" default="50"/>
+    <arg name="nDrones" default="1"/>
+
+
+
     <!--    Activate the server.-->
     <include file="$(find crazyflie_driver)/launch/crazyflie_server.launch">
     </include>
@@ -142,8 +154,30 @@ A few notes:
 <!--        <node name="drone_data_parser" pkg="crazyflie_demo" type="rotem.py" output="screen">-->
 <!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
 <!--        </node>-->
-        <node name="grid_publisher" pkg="crazyflie_demo" type="Grid.py" output="screen"></node>
-        <node name="display_manager" pkg="crazyflie_demo" type="Display.py" output="screen"></node>
+        <node name="grid_publisher" pkg="crazyflie_demo" type="Grid.py" output="screen">
+            <param name="env_lim" value="$(arg env_lim)"/>
+            <param name="env_space" value="$(arg env_space)"/>
+            <param name="resolution" value="$(arg resolution)"/>
+
+            <param name="nDrones" value="$(arg nDrones)"/>
+            <param name="drone_name_0" value="$(arg frame2)"/>
+        </node>
+
+        <node name="display_manager" pkg="crazyflie_demo" type="Display.py" output="screen">
+            <param name="env_lim" value="$(arg env_lim)"/>
+            <param name="env_space" value="$(arg env_space)"/>
+            <param name="resolution" value="$(arg resolution)"/>
+
+            <param name="nObstacles" value="4"/>
+            <param name="obs_0" value="[(0, 0), (10, 0), (10, 200), (0, 200), (0, 0)]"/>
+            <param name="obs_1" value="[(10, 0), (10, 10), (200, 10), (200, 0), (10, 0)]"/>
+            <param name="obs_2" value="[(200, 10), (190, 10), (190, 200), (200, 200), (200, 10)]"/>
+            <param name="obs_3" value="[(10, 200), (10, 190), (190, 190), (190, 200), (10, 200)]"/>
+
+            <param name="nDrones" value="$(arg nDrones)"/>
+            <param name="drone_name_0" value="$(arg frame2)"/>
+            <param name="drone_takeoff_position_0" value="[100, 100, 0]"/>
+        </node>
 
 
     </group>
