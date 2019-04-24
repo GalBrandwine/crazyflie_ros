@@ -145,16 +145,16 @@ def handler(cf_handler):
     def_duration = 1.8
 
     try:
-        rospy.loginfo("keyboard controller.\n")
-        rospy.loginfo("press SPACE for emergency stop + land.\n")
-        rospy.loginfo("press 's' for stop.\n")
-        rospy.loginfo("press 'w' for forward.\n")
-        rospy.loginfo("press 'x' for backward.\n")
-        rospy.loginfo("press 'a' for left.\n")
-        rospy.loginfo("press 'd' for right.\n")
-        rospy.loginfo("press 'i' for up.\n")
-        rospy.loginfo("press 'k' for down.\n")
-        rospy.loginfo("press 'q','e' for yaw +-45 deg.\n")
+        # rospy.loginfo("keyboard controller.\n")
+        # rospy.loginfo("press SPACE for emergency stop + land.\n")
+        # rospy.loginfo("press 's' for stop.\n")
+        # rospy.loginfo("press 'w' for forward.\n")
+        # rospy.loginfo("press 'x' for backward.\n")
+        # rospy.loginfo("press 'a' for left.\n")
+        # rospy.loginfo("press 'd' for right.\n")
+        # rospy.loginfo("press 'i' for up.\n")
+        # rospy.loginfo("press 'k' for down.\n")
+        # rospy.loginfo("press 'q','e' for yaw +-45 deg.\n")
 
         while not rospy.is_shutdown():
 
@@ -210,52 +210,52 @@ def handler(cf_handler):
                 cf_handler.goTo(goal=[x, y, z], yaw=yaw, duration=def_duration, relative=False)
 
 
-            elif key is not None:
-
-                rospy.loginfo("************* Key pressed is " + key.decode('utf-8'))
-
-                if key == ' ':
-                    # emergency land
-                    land_duration = z * 3
-                    cf_handler.land(targetHeight=0.0, duration=land_duration)
-                    time.sleep(land_duration - 0.5)
-                    cf_handler.stop()
-                    break
-                elif key == 'w':
-                    # move forward
-                    cf_handler.goTo(goal=[0.25, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
-                elif key == 'x':
-                    # move backward
-                    cf_handler.goTo(goal=[-0.25, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
-                elif key == 'd':
-                    # move right
-                    cf_handler.goTo(goal=[0.0, -0.25, 0.0], yaw=0, duration=def_duration, relative=True)
-                elif key == 'a':
-                    # move left
-                    cf_handler.goTo(goal=[0.0, 0.25, 0.0], yaw=0, duration=def_duration, relative=True)
-                elif key == 'i':
-                    # move up
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.05], yaw=0, duration=def_duration, relative=True)
-                elif key == 'k':
-                    # move down
-                    cf_handler.goTo(goal=[0.0, 0.0, -0.05], yaw=0, duration=def_duration, relative=True)
-                elif key == 'q':
-                    # 45 degrees CW
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=1.5708, duration=def_duration + 1.0,
-                                    relative=True)  # slow down yaw rotation
-                elif key == 'e':
-                    # 45 degrees CCW
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=-1.5708, duration=def_duration + 1.0,
-                                    relative=True)  # slow down yaw rotation
-
-                # todo add number for trajectorys
-                # elif key == 's':
-                # stop
-
-                # todo FIX this stupid thing!
-                key = None
-                t2 = Thread(target=keypress, )
-                t2.start()
+            # elif key is not None:
+            #
+            #     rospy.loginfo("************* Key pressed is " + key.decode('utf-8'))
+            #
+            #     if key == ' ':
+            #         # emergency land
+            #         land_duration = z * 3
+            #         cf_handler.land(targetHeight=0.0, duration=land_duration)
+            #         time.sleep(land_duration - 0.5)
+            #         cf_handler.stop()
+            #         break
+            #     elif key == 'w':
+            #         # move forward
+            #         cf_handler.goTo(goal=[0.25, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+            #     elif key == 'x':
+            #         # move backward
+            #         cf_handler.goTo(goal=[-0.25, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+            #     elif key == 'd':
+            #         # move right
+            #         cf_handler.goTo(goal=[0.0, -0.25, 0.0], yaw=0, duration=def_duration, relative=True)
+            #     elif key == 'a':
+            #         # move left
+            #         cf_handler.goTo(goal=[0.0, 0.25, 0.0], yaw=0, duration=def_duration, relative=True)
+            #     elif key == 'i':
+            #         # move up
+            #         cf_handler.goTo(goal=[0.0, 0.0, 0.05], yaw=0, duration=def_duration, relative=True)
+            #     elif key == 'k':
+            #         # move down
+            #         cf_handler.goTo(goal=[0.0, 0.0, -0.05], yaw=0, duration=def_duration, relative=True)
+            #     elif key == 'q':
+            #         # 45 degrees CW
+            #         cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=1.5708, duration=def_duration + 1.0,
+            #                         relative=True)  # slow down yaw rotation
+            #     elif key == 'e':
+            #         # 45 degrees CCW
+            #         cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=-1.5708, duration=def_duration + 1.0,
+            #                         relative=True)  # slow down yaw rotation
+            #
+            #     # todo add number for trajectorys
+            #     # elif key == 's':
+            #     # stop
+            #
+            #     # todo FIX this stupid thing!
+            #     key = None
+            #     t2 = Thread(target=keypress, )
+            #     t2.start()
 
             # print(" gospeed x: {}, y: {}, z: {} , yaw: {} \n".format( x, y, z ,yaw))
             # cf_handler.goSpeed(x, y, z, yaw)
@@ -312,7 +312,9 @@ if __name__ == '__main__':
     time.sleep(0.2)
 
     rospy.loginfo("launching threads")
-    t1 = Thread(target=handler, args=(cf,))
-    # t2 = Thread(target=keypress)
-    t1.start()
-    # t2.start()
+
+    handler(cf)
+    # t1 = Thread(target=handler, args=(cf,))
+    # # t2 = Thread(target=keypress)
+    # t1.start()
+    # # t2.start()
