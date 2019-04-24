@@ -25,8 +25,8 @@ A few notes:
     <arg name="uri1" default="radio://0/120/2M/E7E7E7E703"/>
     <arg name="frame1" default="cf3"/>
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
-    <arg name="initX1" default="0"/>
-    <arg name="initY1" default="1.2"/>
+    <arg name="initX1" default="0.6"/>
+    <arg name="initY1" default="0.6"/>
     <arg name="initZ1" default="0"/>
 
 
@@ -35,15 +35,15 @@ A few notes:
     <arg name="frame2" default="cf4"/>
     <arg name="traj_list2" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX2" default="1.2"/>
-    <arg name="initY2" default="1.2"/>
+    <arg name="initY2" default="0.6"/>
     <arg name="initZ2" default="0"/>
 
     <!-- for third CF    -->
     <arg name="uri3" default="radio://0/120/2M/E7E7E7E705"/>
     <arg name="frame3" default="cf5"/>
     <arg name="traj_list3" default="[$(arg traj1),$(arg traj2)]"/>
-    <arg name="initX3" default="0"/>
-    <arg name="initY3" default="0"/>
+    <arg name="initX3" default="0.6"/>
+    <arg name="initY3" default="1.2"/>
     <arg name="initZ3" default="0"/>
 
     <!-- for forth CF    -->
@@ -51,7 +51,7 @@ A few notes:
     <arg name="frame4" default="cf6"/>
     <arg name="traj_list4" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX4" default="1.2"/>
-    <arg name="initY4" default="0"/>
+    <arg name="initY4" default="1.2"/>
     <arg name="initZ4" default="0"/>
 
 
