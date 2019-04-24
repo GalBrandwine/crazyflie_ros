@@ -24,6 +24,8 @@ from crazyflie_driver.msg import Hover  # imports for hover message
 from geometry_msgs.msg import PoseStamped
 from tf.transformations import euler_from_quaternion
 
+from geometry_msgs.msg import Twist
+
 # TODO: move all this shit into a class MotionController
 
 
@@ -32,11 +34,32 @@ initialZ = 0.35
 
 global front, back, up, left, right, zrange, cj_injection_flag, cj_injection_message
 front = back = up = left = right = zrange = 0.0
+
+global kb_x, kb_y, kb_z, kb_yaw
+kb_x=kb_y=kb_z=kb_yaw=0
+
 global ranges
 ranges = []
 cj_injection_flag = False
 cj_injection_message = None
 
+keyboard_flag=False
+
+def twist_callback(msg):
+    global kb_x , kb_y , kb_z , kb_yaw , keyboard_flag
+    def_duration=2.0
+    land_duration=1.5
+
+    rospy.loginfo("Received a /cmd_vel message!")
+    rospy.loginfo("Linear Components: [%f, %f, %f]" % (msg.linear.x, msg.linear.y, msg.linear.z))
+    rospy.loginfo("Angular Components: [%f, %f, %f]" % (msg.angular.x, msg.angular.y, msg.angular.z))
+
+    kb_x =  msg.linear.x
+    kb_y =  msg.linear.y
+    kb_z = msg.linear.z
+    kb_yaw= msg.angular.z
+
+    keyboard_flag=True
 
 def Cj_injector(msg):
     global cj_injection_message, cj_injection_flag
@@ -49,6 +72,7 @@ def check_direction():
     global listener, tfBuffer , cj_injection_message
 
     speed = 0.20  # default speed m/s
+    rot_speed = 2.0 #default rot speed sec/radian
     min_duration = 1 #minimum time [sec] for single trajectory
 
     trans = None
@@ -66,6 +90,20 @@ def check_direction():
         distance= sqrt(pow(cj_local_coord.pose.position.x,2)+pow(cj_local_coord.pose.position.y,2))
         duration= distance/speed # #calculate required time for this motion
         if duration< min_duration: duration = min_duration
+
+        q = (cj_local_coord.pose.orientation.x,
+             cj_local_coord.pose.orientation.y,
+             cj_local_coord.pose.orientation.z,
+             cj_local_coord.pose.orientation.w)
+
+        euler = euler_from_quaternion(q, axes='sxyz')
+
+        rotation_yaw = euler[2]
+
+        duration_yaw = rotation_yaw * rot_speed
+
+        if duration_yaw > duration:
+            duration = duration_yaw
 
         return [heading,duration]
     else:
@@ -102,9 +140,6 @@ def getch():
     return ch
 
 
-def keypress():
-    global key
-    key = getch()
 
 
 def handler(cf_handler):
@@ -116,8 +151,7 @@ def handler(cf_handler):
     x, y, yaw = 0, 0, 0
     z = initialZ
 
-    global key
-    key = None
+    global keyboard_flag
     global cj_injection_message, cj_injection_flag
     global front, back, up, left, right, zrange
     dist_threshold = 0.15
@@ -133,49 +167,63 @@ def handler(cf_handler):
 
     dist_threshold = 0.25
     def_duration = 1.8
+    land_duration = 1.5
 
     try:
-        # rospy.loginfo("keyboard controller.\n")
-        # rospy.loginfo("press SPACE for emergency stop + land.\n")
-        # rospy.loginfo("press 's' for stop.\n")
-        # rospy.loginfo("press 'w' for forward.\n")
-        # rospy.loginfo("press 'x' for backward.\n")
-        # rospy.loginfo("press 'a' for left.\n")
-        # rospy.loginfo("press 'd' for right.\n")
-        # rospy.loginfo("press 'i' for up.\n")
-        # rospy.loginfo("press 'k' for down.\n")
-        # rospy.loginfo("press 'q','e' for yaw +-45 deg.\n")
 
         while not rospy.is_shutdown():
 
             if min(ranges) > 0:
                 if front < dist_threshold:
                     rospy.loginfo("forward collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.3, relative=True)
                     time.sleep(def_duration)
 
                 elif back < dist_threshold:
                     rospy.loginfo("back collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.3, relative=True)
                     time.sleep(def_duration)
 
                 elif right < dist_threshold:
                     rospy.loginfo("right collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.3, relative=True)
                     time.sleep(def_duration)
 
                 elif left < dist_threshold:
                     rospy.loginfo("left collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.3, relative=True)
                     time.sleep(def_duration)
 
                 elif up < dist_threshold:
                     rospy.loginfo("top collision avoidance")
-                    land_duration = z * 3
                     cf_handler.land(targetHeight=0.0, duration=land_duration)
                     time.sleep(land_duration)
                     cf_handler.stop()
                     break
+
+            if keyboard_flag == True:
+                keyboard_flag = False
+                if kb_x > 0:
+                    cf_handler.goTo(goal=[0.25, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+                elif kb_x < 0:
+                    cf_handler.goTo(goal=[-0.25, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+                elif kb_yaw < 0:
+                    cf_handler.goTo(goal=[0.0, -0.25, 0.0], yaw=0, duration=def_duration, relative=True)
+                elif kb_yaw > 0:
+                    cf_handler.goTo(goal=[0.0, 0.25, 0.0], yaw=0, duration=def_duration, relative=True)
+                elif kb_y > 0:
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=1.5708, duration=def_duration + 1.0,
+                                    relative=True)  # slow down yaw rotation
+                elif kb_y < 0:
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=-1.5708, duration=def_duration + 1.0,
+                                    relative=True)  # slow down yaw rotation
+                elif kb_x == 0 and kb_y == 0:
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.6, relative=True)
+
+                if kb_z !=0:
+                    cf_handler.land(targetHeight=0.0, duration=land_duration)
+                    time.sleep(land_duration - 0.5)
+                    cf_handler.stop()
 
             # If Cj injection received:
             if cj_injection_flag is True:
@@ -206,55 +254,6 @@ def handler(cf_handler):
                 # else:
                 #     rospy.logwarn("cannot move - obstacle in the way")
 
-            # elif key is not None:
-            #
-            #     rospy.loginfo("************* Key pressed is " + key.decode('utf-8'))
-            #
-            #     if key == ' ':
-            #         # emergency land
-            #         land_duration = z * 3
-            #         cf_handler.land(targetHeight=0.0, duration=land_duration)
-            #         time.sleep(land_duration - 0.5)
-            #         cf_handler.stop()
-            #         break
-            #     elif key == 'w':
-            #         # move forward
-            #         cf_handler.goTo(goal=[0.25, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
-            #     elif key == 'x':
-            #         # move backward
-            #         cf_handler.goTo(goal=[-0.25, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
-            #     elif key == 'd':
-            #         # move right
-            #         cf_handler.goTo(goal=[0.0, -0.25, 0.0], yaw=0, duration=def_duration, relative=True)
-            #     elif key == 'a':
-            #         # move left
-            #         cf_handler.goTo(goal=[0.0, 0.25, 0.0], yaw=0, duration=def_duration, relative=True)
-            #     elif key == 'i':
-            #         # move up
-            #         cf_handler.goTo(goal=[0.0, 0.0, 0.05], yaw=0, duration=def_duration, relative=True)
-            #     elif key == 'k':
-            #         # move down
-            #         cf_handler.goTo(goal=[0.0, 0.0, -0.05], yaw=0, duration=def_duration, relative=True)
-            #     elif key == 'q':
-            #         # 45 degrees CW
-            #         cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=1.5708, duration=def_duration + 1.0,
-            #                         relative=True)  # slow down yaw rotation
-            #     elif key == 'e':
-            #         # 45 degrees CCW
-            #         cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=-1.5708, duration=def_duration + 1.0,
-            #                         relative=True)  # slow down yaw rotation
-            #
-            #     # todo add number for trajectorys
-            #     # elif key == 's':
-            #     # stop
-            #
-            #     # todo FIX this stupid thing!
-            #     key = None
-            #     t2 = Thread(target=keypress, )
-            #     t2.start()
-
-            # print(" gospeed x: {}, y: {}, z: {} , yaw: {} \n".format( x, y, z ,yaw))
-            # cf_handler.goSpeed(x, y, z, yaw)
 
             r.sleep()
 
@@ -275,9 +274,11 @@ if __name__ == '__main__':
     rospy.Subscriber('/' + prefix + '/log_ranges', GenericLogData, get_ranges)
     rospy.Subscriber('/' + prefix + '/Cj_injcetor', PoseStamped, Cj_injector)
 
-    pub_hover = rospy.Publisher('/' + prefix + "/cmd_hover", Hover, queue_size=1)  # hover message publisher
-    msg = Hover()
-    msg.header.seq = 0
+    # pub_hover = rospy.Publisher('/' + prefix + "/cmd_hover", Hover, queue_size=1)  # hover message publisher
+    # msg = Hover()
+    # msg.header.seq = 0
+
+    rospy.Subscriber("/cmd_vel", Twist, twist_callback)
 
     tfBuffer = tf2_ros.Buffer()  # initialize tf buffer for transform lookup
     listener = tf2_ros.TransformListener(tfBuffer)
