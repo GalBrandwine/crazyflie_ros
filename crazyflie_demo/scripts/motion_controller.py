@@ -72,8 +72,8 @@ def check_direction():
 
     speed = 0.20  # default speed m/s
     rot_speed = 2.0  # default rot speed sec/radian
-    min_duration = 2,0  # minimum time [sec] for single trajectory
-
+    min_duration = 2, 0  # minimum time [sec] for single trajectory
+    default_duration = 2  # sec
     trans = None
     try:
         trans = tfBuffer.lookup_transform(prefix, 'world', rospy.Time(0))
@@ -106,7 +106,7 @@ def check_direction():
 
         return [heading, duration]
     else:
-        return False
+        return default_duration
 
 
 # def avoid_collision():
