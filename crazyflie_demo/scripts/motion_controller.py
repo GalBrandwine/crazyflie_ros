@@ -174,7 +174,7 @@ def get_xyz_yaw(cj_injection_message):
 def handler(cf_handler):
     r = rospy.Rate(5)
     time.sleep(0.5)
-    cf_handler.takeoff(targetHeight=initialZ, duration=4.0)
+    cf_handler.takeoff(targetHeight=initialZ, duration=3.0)
     time.sleep(5.0)
 
     x, y, yaw = 0, 0, 0
@@ -247,7 +247,7 @@ def handler(cf_handler):
                     cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=-1.5708, duration=def_duration + 1.0,
                                     relative=True)  # slow down yaw rotation
                 elif kb_x == 0 and kb_y == 0:
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.6, relative=True)
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=1.2, relative=True)
 
                 if kb_z != 0:
                     cf_handler.land(targetHeight=0.0, duration=land_duration)
@@ -278,7 +278,7 @@ def handler(cf_handler):
 
     except Exception as e:
         cf_handler.stop()
-        rospy.loginfo('*******keyboard input exception')
+        rospy.loginfo('*******exception')
         rospy.loginfo(e)
 
 
