@@ -264,8 +264,6 @@ if __name__ == "__main__":
         exec ("curr_drone_takeoff_pos = {}".format(curr_drone_takeoff_pos))
         initial_pos_dict[curr_drone_name] = curr_drone_takeoff_pos
 
-    print initial_pos_dict
-
     matrix = np.zeros([np.int64(np.ceil((x_lim[1] - x_lim[0]) / resolution)),
                             np.int64(np.ceil((y_lim[1] - y_lim[0]) / resolution))])
 
