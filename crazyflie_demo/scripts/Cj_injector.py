@@ -95,6 +95,29 @@ class DroneInjector:
         # x = 0
         # y = 0
         # z = 0
+        x = 0
+        y = 0
+        z = 0.35
+        roll = 0
+        pitch = 0
+        yaw = 0
+
+        step_x = 0.5
+        step_y = 0.5
+        step_z = 0.35
+        step_yaw = 90  # deg
+        for drone in self.cj_injector_container:
+            pose = to_pose_stamped(x, y, z, roll, pitch, step_yaw)
+            drone.Cj_injector_pub.publish(pose)
+            # rospy.sleep(time_delay)
+            rospy.logdebug("******************* {} rotated!".format(drone))
+
+    def simple_rotation_example(self, time_delay=None):
+        """Simple rotation example to make all drones rotate"""
+        time_delay = time_delay if time_delay is not None else 2  # seconds
+        # x = 0
+        # y = 0
+        # z = 0
         x = 1.2
         y = 1.2
         z = 0.35
@@ -112,7 +135,7 @@ class DroneInjector:
             # rospy.sleep(time_delay)
             rospy.logdebug("******************* {} rotated!".format(drone))
 
-    def simple_rectangel_example(self):
+    def simple_rectangel_example(self, time_delay=None):
         """Make all drones in DroneInjector to fly in a rectangle.
 
         Very simple and stupid example for using the injcetor.
@@ -130,53 +153,122 @@ class DroneInjector:
         step_z = 0.3
         step_yaw = 90  # deg
 
-        time_delay = 2  # seconds
-        while not rospy.is_shutdown():
-            x = 0.6
-            y = 0.6
-            z = 0.3
-            """first point in path. """
-            for drone in self.cj_injector_container:
-                pose = to_pose_stamped(x, y, step_z, roll, pitch, step_yaw)
-                drone.Cj_injector_pub.publish(pose)
-                rospy.sleep(time_delay)
-                rospy.logdebug("******************* {} rotated!".format(drone))
+        time_delay = time_delay if time_delay is not None else 4  # seconds
 
+        """first point in path. """
+        x = 0.3
+        y = 0.6
+        z = 0.35
+        yaw = 0
+        pose = to_pose_stamped(x, y, step_z, roll, pitch, yaw)
+        self.cj_injector_container[0].Cj_injector_pub.publish(pose)
 
+        x = 2.1
+        y = 1.8
+        z = 0.35
+        yaw = 0
+        pose = to_pose_stamped(x, y, step_z, roll, pitch, yaw)
+        self.cj_injector_container[3].Cj_injector_pub.publish(pose)
+        rospy.sleep(time_delay)
 
-            # [x, y, z, roll, pitch, yaw] = [step_x, 0, step_z, 0, 0, 0]
-            # pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
-            # Cj_injector_pub.publish(pose)
-            # rospy.sleep(time_delay)
+        """second point in path. """
+        x = 0.3
+        y = 1.8
+        z = 0.35
+        yaw = 0
+        pose = to_pose_stamped(x, y, step_z, roll, pitch, yaw)
+        self.cj_injector_container[0].Cj_injector_pub.publish(pose)
 
-            # [x, y, z, roll, pitch, yaw] = [step_x, step_y, step_z, 0, 0, 0]
-            # pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
-            # Cj_injector_pub.publish(pose)
-            # rospy.sleep(time_delay)
-            #
-            # [x, y, z, roll, pitch, yaw] = [0, step_y, step_z, 0, 0, 0]
-            # pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
-            # Cj_injector_pub.publish(pose)
-            # rospy.sleep(time_delay)
-            #
-            # [x, y, z, roll, pitch, yaw] = [0, 0, step_z, 0, 0, 0]
-            # pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
-            # Cj_injector_pub.publish(pose)
-            # rospy.sleep(time_delay)
-            #
-            # [x, y, z, roll, pitch, yaw] = [0, 0, step_z, 0, 0, step_yaw]
-            # pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
-            # Cj_injector_pub.publish(pose)
-            # rospy.sleep(time_delay)
-            #
-            # [x, y, z, roll, pitch, yaw] = [0, 0, step_z, 0, 0, 0]  # 0 pi
-            # pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
-            # Cj_injector_pub.publish(pose)
-            # rospy.sleep(time_delay)
+        x = 2.1
+        y = 0.6
+        z = 0.35
+        yaw = 0
+        pose = to_pose_stamped(x, y, step_z, roll, pitch, yaw)
+        self.cj_injector_container[3].Cj_injector_pub.publish(pose)
+        rospy.sleep(time_delay)
+
+        """rotate on 90 deg spot. """
+        x = 0.3
+        y = 1.8
+        z = 0.35
+        yaw = 90
+        pose = to_pose_stamped(x, y, step_z, roll, pitch, yaw)
+        self.cj_injector_container[0].Cj_injector_pub.publish(pose)
+
+        x = 2.1
+        y = 0.6
+        z = 0.35
+        yaw = 90
+        pose = to_pose_stamped(x, y, step_z, roll, pitch, yaw)
+        self.cj_injector_container[3].Cj_injector_pub.publish(pose)
+        rospy.sleep(time_delay)
+
+        """third point in path. """
+        x = 2.1
+        y = 1.8
+        z = 0.35
+        yaw = 90
+        pose = to_pose_stamped(x, y, step_z, roll, pitch, yaw)
+        self.cj_injector_container[0].Cj_injector_pub.publish(pose)
+
+        x = 0.3
+        y = 0.6
+        z = 0.35
+        yaw = 90
+        pose = to_pose_stamped(x, y, step_z, roll, pitch, yaw)
+        self.cj_injector_container[3].Cj_injector_pub.publish(pose)
+        rospy.sleep(time_delay)
+
+        """rotate back on spot. """
+        x = 2.1
+        y = 1.8
+        z = 0.35
+        yaw = 0
+        pose = to_pose_stamped(x, y, step_z, roll, pitch, yaw)
+        self.cj_injector_container[0].Cj_injector_pub.publish(pose)
+
+        x = 0.3
+        y = 0.6
+        z = 0.35
+        yaw = 0
+        pose = to_pose_stamped(x, y, step_z, roll, pitch, yaw)
+        self.cj_injector_container[3].Cj_injector_pub.publish(pose)
+        rospy.sleep(time_delay)
+
+        # [x, y, z, roll, pitch, yaw] = [step_x, 0, step_z, 0, 0, 0]
+        # pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
+        # Cj_injector_pub.publish(pose)
+        # rospy.sleep(time_delay)
+
+        # [x, y, z, roll, pitch, yaw] = [step_x, step_y, step_z, 0, 0, 0]
+        # pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
+        # Cj_injector_pub.publish(pose)
+        # rospy.sleep(time_delay)
+        #
+        # [x, y, z, roll, pitch, yaw] = [0, step_y, step_z, 0, 0, 0]
+        # pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
+        # Cj_injector_pub.publish(pose)
+        # rospy.sleep(time_delay)
+        #
+        # [x, y, z, roll, pitch, yaw] = [0, 0, step_z, 0, 0, 0]
+        # pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
+        # Cj_injector_pub.publish(pose)
+        # rospy.sleep(time_delay)
+        #
+        # [x, y, z, roll, pitch, yaw] = [0, 0, step_z, 0, 0, step_yaw]
+        # pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
+        # Cj_injector_pub.publish(pose)
+        # rospy.sleep(time_delay)
+        #
+        # [x, y, z, roll, pitch, yaw] = [0, 0, step_z, 0, 0, 0]  # 0 pi
+        # pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
+        # Cj_injector_pub.publish(pose)
+        # rospy.sleep(time_delay)
 
     def launcher(self, msg):
         """A callback for simple_examples. """
-        self.simple_rotation_example()
+        # self.simple_rotation_example()
+        self.simple_rectangel_example()
 
 
 # todo: motion controller is not working properly because of Cj_injection's we need to make that work

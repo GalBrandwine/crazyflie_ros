@@ -25,7 +25,7 @@ from tf.transformations import euler_from_quaternion
 # TODO: move all this shit into a class MotionController
 
 
-speed = 0.25
+speed = 0.3
 initialZ = 0.35
 
 global front, back, up, left, right, zrange, cj_injection_flag, cj_injection_message
