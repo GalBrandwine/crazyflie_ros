@@ -22,8 +22,8 @@ A few notes:
 
 
     <!-- for first CF -->
-    <arg name="uri1" default="radio://0/120/2M/E7E7E7E706"/>
-    <arg name="frame1" default="cf6"/>
+    <arg name="uri1" default="radio://0/120/2M/E7E7E7E701"/>
+    <arg name="frame1" default="cf1"/>
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX1" default="0.6"/>
     <arg name="initY1" default="0.6"/>
@@ -69,6 +69,10 @@ A few notes:
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find crazyflie_demo)/launch/indoors.rviz"
           required="true"/>
 
+    <!--    teleop_twist_keyboard  -->
+    <node name="teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen"
+          launch-prefix="xterm -e"/>
+
     <!--run vrpn client -->
     <!--<node pkg="vrpn_client_ros" name="vrpn" output="screen" type="vrpn_client_node" required="true">-->
     <!--<rosparam subst_value="true">-->
@@ -86,7 +90,6 @@ A few notes:
     <!--    Activate the server.-->
     <include file="$(find crazyflie_driver)/launch/crazyflie_server.launch">
     </include>
-
 
 
     <!--    Set the name space of the CF_x to be its name-->
@@ -140,7 +143,7 @@ A few notes:
         <!--                </node>-->
 
         <!--        Start keyboard controller. -->
-        <node name="keyboard_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">
+        <node name="motion_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">
             <param name="tf_prefix" value="$(arg frame1)"/>
         </node>
 
@@ -157,10 +160,6 @@ A few notes:
         <node name="logger_by_format" pkg="crazyflie_demo" type="logger_by_format.py" output="screen">
             <param name="tf_prefix" value="$(arg frame1)"/>
         </node>
-        <!--        <node name="Cj_injector" pkg="crazyflie_demo" type="Cj_injector.py" output="screen">-->
-        <!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
-        <!--        </node>-->
-
     </group>
 
 
@@ -348,7 +347,7 @@ A few notes:
         <!--        </node>-->
 
         <!--        Start keyboard controller. -->
-        <node name="keyboard_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">
+        <node name="motion_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">
             <param name="tf_prefix" value="$(arg frame4)"/>
         </node>
 
@@ -372,11 +371,6 @@ A few notes:
         <node name="logger_by_format" pkg="crazyflie_demo" type="logger_by_format.py" output="screen">
             <param name="tf_prefix" value="$(arg frame4)"/>
         </node>
-
-
-        <!--        <node name="Cj_injector" pkg="crazyflie_demo" type="Cj_injector.py" output="screen">-->
-        <!--            <param name="tf_prefix" value="$(arg frame4)"/>-->
-        <!--        </node>-->
     </group>
 
 </launch>
