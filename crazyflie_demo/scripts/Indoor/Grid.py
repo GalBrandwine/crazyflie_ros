@@ -61,28 +61,8 @@ class Grid:
         self.drones_pc_list = dict()
         # maximal limit for pc delta from drone reference in cm
         self.pc_lim = 200
-
-        ###################################### Only for debug ##################################################
-        self.initpos = [0, 0, 0]  # Reference point
         self.takeofpos = [100, 100, 0] # Take off position
-        self.tail_handles = list()
-        self.drone_handle = []
-        self.fig = plt.figure()
-        ax = self.fig.subplots(1, 1)
-        plt.axis([self.x_lim[0], self.x_lim[1], self.y_lim[0], self.y_lim[1]])
-        self.ax = ax
-        for i in range(0, self.matrix.__len__()):
-            handles_list = list()
-            for j in range(0, self.matrix[i].__len__()):
-                handles_list.append(self.plot_ij(i, j))
-            self.tail_handles.append(handles_list)
-
-        self.drone_handle, = self.ax.plot(self.takeofpos[0], self.takeofpos[1], 'ob')
-
-        self.fig.show()
-        self.fig.canvas.draw()
-        plt.pause(0.001)
-        ########################################################################################################
+        self.initpos = [0, 0, 0]  # Reference point
 
         for iDrone in range(self.nDrones):
             # Init listeners
@@ -95,21 +75,6 @@ class Grid:
         # Start occupancy grid publisher
         grid_pub_thread = threading.Thread(name='grid_pub_thread', target=self.init_grid_publisher)
         grid_pub_thread.start()
-
-    ###################################### Only for debug ##################################################
-    def plot_ij(self, i, j):
-        pol_center = self.ij_to_xy(i, j)
-        tail = Polygon([(pol_center[0] - self.res / 2, pol_center[1] - self.res / 2),
-                        (pol_center[0] - self.res / 2, pol_center[1] + self.res / 2)
-                           , (pol_center[0] + self.res / 2, pol_center[1] + self.res / 2),
-                        (pol_center[0] + self.res / 2, pol_center[1] - self.res / 2)
-                           , (pol_center[0] - self.res / 2, pol_center[1] - self.res / 2)])
-        return self.ax.add_patch(PolygonPatch(tail, facecolor='gray'))
-
-    def change_tail_color_ij(self, i, j, color):
-        self.tail_handles[i][j].set_fc(color)
-        ########################################################################################################
-
 
     def point_cloud_parser(self, msg):
         """Each publicitation, theres' an array of 10 points."""
@@ -154,7 +119,7 @@ class Grid:
         # http://docs.ros.org/melodic/api/nav_msgs/html/msg/MapMetaData.html
         occ_grid_msg = OccupancyGrid()
 
-        rate = rospy.Rate(0.5)  # 0.5 Hz
+        rate = rospy.Rate(2)  # 2 Hz
         while not rospy.is_shutdown():
             m = MapMetaData() # Grid metadata
             m.resolution = self.res # Grid resolution
@@ -188,11 +153,9 @@ class Grid:
         return x, y
 
     def change_tail_to_empty(self, i, j):
-        self.change_tail_color_ij(i, j, 'k')
         self.matrix[i][j] = 1
 
     def change_tail_to_wall(self, i, j):
-        self.change_tail_color_ij(i, j, 'w')
         self.matrix[i][j] = 2
 
     def update_from_tof_sensing_list(self, drone_id):
@@ -211,29 +174,6 @@ class Grid:
             if abs(elem[0]) < self.pc_lim and abs(elem[1]) < self.pc_lim and np.linalg.norm(elem) > 0:
                 sensing_pos = [[self.initpos[0]+elem[0], self.initpos[1]+elem[1]]]
                 self.update_with_tof_sensor([[current_pos.x, current_pos.y]], sensing_pos)
-
-                ###################################### Only for debug ##################################################
-                self.drone_handle.set_data(current_pos.x, current_pos.y)
-                self.fig.canvas.draw()
-
-                ########################################################################################################
-
-    # def update_with_tof_sensor(self, sensor_pos, tof_sensing_pos):
-    #     si, sj = self.xy_to_ij(sensor_pos[0][0], sensor_pos[0][1])
-    #     d = np.subtract(tof_sensing_pos, sensor_pos)
-    #     norm_d = np.linalg.norm(d)
-    #     wall_pos = tof_sensing_pos + d / norm_d * self.res / 1000
-    #     gi, gj = self.xy_to_ij(wall_pos[0][0], wall_pos[0][1])
-    #     bpath = list(bresenham(si, sj, gi, gj))
-    #     for ii, elem in enumerate(bpath):
-    #         if 0 > elem[0] or elem[0] >= self.matrix.shape[0] or 0 > elem[1] or elem[1] >= self.matrix.shape[1]:
-    #             return
-    #         if self.matrix[elem[0]][elem[1]] == 0:
-    #             self.change_tail_to_empty(elem[0], elem[1])
-    #             self.empty_idxs.append([elem[0], elem[1]])
-    #     self.change_tail_to_wall(gi, gj)
-    #     self.wall_idxs.append([gi, gj])
-
 
     def update_with_tof_sensor(self, sensor_pos, tof_sensing_pos):
         num_of_samples = int(np.floor(np.linalg.norm(np.subtract(tof_sensing_pos, sensor_pos)) / self.res * 3))
@@ -261,5 +201,3 @@ if __name__ == "__main__":
 
     # grid = Grid([(0, 0), (570, 0), (570, 550), (0, 550), (0, 0)], 10)
     grid = Grid([(0, 0), (200, 0), (200, 200), (0, 200), (0, 0)], 10)
-
-    plt.show(block=True)
