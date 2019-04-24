@@ -10,9 +10,7 @@ import sys
 import termios
 import time
 import tty
-from math import atan2 , degrees, sqrt, pow, pi
-import numpy as np
-from threading import Thread
+from math import atan2, sqrt, pow
 
 import crazyflie
 import rospy
@@ -20,11 +18,9 @@ import tf2_geometry_msgs
 import tf2_ros
 # from crazyflie_driver.msg import Hover
 from crazyflie_driver.msg import GenericLogData
-from crazyflie_driver.msg import Hover  # imports for hover message
 from geometry_msgs.msg import PoseStamped
-from tf.transformations import euler_from_quaternion
-
 from geometry_msgs.msg import Twist
+from tf.transformations import euler_from_quaternion
 
 # TODO: move all this shit into a class MotionController
 
@@ -36,30 +32,32 @@ global front, back, up, left, right, zrange, cj_injection_flag, cj_injection_mes
 front = back = up = left = right = zrange = 0.0
 
 global kb_x, kb_y, kb_z, kb_yaw
-kb_x=kb_y=kb_z=kb_yaw=0
+kb_x = kb_y = kb_z = kb_yaw = 0
 
 global ranges
 ranges = []
 cj_injection_flag = False
 cj_injection_message = None
 
-keyboard_flag=False
+keyboard_flag = False
+
 
 def twist_callback(msg):
-    global kb_x , kb_y , kb_z , kb_yaw , keyboard_flag
-    def_duration=2.0
-    land_duration=1.5
+    global kb_x, kb_y, kb_z, kb_yaw, keyboard_flag
+    def_duration = 2.0
+    land_duration = 1.5
 
     rospy.loginfo("Received a /cmd_vel message!")
     rospy.loginfo("Linear Components: [%f, %f, %f]" % (msg.linear.x, msg.linear.y, msg.linear.z))
     rospy.loginfo("Angular Components: [%f, %f, %f]" % (msg.angular.x, msg.angular.y, msg.angular.z))
 
-    kb_x =  msg.linear.x
-    kb_y =  msg.linear.y
+    kb_x = msg.linear.x
+    kb_y = msg.linear.y
     kb_z = msg.linear.z
-    kb_yaw= msg.angular.z
+    kb_yaw = msg.angular.z
 
-    keyboard_flag=True
+    keyboard_flag = True
+
 
 def Cj_injector(msg):
     global cj_injection_message, cj_injection_flag
@@ -73,8 +71,8 @@ def check_direction():
     global listener, tfBuffer, cj_injection_message
 
     speed = 0.20  # default speed m/s
-    rot_speed = 2.0 #default rot speed sec/radian
-    min_duration = 1 #minimum time [sec] for single trajectory
+    rot_speed = 2.0  # default rot speed sec/radian
+    min_duration = 1  # minimum time [sec] for single trajectory
 
     trans = None
     try:
@@ -106,7 +104,7 @@ def check_direction():
         if duration_yaw > duration:
             duration = duration_yaw
 
-        return [heading,duration]
+        return [heading, duration]
     else:
         return False
 
@@ -141,8 +139,6 @@ def getch():
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
     return ch
-
-
 
 
 def get_xyz_yaw(cj_injection_message):
@@ -253,7 +249,7 @@ def handler(cf_handler):
                 elif kb_x == 0 and kb_y == 0:
                     cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.6, relative=True)
 
-                if kb_z !=0:
+                if kb_z != 0:
                     cf_handler.land(targetHeight=0.0, duration=land_duration)
                     time.sleep(land_duration - 0.5)
                     cf_handler.stop()
@@ -273,7 +269,6 @@ def handler(cf_handler):
                 cf_handler.goTo(goal=[x, y, z], yaw=yaw, duration=duration, relative=False)
                 # else:
                 #     rospy.logwarn("cannot move - obstacle in the way")
-
 
             r.sleep()
 
