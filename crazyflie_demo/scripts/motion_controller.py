@@ -266,7 +266,7 @@ def handler(cf_handler):
 
             # obstacle_free=avoid_collision()
             # if obstacle_free == True:
-            rospy.logdebug("test: {}".format([x,y,z]))
+            rospy.logdebug("test: {}".format(duration))
             cf_handler.goTo(goal=[x, y, z], yaw=yaw, duration=duration, relative=False)
             # else:
             #     rospy.logwarn("cannot move - obstacle in the way")
@@ -284,7 +284,7 @@ def handler(cf_handler):
 
 
 if __name__ == '__main__':
-    rospy.init_node('motion', )  # log_level=rospy.DEBUG
+    rospy.init_node('motion', log_level=rospy.DEBUG)  # log_level=rospy.DEBUG
 
     prefix = rospy.get_param("~tf_prefix")
     rospy.Subscriber('/' + prefix + '/log_ranges', GenericLogData, get_ranges)
