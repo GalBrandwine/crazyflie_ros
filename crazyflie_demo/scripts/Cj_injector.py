@@ -95,8 +95,8 @@ class DroneInjector:
         # x = 0
         # y = 0
         # z = 0
-        x = 0.6
-        y = 0.6
+        x = 1.2
+        y = 1.2
         z = 0.35
         roll = 0
         pitch = 0
