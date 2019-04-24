@@ -10,9 +10,7 @@ import sys
 import termios
 import time
 import tty
-from math import atan2 , degrees, sqrt, pow, pi
-import numpy as np
-from threading import Thread
+from math import atan2, sqrt, pow
 
 import crazyflie
 import rospy
@@ -45,15 +43,16 @@ def Cj_injector(msg):
     cj_injection_message = msg
     # rospy.loginfo(msg)
 
+
 def check_direction():
-    global listener, tfBuffer , cj_injection_message
+    global listener, tfBuffer, cj_injection_message
 
     speed = 0.20  # default speed m/s
-    min_duration = 1 #minimum time [sec] for single trajectory
+    min_duration = 1  # minimum time [sec] for single trajectory
 
     trans = None
     try:
-        trans = tfBuffer.lookup_transform(prefix ,'world', rospy.Time(0))
+        trans = tfBuffer.lookup_transform(prefix, 'world', rospy.Time(0))
     except:
         rospy.logwarn("tf lookup -- {} not found".format(prefix))
     if trans != None:
@@ -63,13 +62,14 @@ def check_direction():
         heading = atan2(cj_local_coord.pose.position.y, cj_local_coord.pose.position.x)
         rospy.loginfo(heading)
 
-        distance= sqrt(pow(cj_local_coord.pose.position.x,2)+pow(cj_local_coord.pose.position.y,2))
-        duration= distance/speed # #calculate required time for this motion
-        if duration< min_duration: duration = min_duration
+        distance = sqrt(pow(cj_local_coord.pose.position.x, 2) + pow(cj_local_coord.pose.position.y, 2))
+        duration = distance / speed  # #calculate required time for this motion
+        if duration < min_duration: duration = min_duration
 
-        return [heading,duration]
+        return [heading, duration]
     else:
         return False
+
 
 # def avoid_collision():
 #     global heading
@@ -81,15 +81,16 @@ def check_direction():
 
 def get_ranges(msg):
     global front, back, up, left, right, zrange, ranges
-    weight_old=0.65 #the weight given to old values in filter 0-1
+    weight_old = 0.65  # the weight given to old values in filter 0-1
     weight_new = 1.0 - weight_old
-    front = weight_old * front + weight_new * msg.values[0] / 1000 # low-pass filter on range inputs used for collision
+    front = weight_old * front + weight_new * msg.values[0] / 1000  # low-pass filter on range inputs used for collision
     back = weight_old * back + weight_new * msg.values[1] / 1000
     up = weight_old * up + weight_new * msg.values[2] / 1000
     left = weight_old * left + weight_new * msg.values[3] / 1000
     right = weight_old * right + weight_new * msg.values[4] / 1000
-    #zrange = msg.values[5] / 1000
+    # zrange = msg.values[5] / 1000
     ranges = [back, left, front, right, up, zrange]
+
 
 def getch():
     fd = sys.stdin.fileno()
@@ -105,6 +106,36 @@ def getch():
 def keypress():
     global key
     key = getch()
+
+
+def get_xyz_yaw(cj_injection_message):
+    """Transform Cj injection into drone coordinates"""
+    trans = None
+    try:
+        trans = tfBuffer.lookup_transform(prefix + '_takeoff', 'world', rospy.Time(0))
+    except:
+        rospy.logwarn("tf lookup -- {} not found".format(prefix + '_takeoff'))
+    if trans is not None:
+        cj_local_coord = PoseStamped()
+        cj_local_coord = tf2_geometry_msgs.do_transform_pose(cj_injection_message, trans)
+
+        quaternion = (
+            cj_local_coord.pose.orientation.x,
+            cj_local_coord.pose.orientation.y,
+            cj_local_coord.pose.orientation.z,
+            cj_local_coord.pose.orientation.w)
+        euler = euler_from_quaternion(quaternion)
+
+        x = cj_local_coord.pose.position.x
+        y = cj_local_coord.pose.position.y
+        z = cj_local_coord.pose.position.z
+        roll = euler[0]
+        pitch = euler[1]
+        yaw = euler[2]
+
+        return [x, y, z, yaw]
+    else:
+        return False
 
 
 def handler(cf_handler):
@@ -180,22 +211,9 @@ def handler(cf_handler):
             # If Cj injection received:
             if cj_injection_flag is True:
                 cj_injection_flag = False
-
-                quaternion = (
-                    cj_injection_message.pose.orientation.x,
-                    cj_injection_message.pose.orientation.y,
-                    cj_injection_message.pose.orientation.z,
-                    cj_injection_message.pose.orientation.w)
-                euler = euler_from_quaternion(quaternion)
-
-                x = cj_injection_message.pose.position.x
-                y = cj_injection_message.pose.position.y
-                z = cj_injection_message.pose.position.z
-                roll = euler[0]
-                pitch = euler[1]
-                yaw = euler[2]
-
-                [direction,duration] = check_direction()
+                # get Cj_injection in drone coordinates
+                [x, y, z, yaw] = get_xyz_yaw(cj_injection_message)
+                [direction, duration] = check_direction()
 
                 rospy.loginfo("Cj direction is ".format(direction))
                 rospy.loginfo("Cj duration is ".format(duration))
@@ -269,7 +287,7 @@ def handler(cf_handler):
 
 
 if __name__ == '__main__':
-    rospy.init_node('keyboard_controller',)# log_level=rospy.DEBUG
+    rospy.init_node('keyboard_controller', )  # log_level=rospy.DEBUG
 
     prefix = rospy.get_param("~tf_prefix")
     rospy.Subscriber('/' + prefix + '/log_ranges', GenericLogData, get_ranges)
