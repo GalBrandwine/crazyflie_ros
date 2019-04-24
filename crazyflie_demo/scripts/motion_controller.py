@@ -198,89 +198,88 @@ def handler(cf_handler):
     def_duration = 1.8
     land_duration = 1.5
 
-    # try:
+    try:
 
-    while not rospy.is_shutdown():
+        while not rospy.is_shutdown():
 
-        if min(ranges) > 0:
-            if front < dist_threshold:
-                rospy.loginfo("forward collision avoidance")
-                cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
-                time.sleep(def_duration)
+            if min(ranges) > 0:
+                if front < dist_threshold:
+                    rospy.loginfo("forward collision avoidance")
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
+                    time.sleep(def_duration)
 
-            elif back < dist_threshold:
-                rospy.loginfo("back collision avoidance")
-                cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
-                time.sleep(def_duration)
+                elif back < dist_threshold:
+                    rospy.loginfo("back collision avoidance")
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
+                    time.sleep(def_duration)
 
-            elif right < dist_threshold:
-                rospy.loginfo("right collision avoidance")
-                cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
-                time.sleep(def_duration)
+                elif right < dist_threshold:
+                    rospy.loginfo("right collision avoidance")
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
+                    time.sleep(def_duration)
 
-            elif left < dist_threshold:
-                rospy.loginfo("left collision avoidance")
-                cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
-                time.sleep(def_duration)
+                elif left < dist_threshold:
+                    rospy.loginfo("left collision avoidance")
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
+                    time.sleep(def_duration)
 
-            elif up < dist_threshold:
-                rospy.loginfo("top collision avoidance")
-                cf_handler.land(targetHeight=0.0, duration=land_duration)
-                time.sleep(land_duration)
-                cf_handler.stop()
-                break
+                elif up < dist_threshold:
+                    rospy.loginfo("top collision avoidance")
+                    cf_handler.land(targetHeight=0.0, duration=land_duration)
+                    time.sleep(land_duration)
+                    cf_handler.stop()
+                    break
 
-        if keyboard_flag is True:
-            keyboard_flag = False
-            if kb_x > 0:
-                cf_handler.goTo(goal=[0.25, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
-            elif kb_x < 0:
-                cf_handler.goTo(goal=[-0.25, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
-            elif kb_yaw < 0:
-                cf_handler.goTo(goal=[0.0, -0.25, 0.0], yaw=0, duration=def_duration, relative=True)
-            elif kb_yaw > 0:
-                cf_handler.goTo(goal=[0.0, 0.25, 0.0], yaw=0, duration=def_duration, relative=True)
-            elif kb_y > 0:
-                cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=1.5708, duration=def_duration + 1.0,
-                                relative=True)  # slow down yaw rotation
-            elif kb_y < 0:
-                cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=-1.5708, duration=def_duration + 1.0,
-                                relative=True)  # slow down yaw rotation
-            elif kb_x == 0 and kb_y == 0:
-                cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.6, relative=True)
+            if keyboard_flag is True:
+                keyboard_flag = False
+                if kb_x > 0:
+                    cf_handler.goTo(goal=[0.25, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+                elif kb_x < 0:
+                    cf_handler.goTo(goal=[-0.25, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+                elif kb_yaw < 0:
+                    cf_handler.goTo(goal=[0.0, -0.25, 0.0], yaw=0, duration=def_duration, relative=True)
+                elif kb_yaw > 0:
+                    cf_handler.goTo(goal=[0.0, 0.25, 0.0], yaw=0, duration=def_duration, relative=True)
+                elif kb_y > 0:
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=1.5708, duration=def_duration + 1.0,
+                                    relative=True)  # slow down yaw rotation
+                elif kb_y < 0:
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=-1.5708, duration=def_duration + 1.0,
+                                    relative=True)  # slow down yaw rotation
+                elif kb_x == 0 and kb_y == 0:
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.6, relative=True)
 
-            if kb_z != 0:
-                cf_handler.land(targetHeight=0.0, duration=land_duration)
-                time.sleep(land_duration - 0.5)
-                cf_handler.stop()
+                if kb_z != 0:
+                    cf_handler.land(targetHeight=0.0, duration=land_duration)
+                    time.sleep(land_duration - 0.5)
+                    cf_handler.stop()
 
-        # If Cj injection received:
-        if cj_injection_flag is True:
-            cj_injection_flag = False
-            # get Cj_injection in drone coordinates
-            [x, y, z, yaw] = get_xyz_yaw(cj_injection_message)
-            [direction, duration] = check_direction()
+            # If Cj injection received:
+            if cj_injection_flag is True:
+                cj_injection_flag = False
+                # get Cj_injection in drone coordinates
+                [x, y, z, yaw] = get_xyz_yaw(cj_injection_message)
+                [direction, duration] = check_direction()
 
-            rospy.loginfo("Cj direction is ".format(direction))
-            rospy.loginfo("Cj duration is ".format(duration))
+                rospy.loginfo("Cj direction is ".format(direction))
+                rospy.loginfo("Cj duration is ".format(duration))
 
-            # obstacle_free=avoid_collision()
-            # if obstacle_free == True:
-            rospy.logdebug("test: {}".format(duration))
-            cf_handler.goTo(goal=[x, y, z], yaw=yaw, duration=duration, relative=False)
-            # else:
-            #     rospy.logwarn("cannot move - obstacle in the way")
+                # obstacle_free=avoid_collision()
+                # if obstacle_free == True:
+                cf_handler.goTo(goal=[x, y, z], yaw=yaw, duration=duration, relative=False)
+                # else:
+                #     rospy.logwarn("cannot move - obstacle in the way")
 
-        r.sleep()
+            r.sleep()
 
-    rospy.loginfo('********EXITING*********')
-    cf_handler.stop()
-    # break
+        rospy.loginfo('********EXITING*********')
+        cf_handler.stop()
+        # break
 
-    # except Exception as e:
-    #     cf_handler.stop()
-    #     rospy.loginfo('*******keyboard input exception')
-    #     rospy.loginfo(e)
+    except Exception as e:
+        cf_handler.stop()
+        rospy.loginfo('*******keyboard input exception')
+        rospy.loginfo(e)
 
 
 if __name__ == '__main__':

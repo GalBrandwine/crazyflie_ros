@@ -26,14 +26,14 @@ def filter_scan():
     inf = float('inf')
     global scan
     for i in range(len(scan.ranges)):
-        if not isinf(scan.ranges[i]):
-            if scan.ranges[i] > max_distance:
+        if not isinf(scan.ranges[i]):       #distance filter
+            if abs(scan.ranges[i]) > max_distance:
                 scan.ranges[i]=inf
-            else:
-                if abs(scan.ranges[i] - ranges_previous[i]) < outlier_threshold:
-                    ranges_previous[i] = scan.ranges[i] # remember current scan for next cycle
-                else:
-                    scan.ranges[i] = inf #if delta between two sequential readings is too large , discard scan
+            # else:
+            #     if abs(scan.ranges[i] - ranges_previous[i]) < outlier_threshold:
+            #         ranges_previous[i] = scan.ranges[i] # remember current scan for next cycle
+            #     else:
+            #         scan.ranges[i] = inf #if delta between two sequential readings is too large , discard scan
 
 
 def get_ranges(msg):
