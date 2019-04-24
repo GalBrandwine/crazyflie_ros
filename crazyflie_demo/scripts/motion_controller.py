@@ -27,7 +27,6 @@ from tf.transformations import euler_from_quaternion
 # TODO: move all this shit into a class MotionController
 
 
-speed = 0.25
 initialZ = 0.35
 
 global front, back, up, left, right, zrange, cj_injection_flag, cj_injection_message
@@ -46,7 +45,11 @@ def Cj_injector(msg):
     # rospy.loginfo(msg)
 
 def check_direction():
-    global listener, tfBuffer , cj_injection_message , heading
+    global listener, tfBuffer , cj_injection_message
+
+    speed = 0.20  # default speed m/s
+    min_duration = 1 #minimum time [sec] for single trajectory
+
     trans = None
     try:
         trans = tfBuffer.lookup_transform(prefix ,'world', rospy.Time(0))
@@ -56,8 +59,12 @@ def check_direction():
         cj_local_coord = tf2_geometry_msgs.do_transform_pose(cj_injection_message, trans)
         rospy.loginfo(cj_local_coord)
         heading = atan2(cj_local_coord.pose.position.y, cj_local_coord.pose.position.x)
+
         distance= sqrt(pow(cj_local_coord.pose.position.x,2)+pow(cj_local_coord.pose.position.y,2))
-        return heading , distance
+        duration= distance/speed # #calculate required time for this motion
+        if duration< min_duration: duration = min_duration
+
+        return [heading,duration]
     else:
         return False
 
@@ -70,17 +77,16 @@ def check_direction():
 
 
 def get_ranges(msg):
-    global front, back, up, left, right, zrange, ranges, ranges_smoothed
-    front = 0.8* front + 0.2 * msg.values[0] / 1000
-    back = 0.8 * back + 0.2 * msg.values[1] / 1000
-    up = msg.values[2] / 1000
-    left = 0.8 * left + 0.2 * msg.values[3] / 1000
-    right = 0.8 * right + 0.2 * msg.values[4] / 1000
-    zrange = msg.values[5] / 1000
+    global front, back, up, left, right, zrange, ranges
+    weight_old=0.65 #the weight given to old values in filter 0-1
+    weight_new = 1.0 - weight_old
+    front = weight_old * front + weight_new * msg.values[0] / 1000 # low-pass filter on range inputs used for collision
+    back = weight_old * back + weight_new * msg.values[1] / 1000
+    up = weight_old * up + weight_new * msg.values[2] / 1000
+    left = weight_old * left + weight_new * msg.values[3] / 1000
+    right = weight_old * right + weight_new * msg.values[4] / 1000
+    #zrange = msg.values[5] / 1000
     ranges = [back, left, front, right, up, zrange]
-    # ranges_np = np.asarray(ranges)
-    # good_vals = np.nonzero(ranges_np)
-
 
 def getch():
     fd = sys.stdin.fileno()
@@ -131,22 +137,22 @@ def handler(cf_handler):
             if min(ranges) > 0:
                 if front < dist_threshold:
                     rospy.loginfo("forward collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.3, relative=True)
                     time.sleep(def_duration)
 
                 elif back < dist_threshold:
                     rospy.loginfo("back collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.3, relative=True)
                     time.sleep(def_duration)
 
                 elif right < dist_threshold:
                     rospy.loginfo("right collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.3, relative=True)
                     time.sleep(def_duration)
 
                 elif left < dist_threshold:
                     rospy.loginfo("left collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.3, relative=True)
                     time.sleep(def_duration)
 
                 elif up < dist_threshold:
@@ -175,15 +181,16 @@ def handler(cf_handler):
                 pitch = euler[1]
                 yaw = euler[2]
 
-                direction,distance = degrees(check_direction())
-                rospy.loginfo("DIRECTION", direction , "DISTANCE" , distance)
-                obstacle_free=avoid_collision()
-                if obstacle_free == True:
-                    cf_handler.goTo(goal=[x, y, z], yaw=yaw, duration=def_duration, relative=False)
-                else:
-                    rospy.logwarn("cannot move - obstacle in the way")
+                [direction,duration] = check_direction()
 
+                rospy.loginfo("Cj direction is ".format(direction))
+                rospy.loginfo("Cj duration is ".format(duration))
 
+                # obstacle_free=avoid_collision()
+                # if obstacle_free == True:
+                cf_handler.goTo(goal=[x, y, z], yaw=yaw, duration=duration, relative=False)
+                # else:
+                #     rospy.logwarn("cannot move - obstacle in the way")
 
             elif key is not None:
 
@@ -290,4 +297,5 @@ if __name__ == '__main__':
     t1 = Thread(target=handler, args=(cf,))
     t2 = Thread(target=keypress)
     t1.start()
+    time.sleep(6)
     t2.start()
