@@ -22,8 +22,8 @@ A few notes:
 
 
     <!-- for first CF -->
-    <arg name="uri1" default="radio://0/120/2M/E7E7E7E705"/>
-    <arg name="frame1" default="cf5"/>
+    <arg name="uri1" default="radio://0/120/2M/E7E7E7E731"/>
+    <arg name="frame1" default="cf3"/>
     <arg name="frame1_active" default="1"/>
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX1" default="0.0"/>
@@ -133,9 +133,9 @@ A few notes:
         </node>
 
         <!--            Fix vrpn axes - broadcasts tf frame "cf#_fixed" FOR IT TO WORK THE RIGID BODY NAME MUST BE CF#_VRPN -->
-        <node name="explorer" pkg="crazyflie_demo" type="tf_fixer.py" output="screen">
-            <param name="tf_prefix" value="$(arg frame1)"/>
-        </node>
+<!--        <node name="explorer" pkg="crazyflie_demo" type="tf_fixer.py" output="screen">-->
+<!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
+<!--        </node>-->
         <!--        Tf_broadcast a static transform with offset between a drone launch point and world-->
         <node pkg="tf" type="static_transform_publisher" name="world_to_$(arg frame1)_takeoff"
               args="$(arg initX1) $(arg initY1) 0 0 0 0 1 world $(arg frame1)_takeoff 100"/>
@@ -202,9 +202,9 @@ A few notes:
         </node>
 
         <!--        Fix vrpn axes - broadcasts tf frame "cf#_fixed" FOR IT TO WORK THE RIGID BODY NAME MUST BE CF#_VRPN -->
-        <node name="explorer" pkg="crazyflie_demo" type="tf_fixer.py" output="screen">
-            <param name="tf_prefix" value="$(arg frame2)"/>
-        </node>
+<!--        <node name="explorer" pkg="crazyflie_demo" type="tf_fixer.py" output="screen">-->
+<!--            <param name="tf_prefix" value="$(arg frame2)"/>-->
+<!--        </node>-->
 
         <!--        Tf_broadcast a static transform with offset between a drone launch point and world-->
         <node pkg="tf" type="static_transform_publisher" name="world_to_$(arg frame2)_takeoff"
