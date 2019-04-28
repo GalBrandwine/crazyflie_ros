@@ -61,7 +61,7 @@ def twist_callback(msg):
 
 def Cj_injector(msg):
     global cj_injection_message, cj_injection_flag
-    rospy.logdebug("Cj_recieved...")
+    # rospy.logdebug("Cj_recieved...")
     cj_injection_flag = True
     cj_injection_message = msg
     # rospy.loginfo(msg)
@@ -88,7 +88,7 @@ def check_direction():
 
         distance = sqrt(pow(cj_local_coord.pose.position.x, 2) + pow(cj_local_coord.pose.position.y, 2))
         duration = distance / speed  # #calculate required time for this motion
-        rospy.logdebug("in check_direction: before if: [{},{}]".format(heading, duration))
+        # rospy.logdebug("in check_direction: before if: [{},{}]".format(heading, duration))
         if duration < min_duration:
             duration = min_duration
 
@@ -102,12 +102,12 @@ def check_direction():
         rotation_yaw = abs(euler[2])
 
         duration_yaw = rotation_yaw / rot_speed
-        rospy.logdebug("in check_direction: duration_yaw: {}".format(duration_yaw))
-        rospy.logdebug("in check_direction: duration: {}".format(duration))
+        # rospy.logdebug("in check_direction: duration_yaw: {}".format(duration_yaw))
+        # rospy.logdebug("in check_direction: duration: {}".format(duration))
         if duration_yaw > duration:
             duration = duration_yaw
 
-        rospy.logdebug("in check_direction. returning: [{},{}]".format(heading, duration))
+        # rospy.logdebug("in check_direction. returning: [{},{}]".format(heading, duration))
         return [heading, duration]
     else:
         rospy.logerr("in check_direction: trans is None")
