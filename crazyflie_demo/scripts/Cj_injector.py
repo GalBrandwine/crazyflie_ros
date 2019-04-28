@@ -162,7 +162,7 @@ class DroneInjector:
         threads = []
         step = 0.30  # m
         #                       [t, ----x---, ---y---, --z--, yaw]
-        path_maze_right_side = [[2, 0 * step, 6 * step, 0.35, 0],  # start in (0,180,0.35)
+        path_maze_right_side = [[6, 0 * step, 6 * step, 0.35, 0],  # start in (0,180,0.35)
                                 [2, 0 * step, 7 * step, 0.35, 0],  # proceed in  corridor
                                 [2, 1 * step, 7 * step, 0.35, 0],  #
                                 [2, 2 * step, 7 * step, 0.35, 0],  #
@@ -193,7 +193,7 @@ class DroneInjector:
                                 [2, 6.5 * step, 6 * step, 0.35, 90],  #
                                 ]
 
-        path_maze_left_side = [[6, 0 * step, 8 * step, 0.35, 0],  # start in (0,240,0.35)
+        path_maze_left_side = [[2, 0 * step, 8 * step, 0.35, 0],  # start in (0,240,0.35)
                                [2, 0 * step, 7 * step, 0.35, 0],
                                [2, 1 * step, 7 * step, 0.35, 0],
                                [2, 2 * step, 7 * step, 0.35, 0],
@@ -254,8 +254,8 @@ class DroneInjector:
         t1 = Thread(target=injector, args=(self.cj_injector_container[0], path_maze_right_side,))
         threads.append(t1)
 
-        # t2 = Thread(target=injector, args=(self.cj_injector_container[1], path_maze_left_side,))
-        # threads.append(t2)
+        t2 = Thread(target=injector, args=(self.cj_injector_container[1], path_maze_left_side,))
+        threads.append(t2)
 
         # start all threads.
         for t in threads:

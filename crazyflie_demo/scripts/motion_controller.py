@@ -210,7 +210,7 @@ def handler(cf_handler):
 
         while not rospy.is_shutdown():
 
-            if min(ranges) > 0 and (rospy.Time.now() - last_collision).to_sec() > 1.0:
+            if min(ranges) > 0 and (rospy.Time.now() - last_collision).to_sec() > 2.0:
 
                 # if no range sensors are present all range values will be zero - skip collision
                 # minimum time delta between stop msgs due to collision in seconds
@@ -218,21 +218,21 @@ def handler(cf_handler):
 
                 if ranges[2] < dist_threshold:
                     rospy.loginfo("front collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.6, relative=True)
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.8, relative=True)
                     last_collision=rospy.Time.now()
                 elif ranges[0] < dist_threshold:
                     rospy.loginfo("back collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.6, relative=True)
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.8, relative=True)
                     last_collision=rospy.Time.now()
 
                 elif ranges[3] < dist_threshold:
                     rospy.loginfo("right collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.6, relative=True)
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.8, relative=True)
                     last_collision=rospy.Time.now()
 
                 elif ranges[1] < dist_threshold:
                     rospy.loginfo("left collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.6, relative=True)
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.8, relative=True)
                     last_collision=rospy.Time.now()
 
                 elif ranges[4] < dist_threshold:
