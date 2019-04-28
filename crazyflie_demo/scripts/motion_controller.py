@@ -35,7 +35,7 @@ global kb_x, kb_y, kb_z, kb_yaw
 kb_x = kb_y = kb_z = kb_yaw = 0
 
 global ranges
-ranges = []
+ranges = [0,0,0,0]
 cj_injection_flag = False
 cj_injection_message = None
 
