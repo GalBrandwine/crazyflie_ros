@@ -35,7 +35,7 @@ global kb_x, kb_y, kb_z, kb_yaw
 kb_x = kb_y = kb_z = kb_yaw = 0
 
 global ranges
-ranges = []
+ranges = [0,0,0,0]
 cj_injection_flag = False
 cj_injection_message = None
 
@@ -129,8 +129,7 @@ def get_ranges(msg):
     left = weight_old * left + weight_new * msg.values[3] / 1000
     right = weight_old * right + weight_new * msg.values[4] / 1000
     # zrange = msg.values[5] / 1000
-    ranges = [back, left, front, right, up, zrange]
-
+    ranges = [back, left, front, right, up]
 
 def getch():
     fd = sys.stdin.fileno()
@@ -185,8 +184,11 @@ def handler(cf_handler):
     global keyboard_flag
     global cj_injection_message, cj_injection_flag
     global front, back, up, left, right, zrange
+
     dist_threshold = 0.15
     def_duration = 2.0
+
+    last_collision = rospy.Time.now()
 
     # There's 2 levels of collision protections:
     #   Low level:
@@ -196,7 +198,8 @@ def handler(cf_handler):
     #       Cj_injection and before that Cj order will go to drone,
     #       we will check if theres a futoristic collision within that path.
 
-    dist_threshold = 0.25
+    dist_threshold = 0.15 #minimum distance to trigger collission avoidance [meters]
+
     def_duration = 1.8
     land_duration = 1.5
 
@@ -204,28 +207,32 @@ def handler(cf_handler):
 
         while not rospy.is_shutdown():
 
-            if min(ranges) > 0:
-                if front < dist_threshold:
-                    rospy.loginfo("forward collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
-                    time.sleep(def_duration)
+            if min(ranges) > 0 and (rospy.Time.now() - last_collision).to_sec() > 1.0:
 
-                elif back < dist_threshold:
+                # if no range sensors are present all range values will be zero - skip collision
+                # minimum time delta between stop msgs due to collision in seconds
+                # #ranges order is [back, left, front, right, up]
+
+                if ranges[2] < dist_threshold:
+                    rospy.loginfo("front collision avoidance")
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.6, relative=True)
+                    last_collision=rospy.Time.now()
+                elif ranges[0] < dist_threshold:
                     rospy.loginfo("back collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
-                    time.sleep(def_duration)
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.6, relative=True)
+                    last_collision=rospy.Time.now()
 
-                elif right < dist_threshold:
+                elif ranges[3] < dist_threshold:
                     rospy.loginfo("right collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
-                    time.sleep(def_duration)
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.6, relative=True)
+                    last_collision=rospy.Time.now()
 
-                elif left < dist_threshold:
+                elif ranges[1] < dist_threshold:
                     rospy.loginfo("left collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
-                    time.sleep(def_duration)
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.6, relative=True)
+                    last_collision=rospy.Time.now()
 
-                elif up < dist_threshold:
+                elif ranges[4] < dist_threshold:
                     rospy.loginfo("top collision avoidance")
                     cf_handler.land(targetHeight=0.0, duration=land_duration)
                     time.sleep(land_duration)
