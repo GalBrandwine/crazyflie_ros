@@ -173,7 +173,22 @@ class DroneInjector:
                                 [2, 6.5 * step, 7 * step, 0.35, 0],  #
                                 [2, 6.5 * step, 7 * step, 0.35, -90],  # rotate right in place
                                 [2, 6.5 * step, 5 * step, 0.35, -90],  # enter into first room
-                                [2, 6.5 * step, 4 * step, 0.35, -90],  #
+                                [2, 6.5 * step, 5 * step, 0.35, -180],  # enter into first room
+                                [2, 4 * step, 5 * step, 0.35, -180],    #
+                                [2, 3.5 * step, 5 * step, 0.35, -90],   # scan
+                                [2, 3.5 * step, 5 * step, 0.35, 90],    #
+                                [2, 3.5 * step, 5 * step, 0.35, -90],   #
+                                [2, 3.5 * step, 4 * step, 0.35, -90],  #
+                                [2, 3.5 * step, 3 * step, 0.35, -90],  #
+                                [2, 3.5 * step, 1 * step, 0.35, -90],  #
+                                [2, 3.5 * step, 1 * step, 0.35, 0],  # turn 90 left
+                                [2, 4 * step, 1 * step, 0.35, 0],  #
+                                [2, 5 * step, 1 * step, 0.35, 0],  #
+                                [2, 6.5 * step, 1 * step, 0.35, 0],  #
+                                [2, 6.5 * step, 1 * step, 0.35, 90],  # turn 90 left
+                                [2, 6.5 * step, 2 * step, 0.35, 90],  #
+                                [2, 6.5 * step, 4 * step, 0.35, 90],  #
+                                [2, 6.5 * step, 6 * step, 0.35, 90],  #
                                 ]
 
         path_maze_left_side = [[6, 0 * step, 8 * step, 0.35, 0],  # start in (0,240,0.35)
@@ -237,8 +252,8 @@ class DroneInjector:
         t1 = Thread(target=injector, args=(self.cj_injector_container[0], path_maze_right_side,))
         threads.append(t1)
 
-        t2 = Thread(target=injector, args=(self.cj_injector_container[1], path_maze_left_side,))
-        threads.append(t2)
+        # t2 = Thread(target=injector, args=(self.cj_injector_container[1], path_maze_left_side,))
+        # threads.append(t2)
 
         # start all threads.
         for t in threads:
