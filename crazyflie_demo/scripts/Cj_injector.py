@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """This is a simple Cj_injector for emulating. """
-from math import radians
 from threading import Thread
 
 import rospy
 import tf
 from geometry_msgs.msg import PoseStamped
+from math import radians
 from std_msgs.msg import Empty
 
 
@@ -40,7 +40,7 @@ class DroneCjInjector:
 
 
 def injector(drone_injector, path):
-    """Simple threaded function for publishing point of a drone """
+    """Simple threaded function for publishing point of a drone. """
     for point in path:
         time_delay = point[0]
         x = point[1]
@@ -161,20 +161,38 @@ class DroneInjector:
         """
         threads = []
         step = 0.30  # m
-
+        #                       [t, ----x---, ---y---, --z--, yaw]
         path_maze_right_side = [[2, 0 * step, 6 * step, 0.35, 0],  # start in (0,180,0.35)
-                                [2, 0 * step, 7 * step, 0.35, 0],
-                                [2, 1 * step, 7 * step, 0.35, 0],
-                                [2, 2 * step, 7 * step, 0.35, 0],
-                                [2, 3 * step, 7 * step, 0.35, 0],
-                                [2, 4 * step, 7 * step, 0.35, 0],
-                                [2, 5 * step, 7 * step, 0.35, 0],
-                                [2, 6 * step, 7 * step, 0.35, 0],
-                                [2, 7 * step, 7 * step, 0.35, 0],
-                                [2, 8 * step, 7 * step, 0.35, 0],
-                                [2, 9 * step, 7 * step, 0.35, 0],
-
+                                [2, 0 * step, 7 * step, 0.35, 0],  # proceed in  corridor
+                                [2, 1 * step, 7 * step, 0.35, 0],  #
+                                [2, 2 * step, 7 * step, 0.35, 0],  #
+                                [2, 3 * step, 7 * step, 0.35, 0],  #
+                                [2, 4 * step, 7 * step, 0.35, 0],  #
+                                [2, 5 * step, 7 * step, 0.35, 0],  #
+                                [2, 6 * step, 7 * step, 0.35, 0],  #
+                                [2, 6.5 * step, 7 * step, 0.35, 0],  #
+                                [4, 6.5 * step, 7 * step, 0.35, -90],  # rotate right in place
+                                [2, 6.5 * step, 5 * step, 0.35, -90],  # enter into first room
+                                [4, 6.5 * step, 5 * step, 0.35, -180],  # enter into first room
+                                [2, 4 * step, 5 * step, 0.35, -180],    #
+                                [4, 3.5 * step, 5 * step, 0.35, -90],   # scan
+                                [4, 3.5 * step, 5 * step, 0.35, 0],  #
+                                [4, 3.5 * step, 5 * step, 0.35, 90],    #
+                                [4, 3.5 * step, 5 * step, 0.35, 0],  #
+                                [4, 3.5 * step, 5 * step, 0.35, -90],   #
+                                [2, 3.5 * step, 4 * step, 0.35, -90],  #
+                                [2, 3.5 * step, 3 * step, 0.35, -90],  #
+                                [2, 3.5 * step, 1 * step, 0.35, -90],  #
+                                [4, 3.5 * step, 1 * step, 0.35, 0],  # turn 90 left
+                                [2, 4 * step, 1 * step, 0.35, 0],  #
+                                [2, 5 * step, 1 * step, 0.35, 0],  #
+                                [2, 6.5 * step, 1 * step, 0.35, 0],  #
+                                [4, 6.5 * step, 1 * step, 0.35, 90],  # turn 90 left
+                                [2, 6.5 * step, 2 * step, 0.35, 90],  #
+                                [2, 6.5 * step, 4 * step, 0.35, 90],  #
+                                [2, 6.5 * step, 6 * step, 0.35, 90],  #
                                 ]
+
         path_maze_left_side = [[6, 0 * step, 8 * step, 0.35, 0],  # start in (0,240,0.35)
                                [2, 0 * step, 7 * step, 0.35, 0],
                                [2, 1 * step, 7 * step, 0.35, 0],
@@ -185,7 +203,17 @@ class DroneInjector:
                                [2, 6 * step, 7 * step, 0.35, 0],
                                [2, 7 * step, 7 * step, 0.35, 0],
                                [2, 8 * step, 7 * step, 0.35, 0],
-                               # [2, 9 * step, 7 * step, 0.35, 0],
+                               [2, 9 * step, 7 * step, 0.35, 0],
+                               [2, 9 * step, 8 * step, 0.35, 0],
+                               [2, 9 * step, 9 * step, 0.35, 0],
+                               [3, 9 * step, 10 * step, 0.35, 0],
+                               [2, 9 * step, 11 * step, 0.35, 0],
+                               [2, 9 * step, 12 * step, 0.35, 0],
+                               [2, 8 * step, 12 * step, 0.35, 0],
+                               [2, 7 * step, 12 * step, 0.35, 0],
+                               [2, 6 * step, 12 * step, 0.35, 0],
+                               [2, 5 * step, 12 * step, 0.35, 0],
+                               [3.5, 5 * step, 12 * step, 0.35, 180],
                                ]
 
         path1 = [[2, 0.3, 0.6, 0.35, 0],
@@ -223,11 +251,11 @@ class DroneInjector:
         # t2 = Thread(target=injector, args=(self.cj_injector_container[3], path2,))
         # threads.append(t2)
 
-        # t1 = Thread(target=injector, args=(self.cj_injector_container[2], path_maze_right_side,))
-        # threads.append(t1)
+        t1 = Thread(target=injector, args=(self.cj_injector_container[0], path_maze_right_side,))
+        threads.append(t1)
 
-        t2 = Thread(target=injector, args=(self.cj_injector_container[3], path_maze_left_side,))
-        threads.append(t2)
+        # t2 = Thread(target=injector, args=(self.cj_injector_container[1], path_maze_left_side,))
+        # threads.append(t2)
 
         # start all threads.
         for t in threads:

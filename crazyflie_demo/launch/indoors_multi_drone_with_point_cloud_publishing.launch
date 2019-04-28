@@ -24,7 +24,7 @@ A few notes:
     <!-- for first CF -->
     <arg name="uri1" default="radio://0/120/2M/E7E7E7E705"/>
     <arg name="frame1" default="cf5"/>
-    <arg name="frame1_active" default="0"/>
+    <arg name="frame1_active" default="1"/>
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX1" default="0.0"/>
     <arg name="initY1" default="1.8"/>

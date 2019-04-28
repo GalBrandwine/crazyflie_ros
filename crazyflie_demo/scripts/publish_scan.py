@@ -5,30 +5,31 @@
 # publishes laserscan in 'drone' frame, and converts it to PointCloud2 too.
 
 
-from math import pi, isinf
-
 import laser_geometry.laser_geometry as lg
 import rospy
 import tf2_ros
-from crazyflie_driver.msg import GenericLogData
+from math import pi, isinf
 from sensor_msgs.msg import PointCloud2, LaserScan
 from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
+
+from crazyflie_driver.msg import GenericLogData
 
 global scan, seq
 scan = None
 
 global ranges_previous
-ranges_previous=[0,0,0,0]
+ranges_previous = [0, 0, 0, 0]
+
 
 def filter_scan():
-    max_distance=2.0 # maximum distance cutoff in meters
-    outlier_threshold = 0.2 # maximum delta between two sequential readings, in meters
+    max_distance = 2.0  # maximum distance cutoff in meters
+    outlier_threshold = 0.2  # maximum delta between two sequential readings, in meters
     inf = float('inf')
     global scan
     for i in range(len(scan.ranges)):
-        if not isinf(scan.ranges[i]):       #distance filter
+        if not isinf(scan.ranges[i]):  # distance filter
             if abs(scan.ranges[i]) > max_distance:
-                scan.ranges[i]=inf
+                scan.ranges[i] = inf
             # else:
             #     if abs(scan.ranges[i] - ranges_previous[i]) < outlier_threshold:
             #         ranges_previous[i] = scan.ranges[i] # remember current scan for next cycle
@@ -135,7 +136,7 @@ def get_ranges(msg):
         #     pub_right_WC.publish(right_WC)
 
     scan.header.stamp = rospy.Time.now()
-    filter_scan() #todo using scan as global variable. overwriting values. not good.
+    filter_scan()  # todo using scan as global variable. overwriting values. not good.
     scan_pub.publish(scan)  # publish LaserScan message in LOCAL (drone) coordinates
 
     if transform is not None and new_data is True:
