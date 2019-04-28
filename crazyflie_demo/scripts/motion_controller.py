@@ -73,7 +73,7 @@ def check_direction():
     speed = 0.20  # default speed m/s
     rot_speed = 2.0  # default rot speed sec/radian
     min_duration = 2, 0  # minimum time [sec] for single trajectory
-    default_duration = 2  # sec
+    duration = default_duration = 2  # sec
     trans = None
     try:
         trans = tfBuffer.lookup_transform(prefix, 'world', rospy.Time(0))
@@ -104,9 +104,11 @@ def check_direction():
         if duration_yaw > duration:
             duration = duration_yaw
 
-        return [heading, duration]
+        rospy.logdebug("in check_direction. returning: [{},{}]".format(heading, duration[0]))
+        return [heading, duration[0]]
     else:
-        return default_duration
+        rospy.logerr("in check_direction: trans is None")
+        return [0, duration[0]]
 
 
 # def avoid_collision():
@@ -259,7 +261,7 @@ def handler(cf_handler):
                 cj_injection_flag = False
                 # get Cj_injection in drone coordinates
                 [x, y, z, yaw] = get_xyz_yaw(cj_injection_message)
-                [direction, duration] = check_direction()
+                [direction, duration] = check_direction() # [direction, duration]
 
                 rospy.loginfo("Cj direction is ".format(direction))
                 rospy.loginfo("Cj duration is ".format(duration))
