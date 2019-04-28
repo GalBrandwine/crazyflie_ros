@@ -71,8 +71,8 @@ def check_direction():
     global listener, tfBuffer, cj_injection_message
 
     speed = 0.20  # default speed m/s
-    rot_speed = 2.0  # default rot speed sec/radian
-    min_duration = 2, 0  # minimum time [sec] for single trajectory
+    rot_speed = 0.5  # default rot speed sec/radian
+    min_duration = 2.0  # minimum time [sec] for single trajectory
     duration = default_duration = 2  # sec
     trans = None
     try:
@@ -88,7 +88,9 @@ def check_direction():
 
         distance = sqrt(pow(cj_local_coord.pose.position.x, 2) + pow(cj_local_coord.pose.position.y, 2))
         duration = distance / speed  # #calculate required time for this motion
-        if duration < min_duration: duration = min_duration
+        rospy.logdebug("in check_direction: before if: [{},{}]".format(heading, duration))
+        if duration < min_duration:
+            duration = min_duration
 
         q = (cj_local_coord.pose.orientation.x,
              cj_local_coord.pose.orientation.y,
@@ -97,18 +99,19 @@ def check_direction():
 
         euler = euler_from_quaternion(q, axes='sxyz')
 
-        rotation_yaw = euler[2]
+        rotation_yaw = abs(euler[2])
 
-        duration_yaw = rotation_yaw * rot_speed
-
+        duration_yaw = rotation_yaw / rot_speed
+        rospy.logdebug("in check_direction: duration_yaw: {}".format(duration_yaw))
+        rospy.logdebug("in check_direction: duration: {}".format(duration))
         if duration_yaw > duration:
             duration = duration_yaw
 
-        rospy.logdebug("in check_direction. returning: [{},{}]".format(heading, duration[0]))
-        return [heading, duration[0]]
+        rospy.logdebug("in check_direction. returning: [{},{}]".format(heading, duration))
+        return [heading, duration]
     else:
         rospy.logerr("in check_direction: trans is None")
-        return [0, duration[0]]
+        return [0, duration]
 
 
 # def avoid_collision():
@@ -261,10 +264,10 @@ def handler(cf_handler):
                 cj_injection_flag = False
                 # get Cj_injection in drone coordinates
                 [x, y, z, yaw] = get_xyz_yaw(cj_injection_message)
-                [direction, duration] = check_direction() # [direction, duration]
+                [direction, duration] = check_direction()
 
                 # rospy.logdebug("Cj direction is {}".format(direction))
-                # rospy.logdebug("Cj duration is {}".format(duration))
+                rospy.logdebug("Cj duration is {}".format(duration))
 
                 # obstacle_free=avoid_collision()
                 # if obstacle_free == True:
@@ -280,7 +283,7 @@ def handler(cf_handler):
 
     except Exception as e:
         cf_handler.stop()
-        rospy.loginfo('*******keyboard input exception')
+        rospy.loginfo('******* keyboard input exception *******')
         rospy.loginfo(e)
 
 

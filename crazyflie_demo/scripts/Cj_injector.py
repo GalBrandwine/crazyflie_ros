@@ -40,7 +40,7 @@ class DroneCjInjector:
 
 
 def injector(drone_injector, path):
-    """Simple threaded function for publishing point of a drone """
+    """Simple threaded function for publishing point of a drone. """
     for point in path:
         time_delay = point[0]
         x = point[1]
@@ -171,21 +171,23 @@ class DroneInjector:
                                 [2, 5 * step, 7 * step, 0.35, 0],  #
                                 [2, 6 * step, 7 * step, 0.35, 0],  #
                                 [2, 6.5 * step, 7 * step, 0.35, 0],  #
-                                [2, 6.5 * step, 7 * step, 0.35, -90],  # rotate right in place
+                                [4, 6.5 * step, 7 * step, 0.35, -90],  # rotate right in place
                                 [2, 6.5 * step, 5 * step, 0.35, -90],  # enter into first room
-                                [2, 6.5 * step, 5 * step, 0.35, -180],  # enter into first room
+                                [4, 6.5 * step, 5 * step, 0.35, -180],  # enter into first room
                                 [2, 4 * step, 5 * step, 0.35, -180],    #
-                                [2, 3.5 * step, 5 * step, 0.35, -90],   # scan
-                                [2, 3.5 * step, 5 * step, 0.35, 90],    #
-                                [2, 3.5 * step, 5 * step, 0.35, -90],   #
+                                [4, 3.5 * step, 5 * step, 0.35, -90],   # scan
+                                [4, 3.5 * step, 5 * step, 0.35, 0],  #
+                                [4, 3.5 * step, 5 * step, 0.35, 90],    #
+                                [4, 3.5 * step, 5 * step, 0.35, 0],  #
+                                [4, 3.5 * step, 5 * step, 0.35, -90],   #
                                 [2, 3.5 * step, 4 * step, 0.35, -90],  #
                                 [2, 3.5 * step, 3 * step, 0.35, -90],  #
                                 [2, 3.5 * step, 1 * step, 0.35, -90],  #
-                                [2, 3.5 * step, 1 * step, 0.35, 0],  # turn 90 left
+                                [4, 3.5 * step, 1 * step, 0.35, 0],  # turn 90 left
                                 [2, 4 * step, 1 * step, 0.35, 0],  #
                                 [2, 5 * step, 1 * step, 0.35, 0],  #
                                 [2, 6.5 * step, 1 * step, 0.35, 0],  #
-                                [2, 6.5 * step, 1 * step, 0.35, 90],  # turn 90 left
+                                [4, 6.5 * step, 1 * step, 0.35, 90],  # turn 90 left
                                 [2, 6.5 * step, 2 * step, 0.35, 90],  #
                                 [2, 6.5 * step, 4 * step, 0.35, 90],  #
                                 [2, 6.5 * step, 6 * step, 0.35, 90],  #
