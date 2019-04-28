@@ -169,7 +169,7 @@ def handler(cf_handler):
                     break
 
             # if key is not None:
-            #
+            #s
             #     rozspy.loginfo("************* Key pressed is " + key.decode('utf-8'))
             #
             #     if key == ' ':
