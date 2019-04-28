@@ -263,8 +263,8 @@ def handler(cf_handler):
                 [x, y, z, yaw] = get_xyz_yaw(cj_injection_message)
                 [direction, duration] = check_direction() # [direction, duration]
 
-                rospy.loginfo("Cj direction is ".format(direction))
-                rospy.loginfo("Cj duration is ".format(duration))
+                # rospy.logdebug("Cj direction is {}".format(direction))
+                # rospy.logdebug("Cj duration is {}".format(duration))
 
                 # obstacle_free=avoid_collision()
                 # if obstacle_free == True:
