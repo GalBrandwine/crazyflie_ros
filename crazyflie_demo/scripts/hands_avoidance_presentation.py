@@ -170,7 +170,7 @@ def handler(cf_handler):
 
             # if key is not None:
             #
-            #     rospy.loginfo("************* Key pressed is " + key.decode('utf-8'))
+            #     rozspy.loginfo("************* Key pressed is " + key.decode('utf-8'))
             #
             #     if key == ' ':
             #         # emergency land
