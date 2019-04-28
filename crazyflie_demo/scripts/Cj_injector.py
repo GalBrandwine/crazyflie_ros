@@ -156,9 +156,38 @@ class DroneInjector:
 
         Very simple and stupid example for using the injcetor.
 
+        path = [[duration,x,y,z,yaw], [], ...]
+
         """
         threads = []
-        # path = [[duration,x,y,z,yaw],]
+        step = 30  # cm
+
+        path_maze_right_side = [[2, 0, 6 * step, 0.35, 0],  # start in (0,180,0.35)
+                                [2, 0, 7 * step, 0.35, 0],
+                                [2, 1 * step, 7 * step, 0.35, 0],
+                                [2, 2 * step, 7 * step, 0.35, 0],
+                                [2, 3 * step, 7 * step, 0.35, 0],
+                                [2, 4 * step, 7 * step, 0.35, 0],
+                                [2, 5 * step, 7 * step, 0.35, 0],
+                                [2, 6 * step, 7 * step, 0.35, 0],
+                                [2, 7 * step, 7 * step, 0.35, 0],
+                                [2, 8 * step, 7 * step, 0.35, 0],
+                                [2, 9 * step, 7 * step, 0.35, 0],
+
+                                ]
+        path_maze_left_side = [[6, 0, 4 * 2 * step, 0.35, 0],  # start in (0,240,0.35)
+                               [2, 0, 7 * step, 0.35, 0],
+                               [2, 1 * step, 7 * step, 0.35, 0],
+                               [2, 2 * step, 7 * step, 0.35, 0],
+                               [2, 3 * step, 7 * step, 0.35, 0],
+                               [2, 4 * step, 7 * step, 0.35, 0],
+                               [2, 5 * step, 7 * step, 0.35, 0],
+                               [2, 6 * step, 7 * step, 0.35, 0],
+                               [2, 7 * step, 7 * step, 0.35, 0],
+                               [2, 8 * step, 7 * step, 0.35, 0],
+                               #[2, 9 * step, 7 * step, 0.35, 0],
+                               ]
+
         path1 = [[2, 0.3, 0.6, 0.35, 0],
                  [2, 0.3, 0.9, 0.35, 0],
                  [2, 0.3, 1.2, 0.35, 0],
@@ -188,10 +217,15 @@ class DroneInjector:
 
                  # [3, 0.3, 0.6, 0.35, 0]
                  ]
-        t1 = Thread(target=injector, args=(self.cj_injector_container[0], path1,))
+        # t1 = Thread(target=injector, args=(self.cj_injector_container[0], path1,))
+        # threads.append(t1)
+        # t2 = Thread(target=injector, args=(self.cj_injector_container[3], path2,))
+        # threads.append(t2)
+
+        t1 = Thread(target=injector, args=(self.cj_injector_container[2], path_maze_right_side,))
         threads.append(t1)
 
-        t2 = Thread(target=injector, args=(self.cj_injector_container[3], path2,))
+        t2 = Thread(target=injector, args=(self.cj_injector_container[3], path_maze_left_side,))
         threads.append(t2)
 
         # start all threads.
