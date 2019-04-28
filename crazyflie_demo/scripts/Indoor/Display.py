@@ -79,13 +79,14 @@ class Display_manager:
 
         for iDrone in range(self.nDrones):
             # Init listeners
-            self.pos_sub = rospy.Subscriber("/cf6/log_pos", GenericLogData,
+            drone_name = rospy.get_param("~drone_name_{}".format(iDrone))
+            self.pos_sub = rospy.Subscriber("/{}/log_pos".format(drone_name), GenericLogData,
                                             self.pos_parser)
 
         self.pos_sub = rospy.Subscriber("/indoor/occupancy_grid_topic", OccupancyGrid,
                                         self.grid_parser)
 
-        self.fig.show()
+        # self.fig.show()
         self.fig.canvas.draw()
 
     def pos_parser(self, msg):
