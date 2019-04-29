@@ -38,6 +38,7 @@ class Display_manager:
 
         self.plot_grid()
         self.plot_obs_array()
+        self.topics_arr = ["/cf6/point_cloud", "/cf8/point_cloud"]
 
         self.takeofpos = initial_pos_dict
         init_pos = []
@@ -81,7 +82,7 @@ class Display_manager:
             # Init listeners
             drone_name = rospy.get_param("~drone_name_{}".format(iDrone))
             self.pos_sub = rospy.Subscriber("/{}/log_pos".format(drone_name), GenericLogData,
-                                            self.pos_parser)
+                                            callback = self.pos_parser)
 
         self.pos_sub = rospy.Subscriber("/indoor/occupancy_grid_topic", OccupancyGrid,
                                         self.grid_parser)
@@ -95,10 +96,11 @@ class Display_manager:
 
         drone_id = pos_header.frame_id.split("/")[0] # Extract drone name from topic name
         # Store drone position and convert it from [m] to [cm]
+        plt_index = self.drones_pos_list[drone_id].index
         self.drones_pos_list[drone_id] = drone_pos(pos_header.stamp.secs,
                                                    self.takeofpos[drone_id][0]+(pos_val[0]*m_to_cm),
                                                    self.takeofpos[drone_id][1]+(pos_val[1]*m_to_cm),
-                                                   self.takeofpos[drone_id][2]+(pos_val[2]*m_to_cm), None, 0)
+                                                   self.takeofpos[drone_id][2]+(pos_val[2]*m_to_cm), None, plt_index)
         # There is no need to change matrix' values acoording to drones position,
         # because it is already done in Grid module.
         # Drones plotting is done via the grid parser (in order to avoid calling the plot function too many times).
@@ -268,6 +270,6 @@ if __name__ == "__main__":
     matrix = np.zeros([np.int64(np.ceil((x_lim[1] - x_lim[0]) / resolution)),
                             np.int64(np.ceil((y_lim[1] - y_lim[0]) / resolution))])
 
-    display_manager = Display_manager(polygon_border, obs_array, x_lim, y_lim, resolution, matrix, initial_pos_dict, 1)
+    display_manager = Display_manager(polygon_border, obs_array, x_lim, y_lim, resolution, matrix, initial_pos_dict, nDrones)
 
     plt.show(block=True)

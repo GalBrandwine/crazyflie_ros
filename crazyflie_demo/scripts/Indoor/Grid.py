@@ -13,6 +13,9 @@ from bresenham import bresenham
 import time
 import threading
 from geometry_msgs.msg import Pose
+import tf2_ros
+from tf.transformations import euler_from_quaternion
+
 
 m_to_cm = 100
 
@@ -37,7 +40,7 @@ class drone_pc:
 
 class Grid:
 
-    def __init__(self, border_polygon, res, nDrones):
+    def __init__(self, border_polygon, res, nDrones, initial_pos_dict):
         self.x_lim = [border_polygon[0][0], border_polygon[0][0]]
         self.y_lim = [border_polygon[0][1], border_polygon[0][1]]
         for i in range(1, border_polygon.__len__()):
@@ -60,17 +63,27 @@ class Grid:
         self.drones_pc_list = dict()
         # maximal limit for pc delta from drone reference in cm
         self.pc_lim = 200
-        self.takeofpos = [100, 100, 0]  # Take off position
+        self.takeofpos = initial_pos_dict
         self.initpos = [0, 0, 0]  # Reference point
+        self.topics_arr = ["/cf6/point_cloud", "/cf8/point_cloud"]
+        self.drone_name_arr = []
+
+        for i, id in enumerate(initial_pos_dict):
+            self.drones_pos_list[id] = drone_pos(time=0, x=initial_pos_dict[id][0],
+                                                 y=initial_pos_dict[id][1],
+                                                 z=initial_pos_dict[id][2], w=None, index=i)
 
         for iDrone in range(self.nDrones):
             # Init listeners
             drone_name = rospy.get_param("~drone_name_{}".format(iDrone))
+            self.drone_name_arr.append(drone_name)
             self.pos_sub = rospy.Subscriber("/{}/log_pos".format(drone_name), GenericLogData,
-                                            self.pos_parser)
+                                            callback = self.pos_parser)
             self.pc_sub = rospy.Subscriber("/{}/point_cloud".format(drone_name), PointCloud2,
                                            callback = self.point_cloud_parser, callback_args = "/{}/point_cloud".format(drone_name))
 
+        self.tfBuffer = tf2_ros.Buffer()
+        self.listener = tf2_ros.TransformListener(self.tfBuffer)
 
         # Start occupancy grid publisher
         grid_pub_thread = threading.Thread(name='grid_pub_thread', target=self.init_grid_publisher)
@@ -80,22 +93,63 @@ class Grid:
         """Each publicitation, theres' an array of 10 points."""
         point_cloud_last_timestamp = msg.header
         point_cloud = pc2.read_points_list(msg, skip_nans=True)
-        topics_arr = ["/cf6/point_cloud", "/cf8/point_cloud"]
 
         sens = []
+        drone_id = []
+        plt_index = []
+        for j in range(len(self.topics_arr)):
+            cur_topic = self.topics_arr[j]
+            if topic == cur_topic:
+                cur_topic_list = cur_topic.split("/")
+                drone_id = [s for s in cur_topic_list if "cf" in s][0]
+                plt_index = j
+
+        # try:
+        #     trans = self.tfBuffer.lookup_transform('world', drone_id, rospy.Time(0))
+        #     rospy.loginfo(drone_id)
+        #     rospy.loginfo(plt_index)
+        #
+        #     q = (trans.transform.rotation.x,
+        #          trans.transform.rotation.y,
+        #          trans.transform.rotation.z,
+        #          trans.transform.rotation.w)
+        #
+        #     euler = euler_from_quaternion(q, axes='sxyz')
+        #
+        #     x = trans.transform.translation.x
+        #     y = trans.transform.translation.y
+        #     z = trans.transform.translation.z
+        #     roll = euler[0]
+        #     pitch = euler[1]
+        #     yaw = euler[2]
+        #
+        #     self.pos = [x, y, z, roll, pitch, yaw]
+        #     rospy.loginfo("pos: {}\n\n\n".format(self.pos))
+        #
+        #     # Store drone position and convert it from [m] to [cm]
+        #     self.drones_pos_list[drone_id] = drone_pos(rospy.Time(0),
+        #                                                self.takeofpos[0]+(x*m_to_cm),
+        #                                                self.takeofpos[1]+(y*m_to_cm),
+        #                                                self.takeofpos[2]+(z*m_to_cm), yaw, plt_index)
+        #
+        #     # Change tail to be empty if the drone is in that tail.
+        #     i, j = self.xy_to_ij(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
+        #     if self.matrix[i][j] == 0:
+        #         self.change_tail_to_empty(i, j)
+        #         self.empty_idxs.append([i, j])
+        #
+        # except:
+        #     rospy.logdebug("tf lookup -- {} not found".format(drone_id))
+        #     rospy.loginfo("Not working")
+
         # Read data from all sensors (probably 4)
         for i in range(len(point_cloud)):
             point = point_cloud[i]
             sens.append([point.x*m_to_cm, point.y*m_to_cm, point.z*m_to_cm])
-            # drone_id = point_cloud_last_timestamp.frame_id # TODO: change frame_id from "world" to cf6
-            for j in range(len(topics_arr)):
-                cur_topic = topics_arr[j]
-                if topic == cur_topic:
-                    drone_id = cur_topic.split("/")[1]
-                if sens and (drone_id in list(self.drones_pos_list.keys())):
-                    self.drones_pc_list[drone_id] = drone_pc(point_cloud_last_timestamp.stamp.secs, sens)
-                    # Update grid using the new data
-                    self.update_from_tof_sensing_list(drone_id)
+            if sens and drone_id:
+                self.drones_pc_list[drone_id] = drone_pc(point_cloud_last_timestamp.stamp.secs, sens)
+                # Update grid using the new data
+                self.update_from_tof_sensing_list(drone_id)
 
 
     def pos_parser(self, msg):
@@ -103,11 +157,12 @@ class Grid:
         pos_val = msg.values
 
         drone_id = pos_header.frame_id.split("/")[0] # Extract drone name from topic name
+        plt_index = self.drones_pos_list[drone_id].index
         # Store drone position and convert it from [m] to [cm]
         self.drones_pos_list[drone_id] = drone_pos(pos_header.stamp.secs,
-                                                   self.takeofpos[0]+(pos_val[0]*m_to_cm),
-                                                   self.takeofpos[1]+(pos_val[1]*m_to_cm),
-                                                   self.takeofpos[2]+(pos_val[2]*m_to_cm), None)
+                                                   self.takeofpos[drone_id][0]+(pos_val[0]*m_to_cm),
+                                                   self.takeofpos[drone_id][1]+(pos_val[1]*m_to_cm),
+                                                   self.takeofpos[drone_id][2]+(pos_val[2]*m_to_cm), None, plt_index)
 
         # Change tail to be empty if the drone is in that tail.
         i, j = self.xy_to_ij(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
@@ -218,4 +273,11 @@ if __name__ == "__main__":
     polygon_border = [(x_lim[0], y_lim[0]), (x_lim[1], y_lim[0]), (x_lim[1], y_lim[1]),
                       (x_lim[0], y_lim[1]), (x_lim[0], y_lim[0])]
 
-    grid = Grid(polygon_border, res=resolution, nDrones=nDrones)
+    initial_pos_dict = dict()
+    for iDrone in range(nDrones):
+        curr_drone_name = rospy.get_param("~drone_name_{}".format(iDrone))
+        curr_drone_takeoff_pos = rospy.get_param("~drone_takeoff_position_{}".format(iDrone))
+        exec ("curr_drone_takeoff_pos = {}".format(curr_drone_takeoff_pos))
+        initial_pos_dict[curr_drone_name] = curr_drone_takeoff_pos
+
+    grid = Grid(polygon_border, resolution, nDrones, initial_pos_dict)

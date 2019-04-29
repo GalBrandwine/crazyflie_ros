@@ -41,8 +41,8 @@ A few notes:
     <arg name="initZ2" default="0"/>
 
     <!-- for third CF    -->
-    <arg name="uri3" default="radio://0/120/2M/E7E7E7E708"/>
-    <arg name="frame3" default="cf8"/>
+    <arg name="uri3" default="radio://0/120/2M/E7E7E7E703"/>
+    <arg name="frame3" default="cf3"/>
     <arg name="frame3_active" default="0"/>
     <arg name="traj_list3" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX3" default="0.0"/>
@@ -396,7 +396,9 @@ A few notes:
 <!---->
             <param name="nDrones" value="$(arg nDrones)"/>
             <param name="drone_name_0" value="$(arg frame2)"/>
+            <param name="drone_takeoff_position_0" value="[180, 180, 0]"/>
             <param name="drone_name_1" value="$(arg frame3)"/>
+            <param name="drone_takeoff_position_1" value="[60, 60, 0]"/>
         </node>
 <!---->
         <node name="display_manager" pkg="crazyflie_demo" type="Display.py" output="screen">
