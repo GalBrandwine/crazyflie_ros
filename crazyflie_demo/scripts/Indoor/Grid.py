@@ -69,17 +69,18 @@ class Grid:
             self.pos_sub = rospy.Subscriber("/{}/log_pos".format(drone_name), GenericLogData,
                                             self.pos_parser)
             self.pc_sub = rospy.Subscriber("/{}/point_cloud".format(drone_name), PointCloud2,
-                                           self.point_cloud_parser)
+                                           callback = self.point_cloud_parser, callback_args = "/{}/point_cloud".format(drone_name))
 
 
         # Start occupancy grid publisher
         grid_pub_thread = threading.Thread(name='grid_pub_thread', target=self.init_grid_publisher)
         grid_pub_thread.start()
 
-    def point_cloud_parser(self, msg):
+    def point_cloud_parser(self, msg, topic):
         """Each publicitation, theres' an array of 10 points."""
         point_cloud_last_timestamp = msg.header
         point_cloud = pc2.read_points_list(msg, skip_nans=True)
+        topics_arr = ["/cf6/point_cloud", "/cf8/point_cloud"]
 
         sens = []
         # Read data from all sensors (probably 4)
@@ -87,11 +88,14 @@ class Grid:
             point = point_cloud[i]
             sens.append([point.x*m_to_cm, point.y*m_to_cm, point.z*m_to_cm])
             # drone_id = point_cloud_last_timestamp.frame_id # TODO: change frame_id from "world" to cf6
-            drone_id = "cf6"
-            if sens and drone_id in list(self.drones_pos_list.keys()):
-                self.drones_pc_list[drone_id] = drone_pc(point_cloud_last_timestamp.stamp.secs, sens)
-                # Update grid using the new data
-                self.update_from_tof_sensing_list(drone_id)
+            for j in range(len(topics_arr)):
+                cur_topic = topics_arr[j]
+                if topic == cur_topic:
+                    drone_id = cur_topic.split("/")[1]
+                if sens and (drone_id in list(self.drones_pos_list.keys())):
+                    self.drones_pc_list[drone_id] = drone_pc(point_cloud_last_timestamp.stamp.secs, sens)
+                    # Update grid using the new data
+                    self.update_from_tof_sensing_list(drone_id)
 
 
     def pos_parser(self, msg):
