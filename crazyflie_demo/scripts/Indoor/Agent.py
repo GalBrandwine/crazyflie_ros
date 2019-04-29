@@ -1,6 +1,5 @@
+#!/usr/bin/env python
 import numpy as np
-import rospy
-from std_msgs.msg import String
 
 class Agent:
 
@@ -28,8 +27,7 @@ class Agent:
         self.x_lim = x_lim
         self.y_lim = y_lim
         self.res = res
-        self.attempts_cnt = 0
-        self.max_attemps = 3
+        self.dist_factor = 3
 
 
     def update_current_state(self, current_pos, current_heading):
@@ -50,23 +48,28 @@ class Agent:
 
     def Dynam_Search_in_maze(self, NeighborsPosList, matrix):
 
-        max_count_val = 15
+        max_count_val = 10
         break_counter = 0
         vec = np.zeros(2)
         flag = False
         as_flag = False
 
-        try:
-            vec = [self.astar_path[0][0]-self.current_pos[0][0],self.astar_path[0][1]-self.current_pos[0][1]]
-            as_flag = True
-        except:
+        if self.astar_path == []:
             vec = [self.next_pos[0][0] - self.current_pos[0][0], self.next_pos[0][1] - self.current_pos[0][1]]
+        else:
+            vec = [self.astar_path[0][0] - self.current_pos[0][0], self.astar_path[0][1] - self.current_pos[0][1]]
+            as_flag = True
+
+        if self.astar_path != [] and np.linalg.norm(np.subtract(self.current_pos[0], self.next_pos[0])) > self.dist_factor * self.step_noise_size\
+                and self.is_step_legal(self.current_pos, [self.next_pos[0][0]-self.current_pos[0][0],self.next_pos[0][1]-self.current_pos[0][1]], matrix):
+            vec = [self.next_pos[0][0] - self.current_pos[0][0], self.next_pos[0][1] - self.current_pos[0][1]]
+
         while not flag and break_counter < max_count_val:
             break_counter = break_counter + 1
             step = self.step_noise_size * ([0.5, 0.5] - np.random.rand(2)) + vec
             if self.is_step_legal(self.current_pos, step, matrix):
                 flag = True
-                if np.random.rand(1) < 0.8:
+                if np.random.rand(1) < 0:#0.8
                     for neighbor_pos in NeighborsPosList:
                         if self.outOfLimit_Ando(neighbor_pos, step):
                             flag = False
@@ -79,7 +82,8 @@ class Agent:
 
         if break_counter < max_count_val:
             self.next_pos = self.current_pos + step
-            if as_flag and self.astar_path != 0:
+            self.attempts_cnt = 0
+            if as_flag and self.astar_path != []:
                 del self.astar_path[0]
 
 

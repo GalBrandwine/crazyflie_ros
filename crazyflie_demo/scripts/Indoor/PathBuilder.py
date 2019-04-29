@@ -1,9 +1,7 @@
+#!/usr/bin/env python
 import math
 import numpy as np
 from bresenham import bresenham
-import copy
-import rospy
-from std_msgs.msg import String
 
 class Node:
 
@@ -244,12 +242,12 @@ def build_trj(pos, scanning_range, x_lim, y_lim, res, matrix, temp_corner_points
 
         astar_movement, corner_idxs = astar.PlanningAlg(pos[0][0], pos[0][1], gx, gy, temp_corner_points_list_xy)
 
-        if len(corner_idxs) >= 3:
-            for ci in corner_idxs:
-                if ci != -1:
-                    temp_corner_points_list_xy[ci] = []
-
-            temp_corner_points_list_xy = filter(None, temp_corner_points_list_xy)
+        # if len(corner_idxs) >= 3:
+        #     for ci in corner_idxs:
+        #         if ci != -1:
+        #             temp_corner_points_list_xy[ci] = []
+        #
+        #     temp_corner_points_list_xy = filter(None, temp_corner_points_list_xy)
 
         Astar_Movement.append(astar_movement[1:])
     else:

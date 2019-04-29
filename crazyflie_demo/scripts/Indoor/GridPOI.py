@@ -1,8 +1,7 @@
-import matplotlib
+#!/usr/bin/env python
 import numpy as np
-import rospy
-from std_msgs.msg import String
-from nav_msgs.msg import OccupancyGrid
+from scipy import ndimage
+import copy
 
 class GridPOI:
 
@@ -16,13 +15,18 @@ class GridPOI:
         self.corner_points_list_xy = []
         self.wall_idxs_ij = []
         self.wall_idxs_xy = []
-
-        self.grid_sub = rospy.Subscriber('/indoor/occupancy_grid_topic', OccupancyGrid, self.grid_parser)
-
-    def grid_parser(self, msg):
-        rospy.loginfo(msg)
+        self.convstrct = np.ones([3, 3])
 
     def find_POI(self, matrix):
+        # temp_mat = copy.deepcopy(matrix)
+        # bin_matrix = ndimage.binary_dilation(temp_mat, self.convstrct).astype(temp_mat.dtype)
+
+        # import matplotlib.pyplot as plt
+        # fig = plt.figure(45645)
+        # ax_1, ax_2 = fig.subplots(1, 2)
+        # ax_1.imshow(np.transpose(matrix), origin='lower')
+        # ax_2.imshow(np.transpose(bin_matrix), origin='lower')
+
         self.interesting_points_list_ij, self.interesting_points_list_xy = self.find_interesting_points(matrix)
         self.corner_points_list_ij, self.corner_points_list_xy = self.find_corner_points(matrix)
         self.wall_idxs_ij = self.complete_wall_in_corners(matrix)
@@ -51,9 +55,23 @@ class GridPOI:
         tail_list = list()
         for i in range(1, matrix.__len__()-1):
             for j in range(1, matrix[i].__len__()-1):
-                if self.is_tail_in_corner(i, j, matrix):
-                    tail_list.append([i, j])
+                cflag, add_num = self.is_tail_in_corner(i, j, matrix)
+                if cflag:
+                    cidx = list(np.add([i, j], add_num))
+                    if matrix[cidx[0]][cidx[1]] == 1:
+                        tail_list.append(cidx)
+                    else:
+                        tail_list.append([i, j])
         return tail_list
+
+
+    # def find_corners_tails(self, matrix):
+    #     tail_list = list()
+    #     for i in range(1, matrix.__len__()-1):
+    #         for j in range(1, matrix[i].__len__()-1):
+    #             if self.is_tail_in_corner(i, j, matrix):
+    #                 tail_list.append([i, j])
+    #     return tail_list
 
 
     def find_interesting_tail(self, matrix):
@@ -90,14 +108,30 @@ class GridPOI:
             return False
 
 
+    # def is_tail_in_corner(self, i, j, matrix):
+    #     if matrix[i][j] == 1:
+    #         if (matrix[i + 1][j] == 1 and matrix[i][j + 1] == 1 and matrix[i + 1][j + 1] != 1 ) or (
+    #                 matrix[i + 1][j] == 1 and matrix[i][j - 1] == 1 and matrix[i + 1][j - 1] != 1 ) or (
+    #                 matrix[i - 1][j] == 1 and matrix[i][j - 1] == 1 and matrix[i - 1][j - 1] != 1 ) or (
+    #                 matrix[i - 1][j] == 1 and matrix[i][j + 1] == 1 and matrix[i - 1][j + 1] != 1 ):
+    #             return True
+    #     return False
+
+
     def is_tail_in_corner(self, i, j, matrix):
         if matrix[i][j] == 1:
-            if (matrix[i + 1][j] == 1 and matrix[i][j + 1] == 1 and matrix[i + 1][j + 1] != 1 ) or (
-                    matrix[i + 1][j] == 1 and matrix[i][j - 1] == 1 and matrix[i + 1][j - 1] != 1 ) or (
-                    matrix[i - 1][j] == 1 and matrix[i][j - 1] == 1 and matrix[i - 1][j - 1] != 1 ) or (
-                    matrix[i - 1][j] == 1 and matrix[i][j + 1] == 1 and matrix[i - 1][j + 1] != 1 ):
-                return True
-        return False
+            if matrix[i + 1][j] == 1 and matrix[i][j + 1] == 1 and matrix[i + 1][j + 1] != 1:
+                return True, [-1, -1]
+            elif matrix[i + 1][j] == 1 and matrix[i][j - 1] == 1 and matrix[i + 1][j - 1] != 1:
+                return True, [-1, 1]
+            elif matrix[i - 1][j] == 1 and matrix[i][j - 1] == 1 and matrix[i - 1][j - 1] != 1:
+                return True, [1, 1]
+            elif matrix[i - 1][j] == 1 and matrix[i][j + 1] == 1 and matrix[i - 1][j + 1] != 1:
+                return True, [1, -1]
+            else:
+                return False, []
+        else:
+            return False, []
 
 
     def xy_to_ij(self, x, y):
@@ -184,11 +218,3 @@ class GridPOI:
         return wall_idxs_ij
 
 
-
-if __name__ == "__main__":
-
-    rospy.init_node("grid_insights")
-
-    grid = GridPOI()
-
-    rospy.spin()
