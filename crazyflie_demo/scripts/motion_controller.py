@@ -10,7 +10,7 @@ import sys
 import termios
 import time
 import tty
-from math import atan2, sqrt, pow
+from math import atan2, sqrt, pow, pi, sin, cos
 
 import crazyflie
 import rospy
@@ -110,17 +110,44 @@ def check_direction():
         # rospy.logdebug("in check_direction. returning: [{},{}]".format(heading, duration))
         return [heading, duration]
     else:
-        rospy.logerr("in check_direction: trans is None")
+        rospy.logerr("in check_direction: transform is None")
         return [0, duration]
 
 
-# def avoid_collision():
-#     global heading
-#     global ranges
-#     result = 0
-#     if -3/4*pi < heading and heading > -1/4*pi:
-#         if
+def collision_direction_wc(collision_sensor_angle):
+    global prefix
+    trans = None
+    try:
+        trans = tfBuffer.lookup_transform(prefix, 'world', rospy.Time(0))
+    except:
+        rospy.logwarn("tf lookup -- {} not found".format(prefix))
+    if trans != None:
+        q = (trans.transform.rotation.x,
+             trans.transform.rotation.y,
+             trans.transform.rotation.z,
+             trans.transform.rotation.w)
 
+        euler = euler_from_quaternion(q, axes='sxyz')
+        yaw = euler[2]
+
+        collision_angle_wc=collision_sensor_angle + yaw
+        if collision_angle_wc < -2*pi :
+            collision_angle_wc += 2*pi
+
+        if collision_angle_wc > 2*pi :
+            collision_angle_wc -= 2*pi
+
+        evade_distance=0.1 #distance to go opposite direction of wall - meters
+        y = evade_distance*  sin(collision_angle_wc)
+        x = evade_distance * cos(collision_angle_wc)
+        avoid_goal = [-x,y]
+        rospy.loginfo('collision at angle LC')
+        rospy.loginfo(collision_sensor_angle)
+        rospy.loginfo('collision at angle WC')
+        rospy.loginfo(collision_angle_wc)
+        rospy.loginfo('avoidance goal WC')
+        rospy.loginfo(avoid_goal)
+        return avoid_goal
 
 def get_ranges(msg):
     global front, back, up, left, right, zrange, ranges
@@ -134,15 +161,6 @@ def get_ranges(msg):
     # zrange = msg.values[5] / 1000
     ranges = [back, left, front, right, up]
 
-def getch():
-    fd = sys.stdin.fileno()
-    old_settings = termios.tcgetattr(fd)
-    try:
-        tty.setraw(sys.stdin.fileno())
-        ch = sys.stdin.read(1)
-    finally:
-        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-    return ch
 
 
 def get_xyz_yaw(cj_injection_message):
@@ -218,22 +236,33 @@ def handler(cf_handler):
 
                 if ranges[2] < dist_threshold:
                     rospy.loginfo("front collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.8, relative=True)
+                    # cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.8, relative=True)
                     last_collision=rospy.Time.now()
+                    [x,y]=collision_direction_wc(0)
+                    cf_handler.goTo(goal=[x, y, 0.0], yaw=0, duration=0.8, relative=True)
+
                 elif ranges[0] < dist_threshold:
                     rospy.loginfo("back collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.8, relative=True)
+                    # cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.8, relative=True)
                     last_collision=rospy.Time.now()
+                    [x,y]=collision_direction_wc(-1*pi)
+                    cf_handler.goTo(goal=[x, y, 0.0], yaw=0, duration=0.8, relative=True)
+
 
                 elif ranges[3] < dist_threshold:
                     rospy.loginfo("right collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.8, relative=True)
+                    # cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.8, relative=True)
                     last_collision=rospy.Time.now()
+                    [x,y]=collision_direction_wc(0.5 * pi)
+                    cf_handler.goTo(goal=[x, y, 0.0], yaw=0, duration=0.8, relative=True)
+
 
                 elif ranges[1] < dist_threshold:
                     rospy.loginfo("left collision avoidance")
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.8, relative=True)
+                    # cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.8, relative=True)
                     last_collision=rospy.Time.now()
+                    [x,y]=collision_direction_wc(-0.5 * pi)
+                    cf_handler.goTo(goal=[x, y, 0.0], yaw=0, duration=0.8, relative=True)
 
                 elif ranges[4] < dist_threshold:
                     rospy.loginfo("top collision avoidance")
@@ -244,14 +273,15 @@ def handler(cf_handler):
 
             if keyboard_flag is True:
                 keyboard_flag = False
+                kb_step=0.25 #meters each step
                 if kb_x > 0:
-                    cf_handler.goTo(goal=[0.25, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[kb_step, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
                 elif kb_x < 0:
-                    cf_handler.goTo(goal=[-0.25, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[-1*kb_step, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
                 elif kb_yaw < 0:
-                    cf_handler.goTo(goal=[0.0, -0.25, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[0.0, -1*kb_step, 0.0], yaw=0, duration=def_duration, relative=True)
                 elif kb_yaw > 0:
-                    cf_handler.goTo(goal=[0.0, 0.25, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[0.0, kb_step, 0.0], yaw=0, duration=def_duration, relative=True)
                 elif kb_y > 0:
                     cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=1.5708, duration=def_duration + 1.0,
                                     relative=True)  # slow down yaw rotation
@@ -290,8 +320,12 @@ def handler(cf_handler):
 
     except Exception as e:
         cf_handler.stop()
-        rospy.loginfo('******* keyboard input exception *******')
+        rospy.loginfo('*******  exception *******')
         rospy.loginfo(e)
+
+    finally:
+        rospy.loginfo('******* EXITING *******')
+        cf_handler.stop()
 
 
 if __name__ == '__main__':

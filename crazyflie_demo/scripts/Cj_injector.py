@@ -25,7 +25,6 @@ def to_pose_stamped(x, y, z, roll, pitch, yaw):
 
     return pose
 
-
 class DroneCjInjector:
     """Class for Cj injection per drone. """
 
@@ -50,8 +49,10 @@ def injector(drone_injector, path):
         pitch = 0
         yaw = point[4]
         pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
-        drone_injector.Cj_injector_pub.publish(pose)
-        rospy.sleep(time_delay)
+        start_time= rospy.get_time()
+        while (rospy.get_time() - start_time < time_delay) :  #re-send point every X sec to reduce reception problems
+            drone_injector.Cj_injector_pub.publish(pose)
+            rospy.sleep(0.99)
 
 
 class DroneInjector:
@@ -162,58 +163,41 @@ class DroneInjector:
         threads = []
         step = 0.30  # m
         #                       [t, ----x---, ---y---, --z--, yaw]
-        path_maze_right_side = [[6, 0 * step, 6 * step, 0.35, 0],  # start in (0,180,0.35)
-                                [2, 0 * step, 7 * step, 0.35, 0],  # proceed in  corridor
-                                [2, 1 * step, 7 * step, 0.35, 0],  #
-                                [2, 2 * step, 7 * step, 0.35, 0],  #
-                                [2, 3 * step, 7 * step, 0.35, 0],  #
-                                [2, 4 * step, 7 * step, 0.35, 0],  #
-                                [2, 5 * step, 7 * step, 0.35, 0],  #
-                                [2, 6 * step, 7 * step, 0.35, 0],  #
-                                [2, 6.5 * step, 7 * step, 0.35, 0],  #
-                                [4, 6.5 * step, 7 * step, 0.35, -90],  # rotate right in place
-                                [2, 6.5 * step, 5 * step, 0.35, -90],  # enter into first room
-                                [4, 6.5 * step, 5 * step, 0.35, -180],  # enter into first room
-                                [2, 4 * step, 5 * step, 0.35, -180],    #
-                                [4, 3.5 * step, 5 * step, 0.35, -90],   # scan
-                                [4, 3.5 * step, 5 * step, 0.35, 0],  #
-                                [4, 3.5 * step, 5 * step, 0.35, 90],    #
-                                [4, 3.5 * step, 5 * step, 0.35, 0],  #
-                                [4, 3.5 * step, 5 * step, 0.35, -90],   #
-                                [2, 3.5 * step, 4 * step, 0.35, -90],  #
-                                [2, 3.5 * step, 3 * step, 0.35, -90],  #
-                                [2, 3.5 * step, 1 * step, 0.35, -90],  #
-                                [4, 3.5 * step, 1 * step, 0.35, 0],  # turn 90 left
-                                [2, 4 * step, 1 * step, 0.35, 0],  #
-                                [2, 5 * step, 1 * step, 0.35, 0],  #
-                                [2, 6.5 * step, 1 * step, 0.35, 0],  #
-                                [4, 6.5 * step, 1 * step, 0.35, 90],  # turn 90 left
-                                [2, 6.5 * step, 2 * step, 0.35, 90],  #
-                                [2, 6.5 * step, 4 * step, 0.35, 90],  #
-                                [2, 6.5 * step, 6 * step, 0.35, 90],  #
+        path_maze_right_side = [[3, 0 * step, 6 * step, 0.35, 0],  # start in (0,180,0.35)
+                                [6, 3 * step, 6 * step, 0.35, 0],
+                                [6, 3 * step, 3 * step, 0.35, 0],
+                                [4, 5.5 * step, 3 * step, 0.35, 0],
+                                [4, 5.5 * step, 5 * step, 0.35, 0],
+                                [4, 5.5 * step, 5 * step, 0.35, 90],
+                                [6, 8 * step, 5 * step, 0.35, 90],
+                                [6, 11 * step, 5 * step, 0.35, 90],
+                                [4, 11 * step, 7 * step, 0.35, 90],
+                                [4, 11 * step, 7 * step, 0.35, 0],
+                                [8, 7 * step, 7 * step, 0.35, 0],
+                                [8, 3 * step, 7 * step, 0.35, 0],
+                                [6, 0 * step, 7 * step, 0.35, 0],
+                                [2, 0 * step, 6 * step, 0.35, 0],
                                 ]
 
-        path_maze_left_side = [[2, 0 * step, 8 * step, 0.35, 0],  # start in (0,240,0.35)
-                               [2, 0 * step, 7 * step, 0.35, 0],
-                               [2, 1 * step, 7 * step, 0.35, 0],
-                               [2, 2 * step, 7 * step, 0.35, 0],
-                               [2, 3 * step, 7 * step, 0.35, 0],
-                               [2, 4 * step, 7 * step, 0.35, 0],
-                               [2, 5 * step, 7 * step, 0.35, 0],
-                               [2, 6 * step, 7 * step, 0.35, 0],
-                               [2, 7 * step, 7 * step, 0.35, 0],
-                               [2, 8 * step, 7 * step, 0.35, 0],
-                               [2, 9 * step, 7 * step, 0.35, 0],
-                               [2, 9 * step, 8 * step, 0.35, 0],
-                               [2, 9 * step, 9 * step, 0.35, 0],
-                               [3, 9 * step, 10 * step, 0.35, 0],
-                               [2, 9 * step, 11 * step, 0.35, 0],
-                               [2, 9 * step, 12 * step, 0.35, 0],
-                               [2, 8 * step, 12 * step, 0.35, 0],
-                               [2, 7 * step, 12 * step, 0.35, 0],
-                               [2, 6 * step, 12 * step, 0.35, 0],
-                               [2, 5 * step, 12 * step, 0.35, 0],
-                               [3.5, 5 * step, 12 * step, 0.35, 180],
+        path_maze_left_side = [[1, 0 * step, 8 * step, 0.35, 0],  # start in (0,240,0.35)
+                               [6, 4 * step, 8 * step, 0.35, 0],
+                               [6, 8 * step, 8 * step, 0.35, 0],
+                               [6, 8 * step, 11 * step, 0.35, 0],
+                               [3, 8 * step, 11 * step, 0.35, 90],
+                               [4, 8 * step, 14 * step, 0.35, 90],
+                               [6, 11 * step, 14 * step, 0.35, 90],
+                               [4, 11 * step, 11 * step, 0.35, 90],
+                               [4, 11 * step, 11 * step, 0.35, 180],
+                               [4, 11 * step, 14 * step, 0.35, 180],
+                               [6, 7 * step, 14 * step, 0.35, 180],
+                               [4, 7 * step, 11 * step, 0.35, 180],
+                               [6, 4 * step, 11 * step, 0.35, 180],
+                               [5, 4 * step, 11 * step, 0.35, 0],
+                               [6, 7 * step, 11 * step, 0.35, 0],
+                               [6, 7 * step, 8 * step, 0.35, 0],
+                               [6, 4 * step, 8 * step, 0.35, 0],
+                               [8, 0 * step, 8 * step, 0.35, 0],
+
                                ]
 
         path1 = [[2, 0.3, 0.6, 0.35, 0],
