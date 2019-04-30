@@ -30,10 +30,11 @@ class Display_manager:
         mgr = plt.get_current_fig_manager()
         # mgr.full_screen_toggle()
 
-        ax_env, ax_grid = self.fig.subplots(1, 2)
+        # ax_env, ax_grid = self.fig.subplots(1, 2)
+        ax_grid = self.fig.subplots(1, 1)
         plt.axis([self.x_lim[0], self.x_lim[1], self.y_lim[0], self.y_lim[1]])
 
-        self.ax_env = ax_env
+        # self.ax_env = ax_env
         self.ax_grid = ax_grid
 
         self.tail_handles = list()
@@ -41,7 +42,7 @@ class Display_manager:
         self.interest_plot_handle = list()
 
         self.plot_grid()
-        self.plot_obs_array()
+        # self.plot_obs_array()
         self.topics_arr = []
         for iDrone in range(self.nDrones):
             drone_name = rospy.get_param("~drone_name_{}".format(iDrone))
@@ -70,8 +71,8 @@ class Display_manager:
         # self.prev_corner_points = []
 
         for pos in init_pos:
-            plot_handle_env, = ax_env.plot(pos[0], pos[1], 'ob')
-            self.plot_handle_envs.append(plot_handle_env, )
+            # plot_handle_env, = ax_env.plot(pos[0], pos[1], 'ob')
+            # self.plot_handle_envs.append(plot_handle_env, )
             plot_handle_grid, = ax_grid.plot(pos[0], pos[1], 'ob')
             self.plot_handle_grids.append(plot_handle_grid, )
             # plot_handle_env_vt, = ax_env.plot(pos[0], pos[1], 'or')
@@ -227,7 +228,7 @@ class Display_manager:
                            , (pol_center[0] + self.res / 2, pol_center[1] + self.res / 2),
                         (pol_center[0] + self.res / 2, pol_center[1] - self.res / 2)
                            , (pol_center[0] - self.res / 2, pol_center[1] - self.res / 2)])
-        return self.ax_grid.add_patch(PolygonPatch(tail, facecolor='gray'))
+        return self.ax_grid.add_patch(PolygonPatch(tail, facecolor='gray')) # edgecolor='none'
 
     def plot_grid(self):
         for i in range(0, self.matrix.__len__()):
@@ -268,7 +269,7 @@ class Display_manager:
         return x, y
 
     def update_drone_plot(self, real_target, virtual_target, list_idx):
-        self.plot_handle_envs[list_idx].set_data(real_target[0], real_target[1])
+        # self.plot_handle_envs[list_idx].set_data(real_target[0], real_target[1])
         self.plot_handle_grids[list_idx].set_data(real_target[0], real_target[1])
         # self.plot_handle_envs_vt[drone_idx].set_data(virtual_target[0][0], virtual_target[0][1])
         # self.plot_handle_grids_vt[drone_idx].set_data(virtual_target[0][0], virtual_target[0][1])

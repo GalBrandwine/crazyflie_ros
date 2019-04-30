@@ -68,6 +68,8 @@ class Grid:
             drone_name = rospy.get_param("~drone_name_{}".format(iDrone))
             self.topics_arr.append("/{}/point_cloud".format(drone_name))
         self.drone_name_arr = []
+        self.floor_thr = 30
+        self.matrix_cnt = self.matrix
 
         for i, id in enumerate(initial_pos_dict):
             self.drones_pos_list[id] = drone_pos(time=0, x=initial_pos_dict[id][0],
@@ -142,7 +144,9 @@ class Grid:
         # Read data from all sensors (probably 4)
         for i in range(len(point_cloud)):
             point = point_cloud[i]
-            sens.append([point.x*m_to_cm, point.y*m_to_cm, point.z*m_to_cm])
+            # rospy.loginfo([point.z*m_to_cm])
+            if point.z*m_to_cm > self.floor_thr:
+                sens.append([point.x*m_to_cm, point.y*m_to_cm, point.z*m_to_cm])
             if sens and drone_id:
                 self.drones_pc_list[drone_id] = drone_pc(point_cloud_last_timestamp.stamp.secs, sens)
                 # Update grid using the new data
