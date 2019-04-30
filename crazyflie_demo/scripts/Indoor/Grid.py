@@ -65,7 +65,10 @@ class Grid:
         self.pc_lim = 200
         self.takeofpos = initial_pos_dict
         self.initpos = [0, 0, 0]  # Reference point
-        self.topics_arr = ["/cf6/point_cloud", "/cf8/point_cloud"]
+        self.topics_arr = []
+        for iDrone in range(self.nDrones):
+            drone_name = rospy.get_param("~drone_name_{}".format(iDrone))
+            self.topics_arr.append("/{}/point_cloud".format(drone_name))
         self.drone_name_arr = []
 
         for i, id in enumerate(initial_pos_dict):
@@ -77,8 +80,8 @@ class Grid:
             # Init listeners
             drone_name = rospy.get_param("~drone_name_{}".format(iDrone))
             self.drone_name_arr.append(drone_name)
-            self.pos_sub = rospy.Subscriber("/{}/log_pos".format(drone_name), GenericLogData,
-                                            callback = self.pos_parser)
+            # self.pos_sub = rospy.Subscriber("/{}/log_pos".format(drone_name), GenericLogData,
+            #                                 callback = self.pos_parser)
             self.pc_sub = rospy.Subscriber("/{}/point_cloud".format(drone_name), PointCloud2,
                                            callback = self.point_cloud_parser, callback_args = "/{}/point_cloud".format(drone_name))
 
@@ -102,45 +105,41 @@ class Grid:
             if topic == cur_topic:
                 cur_topic_list = cur_topic.split("/")
                 drone_id = [s for s in cur_topic_list if "cf" in s][0]
-                plt_index = j
+                plt_index = self.drones_pos_list[drone_id].index
 
-        # try:
-        #     trans = self.tfBuffer.lookup_transform('world', drone_id, rospy.Time(0))
-        #     rospy.loginfo(drone_id)
-        #     rospy.loginfo(plt_index)
-        #
-        #     q = (trans.transform.rotation.x,
-        #          trans.transform.rotation.y,
-        #          trans.transform.rotation.z,
-        #          trans.transform.rotation.w)
-        #
-        #     euler = euler_from_quaternion(q, axes='sxyz')
-        #
-        #     x = trans.transform.translation.x
-        #     y = trans.transform.translation.y
-        #     z = trans.transform.translation.z
-        #     roll = euler[0]
-        #     pitch = euler[1]
-        #     yaw = euler[2]
-        #
-        #     self.pos = [x, y, z, roll, pitch, yaw]
-        #     rospy.loginfo("pos: {}\n\n\n".format(self.pos))
-        #
-        #     # Store drone position and convert it from [m] to [cm]
-        #     self.drones_pos_list[drone_id] = drone_pos(rospy.Time(0),
-        #                                                self.takeofpos[0]+(x*m_to_cm),
-        #                                                self.takeofpos[1]+(y*m_to_cm),
-        #                                                self.takeofpos[2]+(z*m_to_cm), yaw, plt_index)
-        #
-        #     # Change tail to be empty if the drone is in that tail.
-        #     i, j = self.xy_to_ij(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
-        #     if self.matrix[i][j] == 0:
-        #         self.change_tail_to_empty(i, j)
-        #         self.empty_idxs.append([i, j])
-        #
-        # except:
-        #     rospy.logdebug("tf lookup -- {} not found".format(drone_id))
-        #     rospy.loginfo("Not working")
+
+        try:
+            trans = self.tfBuffer.lookup_transform('world', drone_id, rospy.Time(0))
+
+            q = (trans.transform.rotation.x,
+                 trans.transform.rotation.y,
+                 trans.transform.rotation.z,
+                 trans.transform.rotation.w)
+
+            euler = euler_from_quaternion(q, axes='sxyz')
+
+            x = trans.transform.translation.x
+            y = trans.transform.translation.y
+            z = trans.transform.translation.z
+            roll = euler[0]
+            pitch = euler[1]
+            yaw = euler[2]
+
+            self.pos = [x, y, z, roll, pitch, yaw]
+            # rospy.loginfo("pos in Grid: {}\n".format(self.pos))
+
+            # Store drone position and convert it from [m] to [cm]
+            self.drones_pos_list[drone_id] = drone_pos(point_cloud_last_timestamp.stamp.secs, x*m_to_cm, y*m_to_cm, z*m_to_cm, yaw, plt_index)
+
+            # Change tail to be empty if the drone is in that tail.
+            i, j = self.xy_to_ij(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
+            if self.matrix[i][j] == 0:
+                self.change_tail_to_empty(i, j)
+                self.empty_idxs.append([i, j])
+
+        except:
+            rospy.logdebug("tf lookup -- {} not found".format(drone_id))
+            # print("after PC gets except")
 
         # Read data from all sensors (probably 4)
         for i in range(len(point_cloud)):
