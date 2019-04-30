@@ -67,11 +67,20 @@ A few notes:
     <arg name="initY5" default="1.8"/>
     <arg name="initZ5" default="0"/>
 
+            <!-- for third CF    -->
+    <arg name="uri6" default="radio://0/120/2M/E7E7E7E701"/>
+    <arg name="frame6" default="cf1"/>
+    <arg name="frame6_active" default="0"/>
+    <arg name="traj_list6" default="[$(arg traj1),$(arg traj2)]"/>
+    <arg name="initX6" default="0.0"/>
+    <arg name="initY6" default="1.8"/>
+    <arg name="initZ6" default="0"/>
+
     <!-- arguments for indoor mapping  -->
     <arg name="x_min" default="0"/>
-    <arg name="x_max" default="450"/> <!-- 250 -->
+    <arg name="x_max" default="350"/> <!-- 250 -->
     <arg name="y_min" default="0"/>
-    <arg name="y_max" default="450"/> <!-- 250 -->
+    <arg name="y_max" default="350"/> <!-- 250 -->
     <arg name="env_lim" default="[$(arg x_min), $(arg x_max), $(arg y_min), $(arg y_max)]"/>
     <arg name="resolution" default="10"/>
     <arg name="env_space" default="50"/>
@@ -406,8 +415,11 @@ A few notes:
             <param name="nDrones" value="$(arg nDrones)"/>
             <param name="drone_name_0" value="$(arg frame5)"/>
             <param name="drone_takeoff_position_0" value="[0, 180, 0]"/>
-<!--            <param name="drone_name_1" value="$(arg frame3)"/>-->
-<!--            <param name="drone_takeoff_position_1" value="[60, 60, 0]"/>-->
+
+<!--            <param name="drone_name_0" value="$(arg frame6)"/>-->
+<!--            <param name="drone_takeoff_position_0" value="[0, 180, 0]"/>-->
+<!--            <param name="drone_name_1" value="$(arg frame5)"/>-->
+<!--            <param name="drone_takeoff_position_1" value="[0, 240, 0]"/>-->
         </node>
 <!---->
         <node name="display_manager" pkg="crazyflie_demo" type="Display.py" output="screen">
@@ -424,8 +436,11 @@ A few notes:
             <param name="nDrones" value="$(arg nDrones)"/>
             <param name="drone_name_0" value="$(arg frame5)"/>
             <param name="drone_takeoff_position_0" value="[0, 180, 0]"/>
-<!--            <param name="drone_name_1" value="$(arg frame3)"/>-->
-<!--            <param name="drone_takeoff_position_1" value="[60, 60, 0]"/>-->
+
+<!--            <param name="drone_name_0" value="$(arg frame6)"/>-->
+<!--            <param name="drone_takeoff_position_0" value="[0, 180, 0]"/>-->
+<!--            <param name="drone_name_1" value="$(arg frame5)"/>-->
+<!--            <param name="drone_takeoff_position_1" value="[0, 240, 0]"/>-->
         </node>
     </group>
 
