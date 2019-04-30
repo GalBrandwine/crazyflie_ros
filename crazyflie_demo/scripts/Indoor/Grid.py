@@ -70,8 +70,8 @@ class Grid:
             drone_name = rospy.get_param("~drone_name_{}".format(iDrone))
             self.topics_arr.append("/{}/point_cloud".format(drone_name))
         self.drone_name_arr = []
-        self.floor_thr = 30
-        self.matrix_cnt = self.matrix
+        self.floor_thr = 32
+        self.sens_limit = 100
 
         for i, id in enumerate(initial_pos_dict):
             self.drones_pos_list[id] = drone_pos(time=0, x=initial_pos_dict[id][0],
@@ -246,12 +246,12 @@ class Grid:
             i, j = self.xy_to_ij(xs[ind], ys[ind])
             if 0 > i or i >= self.matrix.shape[0] or 0 > j or j >= self.matrix.shape[1]:
                 return
-            if self.matrix[i][j] == 0:
+            if self.matrix[i][j] == 0 and np.linalg.norm(np.subtract([xs[ind], ys[ind]], sensor_pos)) < self.sens_limit:
                 self.change_tail_to_empty(i, j)
                 self.empty_idxs.append([i, j])
         d = np.subtract(tof_sensing_pos, sensor_pos)
         norm_d = np.linalg.norm(d)
-        if norm_d > 0:
+        if norm_d > 0 and np.linalg.norm(np.subtract(tof_sensing_pos, sensor_pos)) < self.sens_limit:
             wall_pos = tof_sensing_pos + d / norm_d * self.res / 1000
             i, j = self.xy_to_ij(wall_pos[0][0], wall_pos[0][1])
             self.change_tail_to_wall(i, j)
