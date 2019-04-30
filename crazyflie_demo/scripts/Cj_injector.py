@@ -162,41 +162,42 @@ class DroneInjector:
         """
         threads = []
         step = 0.30  # m
+        step_time=1.2
         #                       [t, ----x---, ---y---, --z--, yaw]
-        path_maze_right_side = [[3, 0 * step, 6 * step, 0.35, 0],  # start in (0,180,0.35)
-                                [6, 3 * step, 6 * step, 0.35, 0],
-                                [6, 3 * step, 3 * step, 0.35, 0],
-                                [4, 5.5 * step, 3 * step, 0.35, 0],
-                                [4, 5.5 * step, 5 * step, 0.35, 0],
-                                [4, 5.5 * step, 5 * step, 0.35, 90],
-                                [6, 8 * step, 5 * step, 0.35, 90],
-                                [6, 11 * step, 5 * step, 0.35, 90],
-                                [4, 11 * step, 7 * step, 0.35, 90],
-                                [4, 11 * step, 7 * step, 0.35, 0],
-                                [8, 7 * step, 7 * step, 0.35, 0],
-                                [8, 3 * step, 7 * step, 0.35, 0],
-                                [6, 0 * step, 7 * step, 0.35, 0],
-                                [2, 0 * step, 6 * step, 0.35, 0],
+        path_maze_right_side = [[step_time, 0 * step, 6 * step, 0.35, 0],  # start in (0,180,0.35)
+                                [step_time *3 , 3 * step, 6 * step, 0.35, 0],
+                                [step_time *3, 3 * step, 3 * step, 0.35, 0],
+                                [step_time *2, 5.5 * step, 3 * step, 0.35, 0],
+                                [step_time *2 , 5.5 * step, 5 * step, 0.35, 0],
+                                [step_time *2 , 5.5 * step, 5 * step, 0.35, 90],
+                                [step_time *3, 8 * step, 5 * step, 0.35, 90],
+                                [step_time *3, 11 * step, 5 * step, 0.35, 90],
+                                [step_time *2 , 11 * step, 7 * step, 0.35, 90],
+                                [step_time *2 , 11 * step, 7 * step, 0.35, 0],
+                                [step_time *4, 7 * step, 7 * step, 0.35, 0],
+                                [step_time *4, 3 * step, 7 * step, 0.35, 0],
+                                [step_time *3, 0 * step, 7 * step, 0.35, 0],
+                                [step_time, 0 * step, 6 * step, 0.35, 0],
                                 ]
 
         path_maze_left_side = [[1, 0 * step, 8 * step, 0.35, 0],  # start in (0,240,0.35)
-                               [6, 4 * step, 8 * step, 0.35, 0],
-                               [6, 8 * step, 8 * step, 0.35, 0],
-                               [6, 8 * step, 11 * step, 0.35, 0],
-                               [3, 8 * step, 11 * step, 0.35, 90],
-                               [4, 8 * step, 14 * step, 0.35, 90],
-                               [6, 11 * step, 14 * step, 0.35, 90],
-                               [4, 11 * step, 11 * step, 0.35, 90],
-                               [4, 11 * step, 11 * step, 0.35, 180],
-                               [4, 11 * step, 14 * step, 0.35, 180],
-                               [6, 7 * step, 14 * step, 0.35, 180],
-                               [4, 7 * step, 11 * step, 0.35, 180],
-                               [6, 4 * step, 11 * step, 0.35, 180],
-                               [5, 4 * step, 11 * step, 0.35, 0],
-                               [6, 7 * step, 11 * step, 0.35, 0],
-                               [6, 7 * step, 8 * step, 0.35, 0],
-                               [6, 4 * step, 8 * step, 0.35, 0],
-                               [8, 0 * step, 8 * step, 0.35, 0],
+                               [step_time *3, 4 * step, 8 * step, 0.35, 0],
+                               [step_time *3, 8 * step, 8 * step, 0.35, 0],
+                               [step_time *3, 8 * step, 11 * step, 0.35, 0],
+                               [step_time *2, 8 * step, 11 * step, 0.35, 90],
+                               [step_time *2 , 8 * step, 13 * step, 0.35, 90],
+                               [step_time *3, 11 * step, 13 * step, 0.35, 90],
+                               [step_time *2 , 11 * step, 11 * step, 0.35, 90],
+                               [step_time *2 , 11 * step, 11 * step, 0.35, 180],
+                               [step_time *2 , 11 * step, 13 * step, 0.35, 180],
+                               [step_time *3, 7 * step, 13 * step, 0.35, 180],
+                               [step_time *2 , 7 * step, 11 * step, 0.35, 180],
+                               [step_time *3, 4 * step, 11 * step, 0.35, 180],
+                               [step_time *3, 4 * step, 11 * step, 0.35, 0],
+                               [step_time *3, 7 * step, 11 * step, 0.35, 0],
+                               [step_time *3, 7 * step, 8 * step, 0.35, 0],
+                               [step_time *3, 4 * step, 8 * step, 0.35, 0],
+                               [step_time *4, 0 * step, 8 * step, 0.35, 0],
 
                                ]
 

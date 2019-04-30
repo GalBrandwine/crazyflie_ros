@@ -70,7 +70,7 @@ def Cj_injector(msg):
 def check_direction():
     global listener, tfBuffer, cj_injection_message
 
-    speed = 0.20  # default speed m/s
+    speed = 0.10  # default speed m/s
     rot_speed = 0.5  # default rot speed sec/radian
     min_duration = 2.0  # minimum time [sec] for single trajectory
     duration = default_duration = 2  # sec
@@ -82,9 +82,9 @@ def check_direction():
     if trans != None:
         cj_local_coord = PoseStamped()
         cj_local_coord = tf2_geometry_msgs.do_transform_pose(cj_injection_message, trans)
-        rospy.loginfo(cj_local_coord)
+        #rospy.loginfo(cj_local_coord)
         heading = atan2(cj_local_coord.pose.position.y, cj_local_coord.pose.position.x)
-        rospy.loginfo(heading)
+        #rospy.loginfo(heading)
 
         distance = sqrt(pow(cj_local_coord.pose.position.x, 2) + pow(cj_local_coord.pose.position.y, 2))
         duration = distance / speed  # #calculate required time for this motion
@@ -219,9 +219,9 @@ def handler(cf_handler):
     #       Cj_injection and before that Cj order will go to drone,
     #       we will check if theres a futoristic collision within that path.
 
-    dist_threshold = 0.15 #minimum distance to trigger collission avoidance [meters]
+    dist_threshold = 0.01 #minimum distance to trigger collission avoidance [meters]
 
-    def_duration = 1.8
+    def_duration = 1.5
     land_duration = 1.5
 
     try:
@@ -273,7 +273,7 @@ def handler(cf_handler):
 
             if keyboard_flag is True:
                 keyboard_flag = False
-                kb_step=0.25 #meters each step
+                kb_step=0.15 #meters each step
                 if kb_x > 0:
                     cf_handler.goTo(goal=[kb_step, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
                 elif kb_x < 0:
