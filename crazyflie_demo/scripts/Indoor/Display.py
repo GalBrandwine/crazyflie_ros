@@ -9,6 +9,9 @@ from crazyflie_driver.msg import GenericLogData
 from Grid import drone_pos, m_to_cm
 from nav_msgs.msg import OccupancyGrid
 import cv2
+from geometry_msgs.msg import Pose
+import tf2_ros
+from tf.transformations import euler_from_quaternion
 
 class Display_manager:
     def __init__(self, border_polygon, obs_array, x_lim, y_lim, res, matrix, initial_pos_dict, nDrones):
@@ -39,7 +42,10 @@ class Display_manager:
 
         self.plot_grid()
         self.plot_obs_array()
-        self.topics_arr = ["/cf6/point_cloud", "/cf8/point_cloud"]
+        self.topics_arr = []
+        for iDrone in range(self.nDrones):
+            drone_name = rospy.get_param("~drone_name_{}".format(iDrone))
+            self.topics_arr.append("/{}/point_cloud".format(drone_name))
 
         self.takeofpos = initial_pos_dict
         init_pos = []
@@ -79,14 +85,17 @@ class Display_manager:
 
             # self.edg_to_neighbors_plot_handles.append([])
 
-        for iDrone in range(self.nDrones):
-            # Init listeners
-            drone_name = rospy.get_param("~drone_name_{}".format(iDrone))
-            self.pos_sub = rospy.Subscriber("/{}/log_pos".format(drone_name), GenericLogData,
-                                            callback = self.pos_parser)
+        # for iDrone in range(self.nDrones):
+        #     # Init listeners
+        #     drone_name = rospy.get_param("~drone_name_{}".format(iDrone))
+        #     self.pos_sub = rospy.Subscriber("/{}/log_pos".format(drone_name), GenericLogData,
+        #                                     callback = self.pos_parser)
 
-        self.pos_sub = rospy.Subscriber("/indoor/occupancy_grid_topic", OccupancyGrid,
-                                        self.grid_parser)
+        self.grid_sub = rospy.Subscriber("/indoor/occupancy_grid_topic", OccupancyGrid,
+                                        callback = self.grid_parser, callback_args = "/indoor/occupancy_grid_topic")
+
+        self.tfBuffer = tf2_ros.Buffer()
+        self.listener = tf2_ros.TransformListener(self.tfBuffer)
 
         # self.fig.show()
         self.fig.canvas.draw()
@@ -106,12 +115,46 @@ class Display_manager:
         # because it is already done in Grid module.
         # Drones plotting is done via the grid parser (in order to avoid calling the plot function too many times).
 
-    def grid_parser(self, msg):
+    def grid_parser(self, msg, topic):
+
+        for d_idx, cur_topic in enumerate(self.topics_arr):
+            cur_topic_list = cur_topic.split("/")
+            drone_id = [s for s in cur_topic_list if "cf" in s][0]
+            plt_index = d_idx
+            try:
+                trans = self.tfBuffer.lookup_transform('world', drone_id, rospy.Time(0))
+
+                q = (trans.transform.rotation.x,
+                     trans.transform.rotation.y,
+                     trans.transform.rotation.z,
+                     trans.transform.rotation.w)
+
+                euler = euler_from_quaternion(q, axes='sxyz')
+
+                x = trans.transform.translation.x
+                y = trans.transform.translation.y
+                z = trans.transform.translation.z
+                roll = euler[0]
+                pitch = euler[1]
+                yaw = euler[2]
+
+                self.pos = [x, y, z, roll, pitch, yaw]
+                # rospy.loginfo("pos in Display: {}\n".format(self.pos))
+
+                # Store drone position and convert it from [m] to [cm]
+                self.drones_pos_list[drone_id] = drone_pos(0, x*m_to_cm, y*m_to_cm, z*m_to_cm, yaw, plt_index)
+
+            except:
+                rospy.logdebug("tf lookup -- {} not found".format(drone_id))
+            # except Exception as e:
+            #     rospy.loginfo(e)
+
         grid_height = int(msg.info.height / msg.info.resolution)
         grid_width = int(msg.info.width / msg.info.resolution)
         self.last_matrix = self.matrix
         self.matrix = np.array(msg.data).reshape((grid_height, grid_width))
         keys = list(self.drones_pos_list.keys())
+
         for iDrone in range(self.nDrones):
             curr_drone_key = keys[iDrone]
             pos = self.drones_pos_list[curr_drone_key]

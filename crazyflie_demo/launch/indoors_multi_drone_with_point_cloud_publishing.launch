@@ -58,15 +58,24 @@ A few notes:
     <arg name="initY4" default="2.4"/>
     <arg name="initZ4" default="0"/>
 
+        <!-- for third CF    -->
+    <arg name="uri5" default="radio://0/120/2M/E7E7E7E704"/>
+    <arg name="frame5" default="cf4"/>
+    <arg name="frame5_active" default="0"/>
+    <arg name="traj_list5" default="[$(arg traj1),$(arg traj2)]"/>
+    <arg name="initX5" default="0.0"/>
+    <arg name="initY5" default="1.8"/>
+    <arg name="initZ5" default="0"/>
+
     <!-- arguments for indoor mapping  -->
     <arg name="x_min" default="0"/>
-    <arg name="x_max" default="250"/>
+    <arg name="x_max" default="450"/> <!-- 250 -->
     <arg name="y_min" default="0"/>
-    <arg name="y_max" default="250"/>
+    <arg name="y_max" default="450"/> <!-- 250 -->
     <arg name="env_lim" default="[$(arg x_min), $(arg x_max), $(arg y_min), $(arg y_max)]"/>
     <arg name="resolution" default="10"/>
     <arg name="env_space" default="50"/>
-    <arg name="nDrones" default="2"/>
+    <arg name="nDrones" default="1"/>
 
     <!--    Cf's arary. for Cj_injector   input is an array of drones!
             Future develop: add drone as a message!
@@ -395,10 +404,10 @@ A few notes:
             <param name="resolution" value="$(arg resolution)"/>
 <!---->
             <param name="nDrones" value="$(arg nDrones)"/>
-            <param name="drone_name_0" value="$(arg frame2)"/>
-            <param name="drone_takeoff_position_0" value="[180, 180, 0]"/>
-            <param name="drone_name_1" value="$(arg frame3)"/>
-            <param name="drone_takeoff_position_1" value="[60, 60, 0]"/>
+            <param name="drone_name_0" value="$(arg frame5)"/>
+            <param name="drone_takeoff_position_0" value="[0, 180, 0]"/>
+<!--            <param name="drone_name_1" value="$(arg frame3)"/>-->
+<!--            <param name="drone_takeoff_position_1" value="[60, 60, 0]"/>-->
         </node>
 <!---->
         <node name="display_manager" pkg="crazyflie_demo" type="Display.py" output="screen">
@@ -413,10 +422,10 @@ A few notes:
             <param name="obs_3" value="[(10, 250), (10, 240), (240, 240), (240, 250), (10, 250)]"/>
 <!---->
             <param name="nDrones" value="$(arg nDrones)"/>
-            <param name="drone_name_0" value="$(arg frame2)"/>
-            <param name="drone_takeoff_position_0" value="[180, 180, 0]"/>
-            <param name="drone_name_1" value="$(arg frame3)"/>
-            <param name="drone_takeoff_position_1" value="[60, 60, 0]"/>
+            <param name="drone_name_0" value="$(arg frame5)"/>
+            <param name="drone_takeoff_position_0" value="[0, 180, 0]"/>
+<!--            <param name="drone_name_1" value="$(arg frame3)"/>-->
+<!--            <param name="drone_takeoff_position_1" value="[60, 60, 0]"/>-->
         </node>
     </group>
 
