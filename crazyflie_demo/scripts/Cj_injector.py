@@ -162,12 +162,12 @@ class DroneInjector:
         """
         threads = []
         step = 0.30  # m
-        step_time=1.2
+        step_time=2.5
         #                       [t, ----x---, ---y---, --z--, yaw]
         path_maze_right_side = [[step_time, 0 * step, 6 * step, 0.35, 0],  # start in (0,180,0.35)
-                                [step_time *3 , 3 * step, 6 * step, 0.35, 0],
-                                [step_time *3, 3 * step, 3 * step, 0.35, 0],
-                                [step_time *2, 5.5 * step, 3 * step, 0.35, 0],
+                                [step_time *3 , 3.2 * step, 6 * step, 0.35, 0],
+                                [step_time *3, 3.2 * step, 2.5 * step, 0.35, 0],
+                                [step_time *2, 5.5 * step, 2.5 * step, 0.35, 0],
                                 [step_time *2 , 5.5 * step, 5 * step, 0.35, 0],
                                 [step_time *2 , 5.5 * step, 5 * step, 0.35, 90],
                                 [step_time *3, 8 * step, 5 * step, 0.35, 90],

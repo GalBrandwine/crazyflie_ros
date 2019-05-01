@@ -58,8 +58,8 @@ def handle_pose():
         t.header.stamp = rospy.Time.now()
         t.header.frame_id = rospy.get_param("~tf_prefix") + '_takeoff'
         t.child_frame_id = rospy.get_param("~tf_prefix")
-        t.transform.translation.x = x
-        t.transform.translation.y = y
+        t.transform.translation.x = x*0.93
+        t.transform.translation.y = y*0.93
         t.transform.translation.z = z
         q = tf_conversions.transformations.quaternion_from_euler(radians(roll), radians(pitch), radians(yaw))
         t.transform.rotation.x = q[0]
