@@ -60,7 +60,6 @@ class Grid:
         self.drones_pos_list = dict()
         self.drones_pc_list = dict()
         # maximal limit for pc delta from drone reference in cm
-        self.pc_lim = 200
         self.takeofpos = initial_pos_dict
         self.initpos = [0, 0, 0]  # Reference point
         self.topics_arr = []
@@ -68,7 +67,7 @@ class Grid:
             drone_name = rospy.get_param("~drone_name_{}".format(iDrone))
             self.topics_arr.append("/{}/point_cloud".format(drone_name))
         self.drone_name_arr = []
-        self.floor_thr = 31
+        self.floor_thr = 32
         self.sens_limit = 100
 
         self.start_time = None
@@ -233,30 +232,30 @@ class Grid:
             self.start_time = current_pc.time
 
         for elem in current_pc.pc_sens:
-            # if np.linalg.norm(np.subtract(elem[:1], [current_pos.x, current_pos.y])) < self.pc_lim and np.linalg.norm(elem) > 0:
-            # if abs(elem[0]) < self.pc_lim and abs(elem[1]) < self.pc_lim and np.linalg.norm(elem) > 0:
             sensing_pos = [[self.initpos[0]+elem[0], self.initpos[1]+elem[1]]]
-            self.update_with_tof_sensor([[current_pos.x, current_pos.y]], sensing_pos, current_pc.time)
+            self.update_with_tof_sensor([[current_pos.x, current_pos.y]], sensing_pos)
 
     def update_with_tof_sensor(self, sensor_pos, tof_sensing_pos, pc_time):
         i0, j0 = self.xy_to_ij(sensor_pos[0][0], sensor_pos[0][1])
         i1, j1 = self.xy_to_ij(tof_sensing_pos[0][0], tof_sensing_pos[0][1])
         bres_list = list(bresenham(i0, j0, i1, j1))
         bres_list = bres_list[:-1]
-        num_of_samples = int(np.floor(np.linalg.norm(np.subtract(tof_sensing_pos, sensor_pos)) / self.res * 1))
+        # num_of_samples = int(np.floor(np.linalg.norm(np.subtract(tof_sensing_pos, sensor_pos)) / self.res * 1))
         # xs = np.linspace(sensor_pos[0][0], tof_sensing_pos[0][0], num=num_of_samples, endpoint=True)
         # ys = np.linspace(sensor_pos[0][1], tof_sensing_pos[0][1], num=num_of_samples, endpoint=True)
         for ind in range(len(bres_list)):
+        # for ind in range(1, num_of_samples):
             # i, j = self.xy_to_ij(xs[ind], ys[ind])
-            # print [i, j]
             i, j = bres_list[ind]
             if 0 > i or i >= self.matrix.shape[0] or 0 > j or j >= self.matrix.shape[1]:
                 return
             if self.matrix[i][j] == 0 and np.linalg.norm(np.subtract([i, j], [i0, j0])) < (self.sens_limit / self.res):
+            # if self.matrix[i][j] == 0 and np.linalg.norm(np.subtract([xs[ind], ys[ind]], sensor_pos)) < (self.sens_limit):
                 self.change_tail_to_empty(i, j)
         d = np.subtract(tof_sensing_pos, sensor_pos)
         norm_d = np.linalg.norm(d)
         if norm_d > 0 and np.linalg.norm(np.subtract([i1, j1], [i0, j0])) < (self.sens_limit / self.res):
+        # if norm_d > 0 and np.linalg.norm(np.subtract(tof_sensing_pos, sensor_pos)) < (self.sens_limit):
             wall_pos = tof_sensing_pos + d / norm_d * self.res / 1000
             i, j = self.xy_to_ij(wall_pos[0][0], wall_pos[0][1])
             # if self.time_filter(i, j, pc_time):
