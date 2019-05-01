@@ -182,14 +182,13 @@ class Display_manager:
             # If there is a wall in the grid, check how many times the wall was "seen",
             # and set the color according to that counter.
             elif self.matrix[i][j] > 1:
-                # self.change_tail_to_wall(i, j)
-                color_r = self.matrix[i][j] * 0.01
-                if color_r > 1:
-                    color_r = 1
-                color_g = 0
-                color_b = 0
-
-                self.change_tail_color_ij(i, j, [color_r, color_g, color_b])
+                self.change_tail_to_wall(i, j)
+                # color_r = self.matrix[i][j] * 0.01
+                # if color_r > 1:
+                #     color_r = 1
+                # color_g = 0
+                # color_b = 0
+                # self.change_tail_color_ij(i, j, [color_r, color_g, color_b])
 
 
     def plot_interesting_points(self, interesting_points_list_ij):

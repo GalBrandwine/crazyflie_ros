@@ -413,7 +413,7 @@ A few notes:
             <param name="resolution" value="$(arg resolution)"/>
 <!---->
             <param name="nDrones" value="$(arg nDrones)"/>
-            <param name="drone_name_0" value="$(arg frame5)"/>
+            <param name="drone_name_0" value="$(arg frame3)"/>
             <param name="drone_takeoff_position_0" value="[0, 180, 0]"/>
 
 <!--            <param name="drone_name_0" value="$(arg frame6)"/>-->
@@ -434,7 +434,7 @@ A few notes:
             <param name="obs_3" value="[(10, 250), (10, 240), (240, 240), (240, 250), (10, 250)]"/>
 <!---->
             <param name="nDrones" value="$(arg nDrones)"/>
-            <param name="drone_name_0" value="$(arg frame5)"/>
+            <param name="drone_name_0" value="$(arg frame3)"/>
             <param name="drone_takeoff_position_0" value="[0, 180, 0]"/>
 
 <!--            <param name="drone_name_0" value="$(arg frame6)"/>-->
