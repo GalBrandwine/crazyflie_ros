@@ -153,23 +153,25 @@ class Grid:
                 self.drones_pc_list[drone_id] = drone_pc(point_cloud_last_timestamp.stamp.secs, sens)
                 # Update grid using the new data
                 self.update_from_tof_sensing_list(drone_id)
+                self.complete_wall_in_corners(self.matrix)
 
-    def pos_parser(self, msg):
-        pos_header = msg.header
-        pos_val = msg.values
 
-        drone_id = pos_header.frame_id.split("/")[0] # Extract drone name from topic name
-        plt_index = self.drones_pos_list[drone_id].index
-        # Store drone position and convert it from [m] to [cm]
-        self.drones_pos_list[drone_id] = drone_pos(pos_header.stamp.secs,
-                                                   self.takeofpos[drone_id][0]+(pos_val[0]*m_to_cm),
-                                                   self.takeofpos[drone_id][1]+(pos_val[1]*m_to_cm),
-                                                   self.takeofpos[drone_id][2]+(pos_val[2]*m_to_cm), None, plt_index)
-
-        # Change tail to be empty if the drone is in that tail.
-        i, j = self.xy_to_ij(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
-        if self.matrix[i][j] == 0:
-            self.change_tail_to_empty(i, j)
+    # def pos_parser(self, msg):
+    #     pos_header = msg.header
+    #     pos_val = msg.values
+    #
+    #     drone_id = pos_header.frame_id.split("/")[0] # Extract drone name from topic name
+    #     plt_index = self.drones_pos_list[drone_id].index
+    #     # Store drone position and convert it from [m] to [cm]
+    #     self.drones_pos_list[drone_id] = drone_pos(pos_header.stamp.secs,
+    #                                                self.takeofpos[drone_id][0]+(pos_val[0]*m_to_cm),
+    #                                                self.takeofpos[drone_id][1]+(pos_val[1]*m_to_cm),
+    #                                                self.takeofpos[drone_id][2]+(pos_val[2]*m_to_cm), None, plt_index)
+    #
+    #     # Change tail to be empty if the drone is in that tail.
+    #     i, j = self.xy_to_ij(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
+    #     if self.matrix[i][j] == 0:
+    #         self.change_tail_to_empty(i, j)
 
 
     # Initialize a publisher for occupancy grid
@@ -275,6 +277,62 @@ class Grid:
                 return True
         return False
 
+
+    def complete_wall_in_corners(self, matrix):
+        for i in range(1, matrix.__len__()-1):
+            for j in range(1, matrix[i].__len__()-1):
+                if matrix[i][j] == 0:
+                    if ((matrix[i - 1][j] == 2 and matrix[i][j - 1] == 2 and (matrix[i - 1][j - 1] == 1 )) or
+                        (matrix[i + 1][j] == 2 and matrix[i][j - 1] == 2 and (matrix[i + 1][j - 1] == 1 )) or
+                        (matrix[i + 1][j] == 2 and matrix[i][j + 1] == 2 and (matrix[i + 1][j + 1] == 1 )) or
+                        (matrix[i - 1][j] == 2 and matrix[i][j + 1] == 2 and (matrix[i - 1][j + 1] == 1 ))):
+                        self.change_tail_to_wall(i, j) # Originally
+        j = 0
+        for i in range(1, matrix.__len__()-1):
+            if (matrix[i][j] == 0 and
+                    (matrix[i + 1][j] == 2 and matrix[i][j + 1] == 2 and (matrix[i + 1][j + 1] == 1)) or
+                    (matrix[i - 1][j] == 2 and matrix[i][j + 1] == 2 and (matrix[i - 1][j + 1] == 1))):
+                self.change_tail_to_wall(i, j)
+
+        j = matrix[0].__len__()-1
+        for i in range(1, matrix.__len__() - 1):
+            if (matrix[i][j] == 0 and
+                    (matrix[i - 1][j] == 2 and matrix[i][j - 1] == 2 and (matrix[i - 1][j - 1] == 1)) or
+                    (matrix[i + 1][j] == 2 and matrix[i][j - 1] == 2 and (matrix[i + 1][j - 1] == 1))):
+                self.change_tail_to_wall(i, j)
+
+        i = 0
+        for j in range(1, matrix[0].__len__()-1):
+            if (matrix[i][j] == 0 and
+                    (matrix[i + 1][j] == 2 and matrix[i][j - 1] == 2 and (matrix[i + 1][j - 1] == 1)) or
+                    (matrix[i + 1][j] == 2 and matrix[i][j + 1] == 2 and (matrix[i + 1][j + 1] == 1))):
+                self.change_tail_to_wall(i, j)
+
+        i = matrix.__len__()-1
+        for j in range(1, matrix[0].__len__() - 1):
+            if (matrix[i][j] == 0 and
+                    (matrix[i - 1][j] == 2 and matrix[i][j - 1] == 2 and (matrix[i - 1][j - 1] == 1)) or
+                    (matrix[i - 1][j] == 2 and matrix[i][j + 1] == 2 and (matrix[i - 1][j + 1] == 1))):
+                self.change_tail_to_wall(i, j)
+
+        if (matrix[0][0] == 0 and
+                    (matrix[0][1] == 2 and matrix[1][0] == 2)):
+            self.change_tail_to_wall(0, 0)
+
+
+        if (matrix[0][matrix[0].__len__()-1] == 0 and
+                (matrix[0][matrix[0].__len__()-2] == 2 and matrix[1][matrix[0].__len__()-1] == 2)):
+            self.change_tail_to_wall(0, matrix[0].__len__()-1)
+
+
+        if (matrix[matrix.__len__()-1][matrix[0].__len__()-1] == 0 and
+                (matrix[matrix[0].__len__()-1][matrix[0].__len__()-2] == 2 and matrix[matrix[0].__len__()-2][matrix[0].__len__()-1] == 2)):
+            self.change_tail_to_wall(matrix.__len__()-1, matrix[0].__len__()-1)
+
+
+        if (matrix[matrix.__len__()-1][0] == 0 and
+                (matrix[matrix[0].__len__()-1][1] == 2 and matrix[matrix[0].__len__()-2][0] == 2)):
+            self.change_tail_to_wall(matrix.__len__()-1, 0)
 
 if __name__ == "__main__":
 

@@ -3,7 +3,7 @@ import numpy as np
 
 class Agent:
 
-    def __init__(self, AgentID, pos, res, x_lim, y_lim):
+    def __init__(self, AgentID, pos, res, env_limits):
         self.ID = AgentID
         self.agent_alive = True
         self.is_homing = False
@@ -24,8 +24,8 @@ class Agent:
         self.goal_orianted_flag = True #np.random.rand(1) < self.goal_orianted_flag_flip_prob
         self.reduced_neigbours_pos_list = list()
         self.astar_path = []
-        self.x_lim = x_lim
-        self.y_lim = y_lim
+        self.x_lim = env_limits[0:2]
+        self.y_lim = env_limits[2:4]
         self.res = res
         self.dist_factor = 3
 
