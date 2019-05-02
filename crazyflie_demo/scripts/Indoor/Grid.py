@@ -70,6 +70,9 @@ class Grid:
         self.floor_thr = 32
         self.sens_limit = 100
 
+        self.start_time = None
+        self.historic_sens_ij = []
+
         for i, id in enumerate(initial_pos_dict):
             self.drones_pos_list[id] = drone_pos(time=0, x=initial_pos_dict[id][0],
                                                  y=initial_pos_dict[id][1],
@@ -227,11 +230,14 @@ class Grid:
         if not self.is_time_equal(current_pos.time, current_pc.time):
             return
 
+        if self.start_time is None:
+            self.start_time = current_pc.time
+
         for elem in current_pc.pc_sens:
             sensing_pos = [[self.initpos[0]+elem[0], self.initpos[1]+elem[1]]]
             self.update_with_tof_sensor([[current_pos.x, current_pos.y]], sensing_pos)
 
-    def update_with_tof_sensor(self, sensor_pos, tof_sensing_pos):
+    def update_with_tof_sensor(self, sensor_pos, tof_sensing_pos, pc_time):
         i0, j0 = self.xy_to_ij(sensor_pos[0][0], sensor_pos[0][1])
         i1, j1 = self.xy_to_ij(tof_sensing_pos[0][0], tof_sensing_pos[0][1])
         bres_list = list(bresenham(i0, j0, i1, j1))
@@ -254,7 +260,22 @@ class Grid:
         # if norm_d > 0 and np.linalg.norm(np.subtract(tof_sensing_pos, sensor_pos)) < (self.sens_limit):
             wall_pos = tof_sensing_pos + d / norm_d * self.res / 1000
             i, j = self.xy_to_ij(wall_pos[0][0], wall_pos[0][1])
+            # if self.time_filter(i, j, pc_time):
             self.change_tail_to_wall(i, j)
+
+    # Apply time filter TODO: document...
+    def time_filter(self, i, j, pc_time):
+        if self.start_time is None or pc_time - self.start_time < 10:
+            self.historic_sens_ij.append((i, j, pc_time))
+            return True
+        # Remove old samples
+        while len(self.historic_sens_ij) > 0 and pc_time - self.historic_sens_ij[0][2] > 5:
+            self.historic_sens_ij.pop(0)
+        for i in range(len(self.historic_sens_ij)):
+            if np.linalg.norm(np.subtract(self.historic_sens_ij[i][:1], (i, j))) <= 5:
+                self.historic_sens_ij.append((i, j, pc_time))
+                return True
+        return False
 
 
     def complete_wall_in_corners(self, matrix):
