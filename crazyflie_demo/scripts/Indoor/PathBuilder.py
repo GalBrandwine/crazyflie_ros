@@ -215,9 +215,10 @@ class Astar:
         return i, j
 
 
-def build_trj(pos, scanning_range, x_lim, y_lim, res, matrix, temp_corner_points_list_xy, temp_interesting_points_list_xy, ref_pos):
+def build_trj(pos, scanning_range, env_limits, res, matrix, temp_corner_points_list_xy, temp_interesting_points_list_xy, ref_pos):
 
-
+    x_lim = env_limits[0:2]
+    y_lim = env_limits[2:4]
     Astar_Movement = []
     astar = Astar(scanning_range, x_lim, y_lim, matrix, res)
 

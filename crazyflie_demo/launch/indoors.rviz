@@ -29,7 +29,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: PointCloud2_CF3
+    SyncSource: PointCloud2_CF1
 Toolbars:
   toolButtonStyle: 2
 Visualization Manager:
@@ -58,13 +58,9 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        cf3:
+        cf1:
           Value: true
-        cf3_takeoff:
-          Value: true
-        cf4:
-          Value: true
-        cf4_takeoff:
+        cf1_takeoff:
           Value: true
         world:
           Value: true
@@ -75,11 +71,8 @@ Visualization Manager:
       Show Names: true
       Tree:
         world:
-          cf3_takeoff:
-            cf3:
-              {}
-          cf4_takeoff:
-            cf4:
+          cf1_takeoff:
+            cf1:
               {}
       Update Interval: 0
       Value: true
@@ -273,7 +266,7 @@ Visualization Manager:
       Channel Name: intensity
       Class: rviz/PointCloud2
       Color: 255; 255; 255
-      Color Transformer: ""
+      Color Transformer: Intensity
       Decay Time: 100
       Enabled: true
       Invert Rainbow: false
@@ -282,7 +275,7 @@ Visualization Manager:
       Min Color: 0; 0; 0
       Min Intensity: 0
       Name: PointCloud2_CF1
-      Position Transformer: ""
+      Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
       Size (Pixels): 3
@@ -325,18 +318,18 @@ Visualization Manager:
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0
-        Y: 0
-        Z: 0
+        X: 0.00522752851
+        Y: 0.359809935
+        Z: 0.161594391
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 1.56479633
+      Pitch: 0.904796243
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.07039762
+      Yaw: 3.73539543
     Saved: ~
 Window Geometry:
   Displays:
