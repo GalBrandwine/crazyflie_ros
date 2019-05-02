@@ -233,7 +233,7 @@ class Grid:
 
         for elem in current_pc.pc_sens:
             sensing_pos = [[self.initpos[0]+elem[0], self.initpos[1]+elem[1]]]
-            self.update_with_tof_sensor([[current_pos.x, current_pos.y]], sensing_pos)
+            self.update_with_tof_sensor([[current_pos.x, current_pos.y]], sensing_pos, current_pc.time)
 
     def update_with_tof_sensor(self, sensor_pos, tof_sensing_pos, pc_time):
         i0, j0 = self.xy_to_ij(sensor_pos[0][0], sensor_pos[0][1])
