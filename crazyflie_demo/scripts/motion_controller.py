@@ -313,9 +313,10 @@ def handler(cf_handler):
 
                 # obstacle_free=avoid_collision()
                 # if obstacle_free == True:
-                if z is 0:
+                if z <= 0.1:
                     cf_handler.land(targetHeight=0.0, duration=land_duration)
                     time.sleep(land_duration)
+                    break
                 else:
                     cf_handler.goTo(goal=[x * 1.075, y * 1.075, z], yaw=yaw, duration=duration, relative=False)
                 # else:
