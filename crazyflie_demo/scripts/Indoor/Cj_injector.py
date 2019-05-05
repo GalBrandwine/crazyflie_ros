@@ -9,6 +9,7 @@ import tf
 import tf2_ros
 from GridPOI import GridPOI
 from Agent import Agent
+import PathBuilder
 from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import OccupancyGrid
 from std_msgs.msg import Empty
@@ -30,6 +31,35 @@ def to_pose_stamped(x, y, z, roll, pitch, yaw):
     pose.pose.orientation.w = quaternion[3]
 
     return pose
+
+def is_los(p1, p2, matrix, x_lim, y_lim, res):
+    n = int(np.maximum(1, np.ceil(np.linalg.norm(p1-p2)/res)*3))
+    x = np.linspace(p1[0][0], p2[0][0], num=n, endpoint=True)
+    y = np.linspace(p1[0][1], p2[0][1], num=n, endpoint=True)
+    for ind in range(1, n):
+        i, j = xy_to_ij(x[ind], y[ind], x_lim, y_lim, res)
+        if matrix[i][j] != 1:
+            return False
+    return True
+
+
+def xy_to_ij(x, y, x_lim, y_lim, res):
+    i = int(np.floor((x - x_lim[0])/res))
+    j = int(np.floor((y - y_lim[0]) / res))
+    return i, j
+
+
+def get_goal_point(pos, temp_interesting_points_list_xy, matrix, x_lim, y_lim, res):
+    g_idx = 0
+    dist_arr = []
+    for idx, elem in enumerate(temp_interesting_points_list_xy):
+        dist_arr.append(np.linalg.norm(np.subtract(elem, pos[0])))
+    sorted_dist_idxs = sorted(range(len(dist_arr)), key=lambda k: dist_arr[k])
+    for idx in sorted_dist_idxs:
+        if is_los(pos, [[temp_interesting_points_list_xy[idx][0], temp_interesting_points_list_xy[idx][1]]], matrix, x_lim, y_lim, res):
+            g_idx = idx
+            break
+    return g_idx
 
 
 class DroneCjInjector:
@@ -76,9 +106,11 @@ class DroneCjInjector:
         self.matrix = new_matrix
         self.pos = drone_pos
         # Assume that new_pos = [x,y,z,r,p,y]
-        # Astar_Movement = PathBuilder.build_trj([self.pos[0:2]], self.env_limits, self.res, self.matrix, corrners_array,
-        #                                        next_point, None)
-        # self.agent.preform_step_sys_sim([self.pos[0:2]], self.pos[5], None, self.matrix)
+        Astar_Movement = PathBuilder.build_trj([self.pos[0:2]], self.env_limits, self.res, self.matrix, corrners_array,
+                                               next_point)
+        self.agent.astar_path = Astar_Movement[0]
+        temp_yaw = np.random.rand() * np.pi / 4 # todo: A function which computing the yaw angle should be placed here
+        self.agent.preform_step_sys_sim([self.pos[0:2]], temp_yaw, self.matrix)
         # self.next_pose[0:2] = self.agent.next_pos
 
         self.next_pose[0:2] = next_point
@@ -167,15 +199,17 @@ class DroneInjector:
         grid_height = int(msg.info.height / msg.info.resolution)
         grid_width = int(msg.info.width / msg.info.resolution)
 
-        self.matrix = np.array(msg.data).reshape((grid_height, grid_width))
-        # [interesting_points_list_ij, interesting_points_list_xy, corner_points_list_ij,
-        #  corner_points_list_xy] = self.POI.find_POI(self.matrix)
-        corner_points_list_xy = [] # Temporary! only for debug
+        # self.matrix = np.array(msg.data).reshape((grid_height, grid_width))
+        # if rospy.time.now() - self.last_time_POI_called >= self.thresh:
+        #     self.last_time_POI_called = rospy.time.now()
+        #     [_, interesting_points_list_xy, _, corner_points_list_xy] = self.POI.find_POI(self.matrix)
+        [_, interesting_points_list_xy, _, corner_points_list_xy] = self.POI.find_POI(self.matrix)
+        x_lim = self.env_limits[0:2]
+        y_lim = self.env_limits[2:4]
+
+        # corner_points_list_xy = [] # Temporary! only for debug
 
         for drone in self.cj_injector_container:
-            # cur_topic_list = cur_topic.split("/")
-            # drone_id = [s for s in cur_topic_list if "cf" in s][0]
-            # plt_index = d_idx
 
             try:
                 trans = self.tfBuffer.lookup_transform('world', drone.tf_prefix, rospy.Time(0))
@@ -196,111 +230,25 @@ class DroneInjector:
 
                 pos = [x, y, z, roll, pitch, yaw]
                 # rospy.loginfo("pos in Display: {}\n".format(self.pos))
+                cur_pos = [[pos[0], pos[1]]]
 
-                # Store drone position and convert it from [m] to [cm]
-                # todo add function for selecting POI per drone!!!!!! *********
-                drone.update_pos(pos, self.matrix, pos[0:2], corner_points_list_xy)
+                g_idx = get_goal_point(cur_pos, interesting_points_list_xy, self.matrix, x_lim, y_lim, self.res)
+                gx = interesting_points_list_xy[g_idx][0]
+                gy = interesting_points_list_xy[g_idx][1]
+
+                # drone.update_pos(pos, self.matrix, pos[0:2], corner_points_list_xy)
+                drone.update_pos(pos, self.matrix, [gx, gy], corner_points_list_xy)
+                del interesting_points_list_xy[g_idx]
+
                 # rospy.logdebug("in grid_parser - drone.update:\n"
                 #                "pos: {}\n"
                 #                "next_pos: {}\n"
                 #                "".format(pos,pos[0:2]))
+
             except:
                 rospy.logdebug("tf lookup -- {} not found".format(drone.tf_prefix))
             # except Exception as e:
             #     rospy.loginfo(e)
-
-    def simple_rectangel_example(self, time_delay=None):
-        """Make all drones in DroneInjector to fly in a rectangle.
-
-        Very simple and stupid example for using the injcetor.
-
-        path = [[duration,x,y,z,yaw], [], ...]
-
-        """
-        threads = []
-        step = 0.30  # m
-
-        path_maze_right_side = [[2, 0 * step, 6 * step, 0.35, 0],  # start in (0,180,0.35)
-                                [2, 0 * step, 7 * step, 0.35, 0],
-                                [2, 1 * step, 7 * step, 0.35, 0],
-                                [2, 2 * step, 7 * step, 0.35, 0],
-                                [2, 3 * step, 7 * step, 0.35, 0],
-                                [2, 4 * step, 7 * step, 0.35, 0],
-                                [2, 5 * step, 7 * step, 0.35, 0],
-                                [2, 6 * step, 7 * step, 0.35, 0],
-                                [2, 7 * step, 7 * step, 0.35, 0],
-                                [2, 8 * step, 7 * step, 0.35, 0],
-                                [2, 9 * step, 7 * step, 0.35, 0],
-
-                                ]
-        path_maze_left_side = [[6, 0 * step, 8 * step, 0.35, 0],  # start in (0,240,0.35)
-                               [2, 0 * step, 7 * step, 0.35, 0],
-                               [2, 1 * step, 7 * step, 0.35, 0],
-                               [2, 2 * step, 7 * step, 0.35, 0],
-                               [2, 3 * step, 7 * step, 0.35, 0],
-                               [2, 4 * step, 7 * step, 0.35, 0],
-                               [2, 5 * step, 7 * step, 0.35, 0],
-                               [2, 6 * step, 7 * step, 0.35, 0],
-                               [2, 7 * step, 7 * step, 0.35, 0],
-                               [2, 8 * step, 7 * step, 0.35, 0],
-                               # [2, 9 * step, 7 * step, 0.35, 0],
-                               ]
-
-        path1 = [[2, 0.3, 0.6, 0.35, 0],
-                 [2, 0.3, 0.9, 0.35, 0],
-                 [2, 0.3, 1.2, 0.35, 0],
-                 [2, 0.3, 1.5, 0.35, 0],
-                 [2, 0.3, 1.8, 0.35, 0],
-                 # [3, 0.3, 1.8, 0.35, 90],
-                 [2, 0.6, 1.8, 0.35, 0],
-                 [2, 0.9, 1.8, 0.35, 0],
-                 [2, 1.2, 1.8, 0.35, 0],
-                 [2, 1.5, 1.8, 0.35, 0],
-                 [2, 1.8, 1.8, 0.35, 0],
-                 [2, 2.1, 1.8, 0.35, 0],
-                 # [3, 2.1, 1.8, 0.35, 0]
-                 ]
-        path2 = [[2, 2.1, 1.8, 0.35, 0],
-                 [2, 2.1, 1.5, 0.35, 0],
-                 [2, 2.1, 1.2, 0.35, 0],
-                 [2, 2.1, 0.9, 0.35, 0],
-                 [2, 2.1, 0.6, 0.35, 0],
-                 # [3, 2.1, 0.6, 0.35, 90],
-                 [2, 1.8, 0.6, 0.35, 0],
-                 [2, 1.5, 0.6, 0.35, 0],
-                 [2, 1.2, 0.6, 0.35, 0],
-                 [2, 0.9, 0.6, 0.35, 0],
-                 [2, 0.6, 0.6, 0.35, 0],
-                 [2, 0.3, 0.6, 0.35, 0],
-
-                 # [3, 0.3, 0.6, 0.35, 0]
-                 ]
-
-        # t1 = Thread(target=injector, args=(self.cj_injector_container[0], path1,))
-        # threads.append(t1)
-        # t2 = Thread(target=injector, args=(self.cj_injector_container[3], path2,))
-        # threads.append(t2)
-
-        # t1 = Thread(target=injector, args=(self.cj_injector_container[2], path_maze_right_side,))
-        # threads.append(t1)
-
-        t2 = Thread(target=injector, args=(self.cj_injector_container[3], path_maze_left_side,))
-        threads.append(t2)
-
-        # start all threads.
-        for t in threads:
-            t.start()
-
-        # stop workers
-        for t in threads:
-            t.join()
-
-        rospy.loginfo("********************************* Done ***************************")
-
-    def launcher(self, msg):
-        """A callback for simple_examples. """
-        # self.simple_rotation_example()
-        self.simple_rectangel_example()
 
 
 if __name__ == '__main__':

@@ -39,14 +39,13 @@ class Agent:
         return self.next_pos, self.next_heading
 
 
-    def preform_step_sys_sim(self, current_pos, current_heading, neigbours_pos_list, matrix):
+    def preform_step_sys_sim(self, current_pos, current_heading, matrix):
         self.update_current_state(current_pos, current_heading)
-        self.reduced_neigbours_pos_list = self.neighborhood_reduction(neigbours_pos_list, matrix)
-        self.Dynam_Search_in_maze(self.reduced_neigbours_pos_list, matrix)
-        self.next_heading = np.random.rand() * np.pi / 4
+        # self.reduced_neigbours_pos_list = self.neighborhood_reduction(neigbours_pos_list, matrix)
+        self.Dynam_Search_in_maze(matrix)
 
 
-    def Dynam_Search_in_maze(self, NeighborsPosList, matrix):
+    def Dynam_Search_in_maze(self, matrix):
 
         max_count_val = 10
         break_counter = 0
@@ -69,16 +68,7 @@ class Agent:
             step = self.step_noise_size * ([0.5, 0.5] - np.random.rand(2)) + vec
             if self.is_step_legal(self.current_pos, step, matrix):
                 flag = True
-                if np.random.rand(1) < 0:#0.8
-                    for neighbor_pos in NeighborsPosList:
-                        if self.outOfLimit_Ando(neighbor_pos, step):
-                            flag = False
-                            break
-                        if not self.is_step_in_corridor(step, neighbor_pos, matrix):
-                            flag = False
-                            break
-                    else:
-                        break
+                break
 
         if break_counter < max_count_val:
             self.next_pos = self.current_pos + step
