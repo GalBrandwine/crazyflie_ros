@@ -25,6 +25,7 @@ def to_pose_stamped(x, y, z, roll, pitch, yaw):
 
     return pose
 
+
 class DroneCjInjector:
     """Class for Cj injection per drone. """
 
@@ -49,8 +50,8 @@ def injector(drone_injector, path):
         pitch = 0
         yaw = point[4]
         pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
-        start_time= rospy.get_time()
-        while (rospy.get_time() - start_time < time_delay) :  #re-send point every X sec to reduce reception problems
+        start_time = rospy.get_time()
+        while (rospy.get_time() - start_time < time_delay):  # re-send point every X sec to reduce reception problems
             drone_injector.Cj_injector_pub.publish(pose)
             rospy.sleep(0.99)
 
@@ -72,39 +73,7 @@ class DroneInjector:
         self.occ_map = None
 
         # Init listeners: Fill here when ready:
-        # self.occ_map_subscriber = rospy.Subscriber("/" + prefix + "/point_cloud", ROS_TYPE_OCC_MAP,
-        #                                self.point_cloud_parser)
-
         self.rotation_example_subscriber = rospy.Subscriber("/Cj_injection_rotation_example", Empty, self.launcher)
-
-    def occ_map_subscriber(self, msg):
-        """Each publication, we do a lookup for where the drone currently is, in x,y,z, r,p,y. """
-        self.occ_map_subscriber_timestamp = msg.header
-        self.occ_map = """Add here:Read the map from received 'msg'"""
-
-        # try:
-        #     trans = self.tfBuffer.lookup_transform('world', prefix, rospy.Time(0))
-        #
-        #     q = (trans.transform.rotation.x,
-        #          trans.transform.rotation.y,
-        #          trans.transform.rotation.z,
-        #          trans.transform.rotation.w)
-        #
-        #     euler = euler_from_quaternion(q, axes='sxyz')
-        #
-        #     x = trans.transform.translation.x
-        #     y = trans.transform.translation.y
-        #     z = trans.transform.translation.z
-        #     roll = euler[0]
-        #     pitch = euler[1]
-        #     yaw = euler[2]
-        #
-        #     self.pos = [x, y, z, roll, pitch, yaw]
-        #
-        #     # rospy.loginfo("pos: {}\n\n\n".format(self.pos))
-        #
-        # except:
-        #     rospy.logdebug("tf lookup -- {} not found".format(prefix))
 
     def simple_rotation_example(self, time_delay=None):
         """Simple rotation example to make all drones rotate"""
@@ -162,42 +131,42 @@ class DroneInjector:
         """
         threads = []
         step = 0.30  # m
-        step_time=2.0
+        step_time = 2.0
         #                       [t, ----x---, ---y---, --z--, yaw]
         path_maze_right_side = [[step_time, 0 * step, 6 * step, 0.35, 0],  # start in (0,180,0.35)
-                                [step_time *3 , 3.2 * step, 6 * step, 0.35, 0],
-                                [step_time *3, 3.2 * step, 2.5 * step, 0.35, 45],
-                                [step_time *2, 6 * step, 2.5 * step, 0.35, 90],
-                                [step_time *2 , 6 * step, 4 * step, 0.35, 135],
-                                [step_time *2 , 6 * step, 4 * step, 0.35, 180],
-                                [step_time *3, 8 * step, 4 * step, 0.35, 180],
-                                [step_time *3, 11 * step, 4 * step, 0.35, 18],
-                                [step_time *2 , 11 * step, 7 * step, 0.35, 180],
-                                [step_time *2 , 11 * step, 7 * step, 0.35, 180],
-                                [step_time *4, 7 * step, 7 * step, 0.35, 180],
-                                [step_time *4, 3 * step, 7 * step, 0.35, 180],
-                                [step_time *3, 0 * step, 7 * step, 0.35, 90],
+                                [step_time * 3, 3.2 * step, 6 * step, 0.35, 0],
+                                [step_time * 3, 3.2 * step, 2.5 * step, 0.35, 45],
+                                [step_time * 2, 6 * step, 2.5 * step, 0.35, 90],
+                                [step_time * 2, 6 * step, 4 * step, 0.35, 135],
+                                [step_time * 2, 6 * step, 4 * step, 0.35, 180],
+                                [step_time * 3, 8 * step, 4 * step, 0.35, 180],
+                                [step_time * 3, 11 * step, 4 * step, 0.35, 18],
+                                [step_time * 2, 11 * step, 7 * step, 0.35, 180],
+                                [step_time * 2, 11 * step, 7 * step, 0.35, 180],
+                                [step_time * 4, 7 * step, 7 * step, 0.35, 180],
+                                [step_time * 4, 3 * step, 7 * step, 0.35, 180],
+                                [step_time * 3, 0 * step, 7 * step, 0.35, 90],
                                 [step_time, 0 * step, 6 * step, 0.35, 0],
                                 ]
 
         path_maze_left_side = [[1, 0 * step, 8 * step, 0.35, 0],  # start in (0,240,0.35)
-                               [step_time *3, 4 * step, 8 * step, 0.35, 0],
-                               [step_time *3, 8 * step, 8 * step, 0.35, 0],
-                               [step_time *3, 8 * step, 11 * step, 0.35, 0],
-                               [step_time *2, 8 * step, 11 * step, 0.35, 90],
-                               [step_time *2 , 8 * step, 13 * step, 0.35, 90],
-                               [step_time *3, 11 * step, 13 * step, 0.35, 90],
-                               [step_time *2 , 11 * step, 11 * step, 0.35, 90],
-                               [step_time *2 , 11 * step, 11 * step, 0.35, 180],
-                               [step_time *2 , 11 * step, 13 * step, 0.35, 180],
-                               [step_time *3, 7 * step, 13 * step, 0.35, 180],
-                               [step_time *2 , 7 * step, 11 * step, 0.35, 180],
-                               [step_time *3, 4 * step, 11 * step, 0.35, 180],
-                               [step_time *3, 4 * step, 11 * step, 0.35, 0],
-                               [step_time *3, 7 * step, 11 * step, 0.35, 0],
-                               [step_time *3, 7 * step, 8 * step, 0.35, 0],
-                               [step_time *3, 4 * step, 8 * step, 0.35, 0],
-                               [step_time *4, 0 * step, 8 * step, 0.35, 0],
+                               [step_time * 3, 4 * step, 8 * step, 0.35, 0],
+                               [step_time * 3, 8 * step, 8 * step, 0.35, 0],
+                               [step_time * 3, 8 * step, 11 * step, 0.35, 0],
+                               [step_time * 2, 8 * step, 11 * step, 0.35, 90],
+                               [step_time * 2, 8 * step, 13 * step, 0.35, 90],
+                               [step_time * 3, 11 * step, 13 * step, 0.35, 90],
+                               [step_time * 2, 11 * step, 11 * step, 0.35, 90],
+                               [step_time * 2, 11 * step, 11 * step, 0.35, 180],
+                               [step_time * 2, 11 * step, 13 * step, 0.35, 180],
+                               [step_time * 3, 7 * step, 13 * step, 0.35, 180],
+                               [step_time * 2, 7 * step, 11 * step, 0.35, 180],
+                               [step_time * 3, 4 * step, 11 * step, 0.35, 180],
+                               [step_time * 3, 4 * step, 11 * step, 0.35, 0],
+                               [step_time * 3, 7 * step, 11 * step, 0.35, 0],
+                               [step_time * 3, 7 * step, 8 * step, 0.35, 0],
+                               [step_time * 3, 4 * step, 8 * step, 0.35, 0],
+                               [step_time * 4, 0 * step, 8 * step, 0.35, 0],
 
                                ]
 
