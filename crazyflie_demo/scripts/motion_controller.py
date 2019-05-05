@@ -6,21 +6,16 @@
 # collision avoidance #todo fix coordinate system currently works only without rotation
 # command drone using KB in WORLD coordinatesz
 
-import sys
-import termios
 import time
-import tty
-from math import atan2, sqrt, pow, pi, sin, cos
 
-import crazyflie
 import rospy
 import tf2_geometry_msgs
 import tf2_ros
 # from crazyflie_driver.msg import Hover
-from crazyflie_driver.msg import GenericLogData
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import Twist
 from math import atan2, sqrt, pow
+from math import pi, sin, cos
 from tf.transformations import euler_from_quaternion
 
 import crazyflie
@@ -87,9 +82,9 @@ def check_direction():
     if trans != None:
         cj_local_coord = PoseStamped()
         cj_local_coord = tf2_geometry_msgs.do_transform_pose(cj_injection_message, trans)
-        #rospy.loginfo(cj_local_coord)
+        # rospy.loginfo(cj_local_coord)
         heading = atan2(cj_local_coord.pose.position.y, cj_local_coord.pose.position.x)
-        #rospy.loginfo(heading)
+        # rospy.loginfo(heading)
 
         distance = sqrt(pow(cj_local_coord.pose.position.x, 2) + pow(cj_local_coord.pose.position.y, 2))
         duration = distance / speed  # #calculate required time for this motion
@@ -120,7 +115,6 @@ def check_direction():
 
 
 def collision_direction_wc(collision_sensor_angle):
-
     evade_distance = 0.07  # distance to go opposite direction of wall - meters
 
     global prefix
@@ -138,17 +132,16 @@ def collision_direction_wc(collision_sensor_angle):
         euler = euler_from_quaternion(q, axes='sxyz')
         yaw = euler[2]
 
-        collision_angle_wc=collision_sensor_angle + yaw
-        if collision_angle_wc < -2*pi :
-            collision_angle_wc += 2*pi
+        collision_angle_wc = collision_sensor_angle + yaw
+        if collision_angle_wc < -2 * pi:
+            collision_angle_wc += 2 * pi
 
-        if collision_angle_wc > 2*pi :
-            collision_angle_wc -= 2*pi
+        if collision_angle_wc > 2 * pi:
+            collision_angle_wc -= 2 * pi
 
-
-        y = evade_distance*  sin(collision_angle_wc)
+        y = evade_distance * sin(collision_angle_wc)
         x = evade_distance * cos(collision_angle_wc)
-        avoid_goal = [-x,y]
+        avoid_goal = [-x, y]
         # rospy.loginfo('collision at angle LC')
         # rospy.loginfo(collision_sensor_angle)
         # rospy.loginfo('collision at angle WC')
@@ -156,6 +149,7 @@ def collision_direction_wc(collision_sensor_angle):
         # rospy.loginfo('avoidance goal WC')
         # rospy.loginfo(avoid_goal)
         return avoid_goal
+
 
 def get_ranges(msg):
     global front, back, up, left, right, zrange, ranges
@@ -168,7 +162,6 @@ def get_ranges(msg):
     right = weight_old * right + weight_new * msg.values[4] / 1000
     # zrange = msg.values[5] / 1000
     ranges = [back, left, front, right, up]
-
 
 
 def get_xyz_yaw(cj_injection_message):
@@ -227,11 +220,11 @@ def handler(cf_handler):
     #       Cj_injection and before that Cj order will go to drone,
     #       we will check if theres a futoristic collision within that path.
 
-    dist_threshold = 0.15 #minimum distance to trigger collission avoidance [meters]
+    dist_threshold = 0.15  # minimum distance to trigger collission avoidance [meters]
 
     def_duration = 1.8
     land_duration = 1.5
-    avoid_c_duration=1.0
+    avoid_c_duration = 1.0
 
     try:
 
@@ -246,31 +239,31 @@ def handler(cf_handler):
                 if ranges[2] < dist_threshold:
                     rospy.loginfo("front collision avoidance")
                     # cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.8, relative=True)
-                    last_collision=rospy.Time.now()
-                    [x,y]=collision_direction_wc(0)
+                    last_collision = rospy.Time.now()
+                    [x, y] = collision_direction_wc(0)
                     cf_handler.goTo(goal=[x, y, 0.0], yaw=0, duration=avoid_c_duration, relative=True)
 
                 elif ranges[0] < dist_threshold:
                     rospy.loginfo("back collision avoidance")
                     # cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.8, relative=True)
-                    last_collision=rospy.Time.now()
-                    [x,y]=collision_direction_wc(-1*pi)
+                    last_collision = rospy.Time.now()
+                    [x, y] = collision_direction_wc(-1 * pi)
                     cf_handler.goTo(goal=[x, y, 0.0], yaw=0, duration=avoid_c_duration, relative=True)
 
 
                 elif ranges[3] < dist_threshold:
                     rospy.loginfo("right collision avoidance")
                     # cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.8, relative=True)
-                    last_collision=rospy.Time.now()
-                    [x,y]=collision_direction_wc(0.5 * pi)
+                    last_collision = rospy.Time.now()
+                    [x, y] = collision_direction_wc(0.5 * pi)
                     cf_handler.goTo(goal=[x, y, 0.0], yaw=0, duration=avoid_c_duration, relative=True)
 
 
                 elif ranges[1] < dist_threshold:
                     rospy.loginfo("left collision avoidance")
                     # cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.8, relative=True)
-                    last_collision=rospy.Time.now()
-                    [x,y]=collision_direction_wc(-0.5 * pi)
+                    last_collision = rospy.Time.now()
+                    [x, y] = collision_direction_wc(-0.5 * pi)
                     cf_handler.goTo(goal=[x, y, 0.0], yaw=0, duration=avoid_c_duration, relative=True)
 
                 elif ranges[4] < dist_threshold:
@@ -282,24 +275,26 @@ def handler(cf_handler):
 
             if keyboard_flag is True:
                 keyboard_flag = False
-                kb_step=0.3 #meters each cmd_vel message
-                cont_rot_yaw=0
+                kb_step = 0.3  # meters each cmd_vel message
+                cont_rot_yaw = 0
                 if kb_x > 0:
                     cf_handler.goTo(goal=[kb_step, 0.0, 0.0], yaw=cont_rot_yaw, duration=def_duration, relative=True)
                 elif kb_x < 0:
-                    cf_handler.goTo(goal=[-1*kb_step, 0.0, 0.0], yaw=cont_rot_yaw, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[-1 * kb_step, 0.0, 0.0], yaw=cont_rot_yaw, duration=def_duration,
+                                    relative=True)
                 elif kb_yaw < 0:
-                    cf_handler.goTo(goal=[0.0, -1*kb_step, 0.0], yaw=cont_rot_yaw, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[0.0, -1 * kb_step, 0.0], yaw=cont_rot_yaw, duration=def_duration,
+                                    relative=True)
                 elif kb_yaw > 0:
                     cf_handler.goTo(goal=[0.0, kb_step, 0.0], yaw=cont_rot_yaw, duration=def_duration, relative=True)
                 elif kb_y > 0:
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=pi/2, duration=def_duration + 1.0,
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=pi / 2, duration=def_duration + 1.0,
                                     relative=True)  # slow down yaw rotation
                 elif kb_y < 0:
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=-1*pi/2, duration=def_duration + 1.0,
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=-1 * pi / 2, duration=def_duration + 1.0,
                                     relative=True)  # slow down yaw rotation
                 elif kb_x == 0 and kb_y == 0:
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=1.0, relative=True) #stop in place
+                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=1.0, relative=True)  # stop in place
 
                 if kb_z != 0:
                     cf_handler.land(targetHeight=0.0, duration=land_duration)
@@ -318,7 +313,7 @@ def handler(cf_handler):
 
                 # obstacle_free=avoid_collision()
                 # if obstacle_free == True:
-                cf_handler.goTo(goal=[x*1.075, y*1.075, z], yaw=yaw, duration=duration, relative=False)
+                cf_handler.goTo(goal=[x * 1.075, y * 1.075, z], yaw=yaw, duration=duration, relative=False)
                 # else:
                 #     rospy.logwarn("cannot move - obstacle in the way")
 
