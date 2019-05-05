@@ -10,17 +10,18 @@ import sys
 import termios
 import time
 import tty
-from math import atan2, sqrt, pow
 
-import crazyflie
 import rospy
 import tf2_geometry_msgs
 import tf2_ros
-# from crazyflie_driver.msg import Hover
-from crazyflie_driver.msg import GenericLogData
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import Twist
+from math import atan2, sqrt, pow
 from tf.transformations import euler_from_quaternion
+
+import crazyflie
+# from crazyflie_driver.msg import Hover
+from crazyflie_driver.msg import GenericLogData
 
 # TODO: move all this shit into a class MotionController
 
@@ -35,7 +36,7 @@ global kb_x, kb_y, kb_z, kb_yaw
 kb_x = kb_y = kb_z = kb_yaw = 0
 
 global ranges
-ranges = [0,0,0,0]
+ranges = [0, 0, 0, 0]
 cj_injection_flag = False
 cj_injection_message = None
 
@@ -134,6 +135,7 @@ def get_ranges(msg):
     # zrange = msg.values[5] / 1000
     ranges = [back, left, front, right, up]
 
+
 def getch():
     fd = sys.stdin.fileno()
     old_settings = termios.tcgetattr(fd)
@@ -201,7 +203,7 @@ def handler(cf_handler):
     #       Cj_injection and before that Cj order will go to drone,
     #       we will check if theres a futoristic collision within that path.
 
-    dist_threshold = 0.15 #minimum distance to trigger collission avoidance [meters]
+    dist_threshold = 0.15  # minimum distance to trigger collission avoidance [meters]
 
     def_duration = 1.8
     land_duration = 1.5
@@ -219,21 +221,21 @@ def handler(cf_handler):
                 if ranges[2] < dist_threshold:
                     rospy.loginfo("front collision avoidance")
                     cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.8, relative=True)
-                    last_collision=rospy.Time.now()
+                    last_collision = rospy.Time.now()
                 elif ranges[0] < dist_threshold:
                     rospy.loginfo("back collision avoidance")
                     cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.8, relative=True)
-                    last_collision=rospy.Time.now()
+                    last_collision = rospy.Time.now()
 
                 elif ranges[3] < dist_threshold:
                     rospy.loginfo("right collision avoidance")
                     cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.8, relative=True)
-                    last_collision=rospy.Time.now()
+                    last_collision = rospy.Time.now()
 
                 elif ranges[1] < dist_threshold:
                     rospy.loginfo("left collision avoidance")
                     cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.8, relative=True)
-                    last_collision=rospy.Time.now()
+                    last_collision = rospy.Time.now()
 
                 elif ranges[4] < dist_threshold:
                     rospy.loginfo("top collision avoidance")
