@@ -83,7 +83,7 @@ class DroneCjInjector:
 
         self.next_pose[0:2] = next_point
         self.next_pose[2:7] = self.pos[2:7]
-        self.next_pose[2] = 35 # hard coded Z height
+        self.next_pose[2] = 0.35 # hard coded Z height
 
         x = self.next_pose[0]
         y = self.next_pose[1]
@@ -92,6 +92,7 @@ class DroneCjInjector:
         pitch = 0
         yaw = self.next_pose[3]
         pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
+        # rospy.logdebug("cj_injection injected this pose: \n{}".format(pose))
         self.Cj_injector_pub.publish(pose)
 
 
@@ -141,8 +142,6 @@ class DroneInjector:
         self.num_of_drones = len(prefix_takeoff_dict_input.keys())  # get number of drones
         self.env_limits = env_limits_input
         self.POI = GridPOI(resolution, env_limits_input)
-        print(self.env_limits[1])
-        print(self.env_limits[3])
         self.matrix = np.zeros([np.int64(np.ceil((self.env_limits[1] - self.env_limits[0]) / self.res)),
                                 np.int64(np.ceil((self.env_limits[3] - self.env_limits[2]) / self.res))])
         # initiate DroneCjInjector per drone and add it to container
@@ -156,23 +155,22 @@ class DroneInjector:
         self.r = rate
 
         # Init listeners: Fill here when ready:
-        # self.occ_map_subscriber = rospy.Subscriber("/" + prefix + "/point_cloud", ROS_TYPE_OCC_MAP,
-        #                                self.point_cloud_parser)
 
         self.tfBuffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.tfBuffer)
         self.grid_sub = rospy.Subscriber("/indoor/occupancy_grid_topic", OccupancyGrid,
                                          callback=self.grid_parser)
-        self.rotation_example_subscriber = rospy.Subscriber("/Cj_injection_rotation_example", Empty, self.launcher)
+        # self.rotation_example_subscriber = rospy.Subscriber("/Cj_injection_rotation_example", Empty, self.launcher) # Why is it here?
 
-    def grid_parser(self, msg, topic):
+    def grid_parser(self, msg):
 
         grid_height = int(msg.info.height / msg.info.resolution)
         grid_width = int(msg.info.width / msg.info.resolution)
 
         self.matrix = np.array(msg.data).reshape((grid_height, grid_width))
-        [interesting_points_list_ij, interesting_points_list_xy, corner_points_list_ij,
-         corner_points_list_xy] = self.POI.find_POI(self.matrix)
+        # [interesting_points_list_ij, interesting_points_list_xy, corner_points_list_ij,
+        #  corner_points_list_xy] = self.POI.find_POI(self.matrix)
+        corner_points_list_xy = [] # Temporary! only for debug
 
         for drone in self.cj_injector_container:
             # cur_topic_list = cur_topic.split("/")
@@ -202,7 +200,10 @@ class DroneInjector:
                 # Store drone position and convert it from [m] to [cm]
                 # todo add function for selecting POI per drone!!!!!! *********
                 drone.update_pos(pos, self.matrix, pos[0:2], corner_points_list_xy)
-
+                # rospy.logdebug("in grid_parser - drone.update:\n"
+                #                "pos: {}\n"
+                #                "next_pos: {}\n"
+                #                "".format(pos,pos[0:2]))
             except:
                 rospy.logdebug("tf lookup -- {} not found".format(drone.tf_prefix))
             # except Exception as e:
@@ -306,14 +307,33 @@ if __name__ == '__main__':
     rospy.init_node("incjetor", log_level=rospy.DEBUG)
 
     prefix_list_from_launch_file = rospy.get_param("~prefix_list")
-    rospy.logdebug(prefix_list_from_launch_file)
     initial_takeoff_list_from_launch_file = rospy.get_param("~init_takeoff_list")
     limits_from_launch_file = rospy.get_param("~env_lim")
     res_from_launch_file = rospy.get_param("~resolution")
+    env_space = rospy.get_param("~env_space")
+    nDrones = rospy.get_param("~nDrones")
+
+    # exec ("limits_from_launch_file = {}".format(limits_from_launch_file))
+    # exec ("initial_takeoff_list_from_launch_file = {}".format(initial_takeoff_list_from_launch_file))
+    rospy.logdebug(limits_from_launch_file)
+
+    x_lim = (limits_from_launch_file[0][0] - env_space, limits_from_launch_file[0][1] + env_space)
+    y_lim = (limits_from_launch_file[0][2] - env_space, limits_from_launch_file[0][3] + env_space)
+
+    limits_from_launch_file = [x_lim[0], x_lim[1], y_lim[0], y_lim[1]]
+
+
+    rospy.logdebug(prefix_list_from_launch_file)
+    rospy.logdebug(initial_takeoff_list_from_launch_file)
 
     prefix_takeoff_dict = dict()
-    for i, pref in enumerate(prefix_list_from_launch_file):
-        prefix_takeoff_dict[pref] = initial_takeoff_list_from_launch_file[i]
+    for iDrone in range(nDrones):
+
+        pref = prefix_list_from_launch_file[iDrone]
+        curr_takeoff = initial_takeoff_list_from_launch_file[iDrone]
+        rospy.logdebug(pref)
+        rospy.logdebug(curr_takeoff[1])
+        prefix_takeoff_dict[pref] = curr_takeoff
 
     drone_container = DroneInjector(prefix_takeoff_dict, limits_from_launch_file, res_from_launch_file, 15)
 

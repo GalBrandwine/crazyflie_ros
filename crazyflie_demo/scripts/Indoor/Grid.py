@@ -41,8 +41,10 @@ class drone_pc:
 class Grid:
 
     def __init__(self, border_polygon, res, nDrones, initial_pos_dict):
+
         self.x_lim = [border_polygon[0][0], border_polygon[0][0]]
         self.y_lim = [border_polygon[0][1], border_polygon[0][1]]
+
         for i in range(1, border_polygon.__len__()):
             if self.x_lim[0] > border_polygon[i][0]:
                 self.x_lim[0] = border_polygon[i][0]

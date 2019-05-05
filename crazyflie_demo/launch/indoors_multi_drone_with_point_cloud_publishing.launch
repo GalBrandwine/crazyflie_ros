@@ -69,7 +69,7 @@ A few notes:
 
 
     <!-- arguments for indoor mapping  -->
-    <arg name="x_min" default="0"/>
+    <arg name="x_min" value="0"/>
     <arg name="x_max" default="450"/> <!-- 250 -->
     <arg name="y_min" default="0"/>
     <arg name="y_max" default="450"/> <!-- 250 -->
@@ -429,14 +429,20 @@ A few notes:
 
 
         <node name="Cj_injector" pkg="crazyflie_demo" type="Cj_injector.py" output="screen">
-            <param name="env_lim" value="$(arg env_lim)"/>
+<!--            <param name="env_lim" value="$(arg env_lim)"/>-->
+            <rosparam param="env_lim" subst_value="True">[$(arg env_lim),]</rosparam>
             <param name="resolution" value="$(arg resolution)"/>
-            <!--            <param name="prefix_list" value="[$(arg frame1), $(arg frame2), $(arg frame3),$(arg frame4)]"/>-->
-            <param name="prefix_list" value="[$(arg frame1)]"/>
+<!--            <rosparam param="resolution" subst_value="True">[$(arg resolution)]</rosparam>-->
+<!--            <param name="prefix_list" value="[$(arg frame1), $(arg frame2), $(arg frame3),$(arg frame4)]"/>-->
+<!--            <param name="prefix_list" value="[$(arg frame1)]"/>-->
+            <rosparam param="prefix_list" subst_value="True">[$(arg frame1),]</rosparam>
             <!--            Pass all drones initial takeoff positions-->
-            <param name="init_takeoff_list" value="[[$(arg initX1), $(arg initY1), $(arg initZ1)]]"/>
-            <!--            &lt;!&ndash;            Pass a list as ros param&ndash;&gt;-->
-            <!--            <rosparam param="prefix_list" subst_value="True">$(arg prefix_list)</rosparam>-->
+<!--            <param name="init_takeoff_list" value="[[$(arg initX1), $(arg initY1), $(arg initZ1)]] "/>-->
+            <rosparam param="init_takeoff_list" subst_value="True">[[$(arg initX1), $(arg initY1), $(arg initZ1)],]</rosparam>
+            <param name="env_space" value="$(arg env_space)"/>
+<!--            <rosparam param="env_space" subst_value="True">[$(arg env_space)]</rosparam>-->
+            <param name="nDrones" value="$(arg nDrones)"/>
+
         </node>
 
         <!--        <node name="agent_incjetor" pkg="crazyflie_demo" type="Agent_0.py" output="screen">-->
