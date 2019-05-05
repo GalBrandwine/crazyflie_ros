@@ -70,8 +70,8 @@ def Cj_injector(msg):
 def check_direction():
     global listener, tfBuffer, cj_injection_message
 
-    speed = 0.15  # default speed m/s
-    rot_speed = 0.5  # default rot speed sec/radian
+    speed = 0.2  # default speed m/s
+    rot_speed = 0.5  # default rot speed RAD/SEC
     min_duration = 2.0  # minimum time [sec] for single trajectory
     duration = default_duration = 3  # sec
     trans = None
@@ -224,7 +224,7 @@ def handler(cf_handler):
 
     dist_threshold = 0.12 #minimum distance to trigger collission avoidance [meters]
 
-    def_duration = 1.5
+    def_duration = 1.6
     land_duration = 1.5
     avoid_c_duration=1.0
 
@@ -278,14 +278,15 @@ def handler(cf_handler):
             if keyboard_flag is True:
                 keyboard_flag = False
                 kb_step=0.3 #meters each cmd_vel message
+                cont_rot_yaw=0
                 if kb_x > 0:
-                    cf_handler.goTo(goal=[kb_step, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[kb_step, 0.0, 0.0], yaw=cont_rot_yaw, duration=def_duration, relative=True)
                 elif kb_x < 0:
-                    cf_handler.goTo(goal=[-1*kb_step, 0.0, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[-1*kb_step, 0.0, 0.0], yaw=cont_rot_yaw, duration=def_duration, relative=True)
                 elif kb_yaw < 0:
-                    cf_handler.goTo(goal=[0.0, -1*kb_step, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[0.0, -1*kb_step, 0.0], yaw=cont_rot_yaw, duration=def_duration, relative=True)
                 elif kb_yaw > 0:
-                    cf_handler.goTo(goal=[0.0, kb_step, 0.0], yaw=0, duration=def_duration, relative=True)
+                    cf_handler.goTo(goal=[0.0, kb_step, 0.0], yaw=cont_rot_yaw, duration=def_duration, relative=True)
                 elif kb_y > 0:
                     cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=pi/2, duration=def_duration + 1.0,
                                     relative=True)  # slow down yaw rotation
@@ -312,7 +313,7 @@ def handler(cf_handler):
 
                 # obstacle_free=avoid_collision()
                 # if obstacle_free == True:
-                cf_handler.goTo(goal=[x, y, z], yaw=yaw, duration=duration, relative=False)
+                cf_handler.goTo(goal=[x*1.075, y*1.075, z], yaw=yaw, duration=duration, relative=False)
                 # else:
                 #     rospy.logwarn("cannot move - obstacle in the way")
 
