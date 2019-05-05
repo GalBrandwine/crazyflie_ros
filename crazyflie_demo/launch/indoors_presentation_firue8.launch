@@ -31,8 +31,8 @@ USAGE:
 
 
     <!-- for second CF    -->
-    <arg name="uri2" default="radio://0/120/2M/E7E7E7E706"/>
-    <arg name="frame2" default="cf6"/>
+    <arg name="uri2" default="radio://0/120/2M/E7E7E7E707"/>
+    <arg name="frame2" default="cf7"/>
     <arg name="traj_list2" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX2" default="0"/>
     <arg name="initY2" default="0"/>                    <!-- REMEMBER!!!!!!         -->
