@@ -313,7 +313,11 @@ def handler(cf_handler):
 
                 # obstacle_free=avoid_collision()
                 # if obstacle_free == True:
-                cf_handler.goTo(goal=[x * 1.075, y * 1.075, z], yaw=yaw, duration=duration, relative=False)
+                if z is 0:
+                    cf_handler.land(targetHeight=0.0, duration=land_duration)
+                    time.sleep(land_duration)
+                else:
+                    cf_handler.goTo(goal=[x * 1.075, y * 1.075, z], yaw=yaw, duration=duration, relative=False)
                 # else:
                 #     rospy.logwarn("cannot move - obstacle in the way")
 
