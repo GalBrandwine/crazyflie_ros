@@ -134,20 +134,20 @@ class DroneInjector:
         step_time = 2.0
         #                       [----t----, ----x---, ---y---, --z--, yaw]
         path_maze_right_side = [[step_time, 0 * step, 6 * step, 0.35, 0],  # start in (0,180,0.35)
-                                [step_time * 3, 3.2 * step, 6 * step, 0.35, 0],
-                                [step_time * 3, 3.2 * step, 2.5 * step, 0.35, 0],
-                                [step_time * 2, 6 * step, 2.5 * step, 0.35, 0],
-                                [step_time * 2, 6 * step, 4 * step, 0.35, 0],
-                                [step_time * 2, 6 * step, 4 * step, 0.35, 90],
-                                [step_time * 3, 8 * step, 4 * step, 0.35, 90],
-                                [step_time * 3, 11 * step, 4 * step, 0.35, 90],
-                                [step_time * 2, 11 * step, 7 * step, 0.35, 90],
+                                [step_time * 3, 3.2 * step, 6 * step, 0.35, 0],     # go forward
+                                [step_time * 3, 3.2 * step, 2.8 * step, 0.35, 0],   # go right
+                                [step_time * 2, 6 * step, 2.8 * step, 0.35, 0],     # go forward
+                                [step_time * 2, 6 * step, 4 * step, 0.35, 0],       # go left
+                                [step_time * 2, 6 * step, 4 * step, 0.35, 90],      # rotate left on spot: 90
+                                [step_time * 3, 8 * step, 4 * step, 0.35, 90],      # go forward
+                                [step_time * 3, 11 * step, 4 * step, 0.35, 90],     # go forward
+                                [step_time * 2, 11 * step, 7 * step, 0.35, 90],     # go forward
                                 [step_time * 2, 11 * step, 7 * step, 0.35, 180],
                                 [step_time * 4, 7 * step, 7 * step, 0.35, 180],
                                 [step_time * 4, 3 * step, 7 * step, 0.35, 180],
                                 [step_time * 3, 0 * step, 7 * step, 0.35, 180],
-                                [step_time, 0 * step, 6 * step, 0.35, 180],
-                                [step_time, 0 * step, 6 * step, 0.0, 180],
+                                [step_time, 0.3 * step, 6 * step, 0.35, 180],
+                                [step_time, 0.3 * step, 6 * step, 0.0, 180],
                                 ]
 
         path_maze_left_side = [[1, 0 * step, 8 * step, 0.35, 0],  # start in (0,240,0.35)
