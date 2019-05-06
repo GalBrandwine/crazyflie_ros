@@ -34,29 +34,33 @@ front = back = up = left = right = zrange = 0.0
 global kb_x, kb_y, kb_z, kb_yaw
 kb_x = kb_y = kb_z = kb_yaw = 0
 
+global listen_to_keyboard
 global ranges
 ranges = [0, 0, 0, 0]
 cj_injection_flag = False
 cj_injection_message = None
 
+listen_to_keyboard = False
 keyboard_flag = False
 
 
 def twist_callback(msg):
-    global kb_x, kb_y, kb_z, kb_yaw, keyboard_flag
-    def_duration = 2.0
-    land_duration = 1.5
+    global kb_x, kb_y, kb_z, kb_yaw, keyboard_flag, listen_to_keyboard
 
-    # rospy.loginfo("Received a /cmd_vel message!")
-    # rospy.loginfo("Linear Components: [%f, %f, %f]" % (msg.linear.x, msg.linear.y, msg.linear.z))
-    # rospy.loginfo("Angular Components: [%f, %f, %f]" % (msg.angular.x, msg.angular.y, msg.angular.z))
+    if listen_to_keyboard is 1:
+        def_duration = 2.0
+        land_duration = 1.5
 
-    kb_x = msg.linear.x
-    kb_y = msg.linear.y
-    kb_z = msg.linear.z
-    kb_yaw = msg.angular.z
+        # rospy.loginfo("Received a /cmd_vel message!")
+        # rospy.loginfo("Linear Components: [%f, %f, %f]" % (msg.linear.x, msg.linear.y, msg.linear.z))
+        # rospy.loginfo("Angular Components: [%f, %f, %f]" % (msg.angular.x, msg.angular.y, msg.angular.z))
 
-    keyboard_flag = True
+        kb_x = msg.linear.x
+        kb_y = msg.linear.y
+        kb_z = msg.linear.z
+        kb_yaw = msg.angular.z
+
+        keyboard_flag = True
 
 
 def Cj_injector(msg):
@@ -341,6 +345,10 @@ def handler(cf_handler):
 
 if __name__ == '__main__':
     rospy.init_node('motion', log_level=rospy.DEBUG)  # log_level=rospy.DEBUG
+
+    # last minute addition, listen to keyboard per drone!!
+    listen_to_keyboard = rospy.get_param("~listen_to_keyboard")
+    rospy.logdebug("listen_to_keyboard: {}".format(listen_to_keyboard))
 
     prefix = rospy.get_param("~tf_prefix")
     rospy.Subscriber('/' + prefix + '/log_ranges', GenericLogData, get_ranges)

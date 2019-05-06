@@ -22,12 +22,13 @@ A few notes:
 
 
     <!-- for first CF -->
-    <arg name="uri1" default="radio://0/120/2M/E7E7E7E703"/>
-    <arg name="frame1" default="cf3"/>
-    <arg name="frame1_active" default="0"/>
+    <arg name="uri1" default="radio://0/120/2M/E7E7E7E706"/>
+    <arg name="frame1" default="cf6"/>
+    <arg name="frame1_active" default="1"/>
+    <arg name="frame1__listening_to_key_board" default="0"/>
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX1" default="0.0"/>
-    <arg name="initY1" default="1.8"/>
+    <arg name="initY1" default="2.4"/>
     <arg name="initZ1" default="0"/>
 
 
@@ -35,6 +36,7 @@ A few notes:
     <arg name="uri2" default="radio://0/120/2M/E7E7E7E704"/>
     <arg name="frame2" default="cf4"/>
     <arg name="frame2_active" default="1"/>
+    <arg name="frame2__listening_to_key_board" default="1"/>
     <arg name="traj_list2" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX2" default="0.0"/>
     <arg name="initY2" default="1.8"/>
@@ -220,6 +222,7 @@ A few notes:
         <!--        Start keyboard controller. -->
         <node name="motion_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">
             <param name="tf_prefix" value="$(arg frame2)"/>
+            <param name="listen_to_keyboard" value="$(arg frame2__listening_to_key_board)"/>
         </node>
 
         <!--        Tf_broadcast a specific drone with world-->
