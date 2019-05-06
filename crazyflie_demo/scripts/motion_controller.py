@@ -329,7 +329,8 @@ def handler(cf_handler):
         # break
 
     except Exception as e:
-        cf_handler.stop()
+        # todo change the while into inner function.
+        # cf_handler.stop()
         rospy.loginfo('******* keyboard input exception *******')
         rospy.loginfo(e)
 
