@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import numpy as np
+import rospy
 
 class Agent:
 
@@ -54,14 +55,14 @@ class Agent:
         as_flag = False
 
         if self.astar_path == []:
-            vec = [self.next_pos[0][0] - self.current_pos[0][0], self.next_pos[0][1] - self.current_pos[0][1]]
+            vec = np.subtract(self.next_pos[0], self.current_pos[0])
         else:
-            vec = [self.astar_path[0][0] - self.current_pos[0][0], self.astar_path[0][1] - self.current_pos[0][1]]
+            vec = np.subtract(self.astar_path[0], self.current_pos[0])
             as_flag = True
 
         if self.astar_path != [] and np.linalg.norm(np.subtract(self.current_pos[0], self.next_pos[0])) > self.dist_factor * self.step_noise_size\
-                and self.is_step_legal(self.current_pos, [self.next_pos[0][0]-self.current_pos[0][0],self.next_pos[0][1]-self.current_pos[0][1]], matrix):
-            vec = [self.next_pos[0][0] - self.current_pos[0][0], self.next_pos[0][1] - self.current_pos[0][1]]
+                and self.is_step_legal(self.current_pos,  np.subtract(self.next_pos[0], self.current_pos[0]), matrix):
+            vec = np.subtract(self.next_pos[0], self.current_pos[0])
 
         while not flag and break_counter < max_count_val:
             break_counter = break_counter + 1
@@ -71,8 +72,7 @@ class Agent:
                 break
 
         if break_counter < max_count_val:
-            self.next_pos = self.current_pos + step
-            self.attempts_cnt = 0
+            self.next_pos = self.current_pos + vec
             if as_flag and self.astar_path != []:
                 del self.astar_path[0]
 

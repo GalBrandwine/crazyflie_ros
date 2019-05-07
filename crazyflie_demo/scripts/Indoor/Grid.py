@@ -71,6 +71,7 @@ class Grid:
         self.drone_name_arr = []
         self.floor_thr = 32
         self.sens_limit = 100
+        self.rate = 2 #Hz
 
         for i, id in enumerate(initial_pos_dict):
             self.drones_pos_list[id] = drone_pos(time=0, x=initial_pos_dict[id][0],
@@ -136,7 +137,7 @@ class Grid:
             i, j = self.xy_to_ij(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
             if self.matrix[i][j] == 0:
                 self.change_tail_to_empty(i, j)
-                self.empty_idxs.append([i, j])
+                # self.empty_idxs.append([i, j])
 
         except:
             rospy.logdebug("tf lookup -- {} not found".format(drone_id))
@@ -180,7 +181,7 @@ class Grid:
         # http://docs.ros.org/melodic/api/nav_msgs/html/msg/MapMetaData.html
         occ_grid_msg = OccupancyGrid()
 
-        rate = rospy.Rate(2)  # 2 Hz
+        rate = rospy.Rate(self.rate)
         while not rospy.is_shutdown():
             m = MapMetaData() # Grid metadata
             m.resolution = self.res # Grid resolution

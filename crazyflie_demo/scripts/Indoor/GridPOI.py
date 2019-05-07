@@ -89,8 +89,8 @@ class GridPOI:
                 cnt_wall = cnt_wall + 1
             if (matrix[i][j] == 1) and (matrix[ind_list[k][0] + i][ind_list[k][1] + j] == 0):
                 cnt_unexplored = cnt_unexplored + 1
-        if ((cnt_wall == 4) and (cnt_unexplored == 1)):
-            return False
+        # if ((cnt_wall == 4) and (cnt_unexplored == 1)):
+        #     return False
         if ((cnt_wall >= 1) and (cnt_unexplored >= 1)):  # or cnt_unexplored >= 4:
             return True
         else:

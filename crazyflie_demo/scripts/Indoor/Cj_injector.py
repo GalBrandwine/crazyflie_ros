@@ -3,7 +3,7 @@
 import numpy as np
 from math import radians
 from threading import Thread
-
+import time
 import rospy
 import tf
 import tf2_ros
@@ -15,6 +15,7 @@ from nav_msgs.msg import OccupancyGrid
 from std_msgs.msg import Empty
 from tf.transformations import euler_from_quaternion
 
+m_to_cm = 100
 
 def to_pose_stamped(x, y, z, roll, pitch, yaw):
     pose = PoseStamped()
@@ -33,7 +34,7 @@ def to_pose_stamped(x, y, z, roll, pitch, yaw):
     return pose
 
 def is_los(p1, p2, matrix, x_lim, y_lim, res):
-    n = int(np.maximum(1, np.ceil(np.linalg.norm(p1-p2)/res)*3))
+    n = int(np.maximum(1, np.ceil(np.linalg.norm(np.subtract(p1, p2))/res)*3))
     x = np.linspace(p1[0][0], p2[0][0], num=n, endpoint=True)
     y = np.linspace(p1[0][1], p2[0][1], num=n, endpoint=True)
     for ind in range(1, n):
@@ -49,14 +50,14 @@ def xy_to_ij(x, y, x_lim, y_lim, res):
     return i, j
 
 
-def get_goal_point(pos, temp_interesting_points_list_xy, matrix, x_lim, y_lim, res):
+def get_goal_point(pos, interesting_points_list_xy, matrix, x_lim, y_lim, res):
     g_idx = 0
     dist_arr = []
-    for idx, elem in enumerate(temp_interesting_points_list_xy):
+    for idx, elem in enumerate(interesting_points_list_xy):
         dist_arr.append(np.linalg.norm(np.subtract(elem, pos[0])))
     sorted_dist_idxs = sorted(range(len(dist_arr)), key=lambda k: dist_arr[k])
     for idx in sorted_dist_idxs:
-        if is_los(pos, [[temp_interesting_points_list_xy[idx][0], temp_interesting_points_list_xy[idx][1]]], matrix, x_lim, y_lim, res):
+        if is_los(pos, [[interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1]]], matrix, x_lim, y_lim, res):
             g_idx = idx
             break
     return g_idx
@@ -95,7 +96,7 @@ class DroneCjInjector:
         self.Cj_injector_pub = rospy.Publisher('/' + self.tf_prefix + "/Cj_injcetor", PoseStamped,
                                                queue_size=1)  # hover message publisher
 
-    def update_pos(self, drone_pos, new_matrix, next_point, corrners_array):
+    def update_pos(self, drone_pos, new_matrix, next_point, corrners_array, act_as_flag):
         """This function is being called in DroneInjector, every time a pose is recieved for this drone.
             :param
                 new_drone_pos - received from Father's subscriber.
@@ -104,25 +105,34 @@ class DroneCjInjector:
                 corrners_array - allowed land marks,
                 """
         self.matrix = new_matrix
-        self.pos = drone_pos
+        self.pos[0] = drone_pos[0][0]
+        self.pos[1] = drone_pos[0][1]
         # Assume that new_pos = [x,y,z,r,p,y]
-        Astar_Movement = PathBuilder.build_trj([self.pos[0:2]], self.env_limits, self.res, self.matrix, corrners_array,
-                                               next_point)
-        self.agent.astar_path = Astar_Movement[0]
-        temp_yaw = np.random.rand() * np.pi / 4 # todo: A function which computing the yaw angle should be placed here
-        self.agent.preform_step_sys_sim([self.pos[0:2]], temp_yaw, self.matrix)
-        # self.next_pose[0:2] = self.agent.next_pos
+        if act_as_flag:
+            Astar_Movement = PathBuilder.build_trj(drone_pos, self.env_limits, self.res, self.matrix, corrners_array,
+                                                   next_point)
+            self.agent.astar_path = Astar_Movement
 
-        self.next_pose[0:2] = next_point
-        self.next_pose[2:7] = self.pos[2:7]
+        temp_yaw = np.random.rand() * np.pi / 4 # todo: A function which computing the yaw angle should be placed here
+
+        self.agent.preform_step_sys_sim(drone_pos, temp_yaw, self.matrix)
+
+        # self.next_pose[0] = self.pos[0]/m_to_cm # Only for debug - inject input to output
+        # self.next_pose[1] = self.pos[1]/m_to_cm # Only for debug - inject input to output
+
+        self.next_pose[0] = self.agent.next_pos[0][0]/m_to_cm
+        self.next_pose[1] = self.agent.next_pos[0][1]/m_to_cm
         self.next_pose[2] = 0.35 # hard coded Z height
+        self.next_pose[3] = self.pos[3]
+        self.next_pose[4] = self.pos[4]
+        self.next_pose[5] = self.agent.current_heading
 
         x = self.next_pose[0]
         y = self.next_pose[1]
         z = self.next_pose[2]
         roll = 0
         pitch = 0
-        yaw = self.next_pose[3]
+        yaw = self.next_pose[5]
         pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
         # rospy.logdebug("cj_injection injected this pose: \n{}".format(pose))
         self.Cj_injector_pub.publish(pose)
@@ -173,9 +183,14 @@ class DroneInjector:
         self.res = resolution
         self.num_of_drones = len(prefix_takeoff_dict_input.keys())  # get number of drones
         self.env_limits = env_limits_input
+        self.POI_time_thresh = 3 #sec
+        self.last_time_POI_called = rospy.Time.now().to_sec()
+        self.interesting_points_list_xy = []
+        self.corner_points_list_xy = []
         self.POI = GridPOI(resolution, env_limits_input)
         self.matrix = np.zeros([np.int64(np.ceil((self.env_limits[1] - self.env_limits[0]) / self.res)),
                                 np.int64(np.ceil((self.env_limits[3] - self.env_limits[2]) / self.res))])
+
         # initiate DroneCjInjector per drone and add it to container
         for drone in prefix_takeoff_dict_input:
             rospy.logdebug("\n\n******************* Initiating DroneCjInjector for drone: {}".format(drone))
@@ -184,30 +199,29 @@ class DroneInjector:
             drone = DroneCjInjector(drone, drone_init_takeoff, self.env_limits, self.matrix, resolution)
             self.cj_injector_container.append(drone)
 
-        self.r = rate
+        self.rate = rate
 
-        # Init listeners: Fill here when ready:
-
+        # Init listeners:
         self.tfBuffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.tfBuffer)
         self.grid_sub = rospy.Subscriber("/indoor/occupancy_grid_topic", OccupancyGrid,
                                          callback=self.grid_parser)
-        # self.rotation_example_subscriber = rospy.Subscriber("/Cj_injection_rotation_example", Empty, self.launcher) # Why is it here?
 
     def grid_parser(self, msg):
 
         grid_height = int(msg.info.height / msg.info.resolution)
         grid_width = int(msg.info.width / msg.info.resolution)
+        self.matrix = np.array(msg.data).reshape((grid_height, grid_width))
 
-        # self.matrix = np.array(msg.data).reshape((grid_height, grid_width))
-        # if rospy.time.now() - self.last_time_POI_called >= self.thresh:
-        #     self.last_time_POI_called = rospy.time.now()
-        #     [_, interesting_points_list_xy, _, corner_points_list_xy] = self.POI.find_POI(self.matrix)
-        [_, interesting_points_list_xy, _, corner_points_list_xy] = self.POI.find_POI(self.matrix)
+        # Set timer for POI
+        self.POI_enabled = False
+        if (rospy.Time.now().to_sec() - self.last_time_POI_called) >= self.POI_time_thresh:
+            self.POI_enabled = True
+            self.last_time_POI_called = rospy.Time.now().to_sec()
+            [_, self.interesting_points_list_xy, _, self.corner_points_list_xy] = self.POI.find_POI(self.matrix)
+
         x_lim = self.env_limits[0:2]
         y_lim = self.env_limits[2:4]
-
-        # corner_points_list_xy = [] # Temporary! only for debug
 
         for drone in self.cj_injector_container:
 
@@ -228,27 +242,33 @@ class DroneInjector:
                 pitch = euler[1]
                 yaw = euler[2]
 
-                pos = [x, y, z, roll, pitch, yaw]
+                pos = [x*m_to_cm, y*m_to_cm, z*m_to_cm, roll, pitch, yaw]
                 # rospy.loginfo("pos in Display: {}\n".format(self.pos))
                 cur_pos = [[pos[0], pos[1]]]
 
-                g_idx = get_goal_point(cur_pos, interesting_points_list_xy, self.matrix, x_lim, y_lim, self.res)
-                gx = interesting_points_list_xy[g_idx][0]
-                gy = interesting_points_list_xy[g_idx][1]
+                if self.POI_enabled and self.interesting_points_list_xy != []:
+                    g_idx = get_goal_point(cur_pos, self.interesting_points_list_xy, self.matrix, x_lim, y_lim, self.res)
+                    gx = self.interesting_points_list_xy[g_idx][0]
+                    gy = self.interesting_points_list_xy[g_idx][1]
+                    goal = [gx, gy]
+                else:
+                    goal = cur_pos[0]
 
                 # drone.update_pos(pos, self.matrix, pos[0:2], corner_points_list_xy)
-                drone.update_pos(pos, self.matrix, [gx, gy], corner_points_list_xy)
-                del interesting_points_list_xy[g_idx]
+                drone.update_pos(cur_pos, self.matrix, goal, self.corner_points_list_xy, self.POI_enabled)
+
+                if self.POI_enabled and self.interesting_points_list_xy != []:
+                    del self.interesting_points_list_xy[g_idx]
 
                 # rospy.logdebug("in grid_parser - drone.update:\n"
                 #                "pos: {}\n"
                 #                "next_pos: {}\n"
                 #                "".format(pos,pos[0:2]))
 
-            except:
-                rospy.logdebug("tf lookup -- {} not found".format(drone.tf_prefix))
-            # except Exception as e:
-            #     rospy.loginfo(e)
+            # except:
+                # rospy.logdebug("tf lookup -- {} not found".format(drone.tf_prefix))
+            except Exception as e:
+                rospy.logdebug(e)
 
 
 if __name__ == '__main__':
@@ -261,26 +281,16 @@ if __name__ == '__main__':
     env_space = rospy.get_param("~env_space")
     nDrones = rospy.get_param("~nDrones")
 
-    # exec ("limits_from_launch_file = {}".format(limits_from_launch_file))
-    # exec ("initial_takeoff_list_from_launch_file = {}".format(initial_takeoff_list_from_launch_file))
-    rospy.logdebug(limits_from_launch_file)
-
     x_lim = (limits_from_launch_file[0][0] - env_space, limits_from_launch_file[0][1] + env_space)
     y_lim = (limits_from_launch_file[0][2] - env_space, limits_from_launch_file[0][3] + env_space)
 
     limits_from_launch_file = [x_lim[0], x_lim[1], y_lim[0], y_lim[1]]
-
-
-    rospy.logdebug(prefix_list_from_launch_file)
-    rospy.logdebug(initial_takeoff_list_from_launch_file)
 
     prefix_takeoff_dict = dict()
     for iDrone in range(nDrones):
 
         pref = prefix_list_from_launch_file[iDrone]
         curr_takeoff = initial_takeoff_list_from_launch_file[iDrone]
-        rospy.logdebug(pref)
-        rospy.logdebug(curr_takeoff[1])
         prefix_takeoff_dict[pref] = curr_takeoff
 
     drone_container = DroneInjector(prefix_takeoff_dict, limits_from_launch_file, res_from_launch_file, 15)

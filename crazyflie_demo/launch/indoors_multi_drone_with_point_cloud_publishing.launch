@@ -445,15 +445,6 @@ A few notes:
 
         </node>
 
-        <!--        <node name="agent_incjetor" pkg="crazyflie_demo" type="Agent_0.py" output="screen">-->
-        <!--            <param name="env_lim" value="$(arg env_lim)"/>-->
-        <!--            <param name="resolution" value="$(arg resolution)"/>-->
-        <!--            <param name="nDrones" value="$(arg nDrones)"/>-->
-
-        <!--            <param name="drone_name_0" value="$(arg frame1)"/>-->
-        <!--            <param name="drone_takeoff_position_0" value="[$(arg initX1), $(arg initY1), $(arg initZ1)]"/>-->
-
-        <!--        </node>-->
     </group>
 
 </launch>

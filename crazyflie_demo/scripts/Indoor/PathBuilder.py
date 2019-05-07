@@ -218,7 +218,6 @@ def build_trj(pos, env_limits, res, matrix, temp_corner_points_list_xy, goal):
 
     x_lim = env_limits[0:2]
     y_lim = env_limits[2:4]
-    Astar_Movement = []
     astar = Astar(x_lim, y_lim, matrix, res)
 
     gx = goal[0]
@@ -233,6 +232,8 @@ def build_trj(pos, env_limits, res, matrix, temp_corner_points_list_xy, goal):
     #
     #     temp_corner_points_list_xy = filter(None, temp_corner_points_list_xy)
 
-    Astar_Movement.append(astar_movement[1:])
 
-    return Astar_Movement, temp_corner_points_list_xy
+    Astar_Movement = astar_movement[1:]
+
+    # return Astar_Movement, temp_corner_points_list_xy
+    return Astar_Movement
