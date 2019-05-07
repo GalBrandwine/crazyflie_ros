@@ -135,9 +135,9 @@ A few notes:
         </node>
 
         <!--            Fix vrpn axes - broadcasts tf frame "cf#_fixed" FOR IT TO WORK THE RIGID BODY NAME MUST BE CF#_VRPN -->
-<!--        <node name="explorer" pkg="crazyflie_demo" type="tf_fixer.py" output="screen">-->
-<!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
-<!--        </node>-->
+        <!--        <node name="explorer" pkg="crazyflie_demo" type="tf_fixer.py" output="screen">-->
+        <!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
+        <!--        </node>-->
         <!--        Tf_broadcast a static transform with offset between a drone launch point and world-->
         <node pkg="tf" type="static_transform_publisher" name="world_to_$(arg frame1)_takeoff"
               args="$(arg initX1) $(arg initY1) 0 0 0 0 1 world $(arg frame1)_takeoff 100"/>
@@ -160,6 +160,7 @@ A few notes:
         <!--        Start keyboard controller. -->
         <node name="motion_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">
             <param name="tf_prefix" value="$(arg frame1)"/>
+            <param name="listen_to_keyboard" value="$(arg frame1__listening_to_key_board)"/>
         </node>
 
         <!--        Publish TOF sensors readings as pointcloud-->
@@ -204,9 +205,9 @@ A few notes:
         </node>
 
         <!--        Fix vrpn axes - broadcasts tf frame "cf#_fixed" FOR IT TO WORK THE RIGID BODY NAME MUST BE CF#_VRPN -->
-<!--        <node name="explorer" pkg="crazyflie_demo" type="tf_fixer.py" output="screen">-->
-<!--            <param name="tf_prefix" value="$(arg frame2)"/>-->
-<!--        </node>-->
+        <!--        <node name="explorer" pkg="crazyflie_demo" type="tf_fixer.py" output="screen">-->
+        <!--            <param name="tf_prefix" value="$(arg frame2)"/>-->
+        <!--        </node>-->
 
         <!--        Tf_broadcast a static transform with offset between a drone launch point and world-->
         <node pkg="tf" type="static_transform_publisher" name="world_to_$(arg frame2)_takeoff"
@@ -315,7 +316,7 @@ A few notes:
         </node>
     </group>
 
-<!--    ***************************************************** FRAME 4 *******************************************************-->
+    <!--    ***************************************************** FRAME 4 *******************************************************-->
     <group ns="$(arg frame4)" if="$(eval arg('frame4_active') ==1)">
         <node pkg="crazyflie_driver" type="crazyflie_add" name="crazyflie_add" output="screen">
             <param name="uri" value="$(arg uri4)"/>

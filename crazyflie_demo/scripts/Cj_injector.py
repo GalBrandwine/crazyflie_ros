@@ -133,36 +133,33 @@ class DroneInjector:
         step = 0.30  # m
         step_time = 2.0
 
-
-
         # simple straight line, then turn 360, then go back
         #                       [----t----, ----x---, ---y---, --z--, yaw]
         path_straight_line_360_go_back = [
-                                [step_time * 1, 0 * step, 8 * step, 0.35, 0],  # start in (0,180,0.35)
-                                [step_time * 2, 2 * step, 8 * step, 0.35, 0],  # go forward
-                                [step_time * 2, 4 * step, 8 * step, 0.35, 0],  # go forward
-                                [step_time * 2, 6 * step, 8 * step, 0.35, 0],  # go forward
-                                [step_time * 2, 6 * step, 8 * step, 0.35, 90],  # turn
-                                [step_time * 2, 6 * step, 8 * step, 0.35, 180],  # turn
-                                [step_time * 2, 6 * step, 8 * step, 0.35, 270],  # turn
-                                [step_time * 2, 6 * step, 8 * step, 0.35, 360],  # turn
-                                [step_time * 2, 4 * step, 8 * step, 0.35, 360],  # go back home
-                                [step_time * 2, 2 * step, 8 * step, 0.35, 360],  # go forward
-                                [step_time * 2, 0 * step, 8 * step, 0.35, 0],  # go land
-                                ]
-
-
+            [step_time * 1, 0 * step, 8 * step, 0.35, 0],  # start in (0,180,0.35)
+            [step_time * 2, 2 * step, 8 * step, 0.35, 0],  # go forward
+            [step_time * 2, 4 * step, 8 * step, 0.35, 0],  # go forward
+            [step_time * 2, 6 * step, 8 * step, 0.35, 0],  # go forward
+            [step_time * 2, 6 * step, 8 * step, 0.35, 90],  # turn
+            [step_time * 2, 6 * step, 8 * step, 0.35, 180],  # turn
+            [step_time * 2, 6 * step, 8 * step, 0.35, 90],  # turn
+            [step_time * 2, 6 * step, 8 * step, 0.35, 0],  # turn
+            [step_time * 2, 4 * step, 8 * step, 0.35, 0],  # go back home
+            [step_time * 2, 2 * step, 8 * step, 0.35, 0],  # go forward
+            [step_time * 2, 0 * step, 8 * step, 0.35, 0],  # go land
+            [step_time * 2, 0 * step, 8 * step, 0, 0],  # go land
+        ]
 
         #                       [----t----, ----x---, ---y---, --z--, yaw]
         path_maze_right_side = [[step_time, 0 * step, 6 * step, 0.35, 0],  # start in (0,180,0.35)
-                                [step_time * 3, 3.2 * step, 6 * step, 0.35, 0],     # go forward
-                                [step_time * 3, 3.2 * step, 2.8 * step, 0.35, 0],   # go right
-                                [step_time * 2, 6 * step, 2.8 * step, 0.35, 0],     # go forward
-                                [step_time * 2, 6 * step, 4 * step, 0.35, 0],       # go left
-                                [step_time * 2, 6 * step, 4 * step, 0.35, 90],      # rotate left on spot: 90
-                                [step_time * 3, 8 * step, 4 * step, 0.35, 90],      # go forward
-                                [step_time * 3, 11 * step, 4 * step, 0.35, 90],     # go forward
-                                [step_time * 2, 11 * step, 7 * step, 0.35, 90],     # go forward
+                                [step_time * 3, 3.2 * step, 6 * step, 0.35, 0],  # go forward
+                                [step_time * 3, 3.2 * step, 2.8 * step, 0.35, 0],  # go right
+                                [step_time * 2, 6 * step, 2.8 * step, 0.35, 0],  # go forward
+                                [step_time * 2, 6 * step, 4 * step, 0.35, 0],  # go left
+                                [step_time * 2, 6 * step, 4 * step, 0.35, 90],  # rotate left on spot: 90
+                                [step_time * 3, 8 * step, 4 * step, 0.35, 90],  # go forward
+                                [step_time * 3, 11 * step, 4 * step, 0.35, 90],  # go forward
+                                [step_time * 2, 11 * step, 7 * step, 0.35, 90],  # go forward
                                 [step_time * 2, 11 * step, 7 * step, 0.35, 180],
                                 [step_time * 4, 7 * step, 7 * step, 0.35, 180],
                                 [step_time * 4, 3 * step, 7 * step, 0.35, 180],
