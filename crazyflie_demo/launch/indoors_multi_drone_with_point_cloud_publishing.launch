@@ -22,9 +22,9 @@ A few notes:
 
 
     <!-- for first CF -->
-    <arg name="uri1" default="radio://0/120/2M/E7E7E7E701"/>
+    <arg name="uri1" default="radio://0/120/2M/E7E7E7E701"/> <!-- To activate cj injector using the bag file of cf1 change the last number to 3  -->
     <arg name="frame1" default="cf1"/>
-    <arg name="frame1_active" default="0"/>
+    <arg name="frame1_active" default="0"/> <!-- To activate with real drone change to 1 -->
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX1" default="0.0"/>
     <arg name="initY1" default="1.8"/>

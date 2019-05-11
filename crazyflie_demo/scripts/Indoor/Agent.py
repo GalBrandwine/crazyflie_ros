@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import numpy as np
+import math
 import rospy
 
 class Agent:
@@ -15,7 +16,7 @@ class Agent:
         self.step_factor = 1
         self.next_pos = pos
         self.current_pos = self.next_pos
-        self.next_heading = 0
+        self.next_heading = math.radians(0)
         self.current_heading = self.next_heading
         self.VisibilityRange = 300
         self.scanning_range = 200
@@ -42,7 +43,6 @@ class Agent:
 
     def preform_step_sys_sim(self, current_pos, current_heading, matrix):
         self.update_current_state(current_pos, current_heading)
-        # self.reduced_neigbours_pos_list = self.neighborhood_reduction(neigbours_pos_list, matrix)
         self.Dynam_Search_in_maze(matrix)
 
 

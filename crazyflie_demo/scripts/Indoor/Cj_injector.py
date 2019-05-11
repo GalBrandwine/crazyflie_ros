@@ -2,6 +2,7 @@
 """This is a simple Cj_injector for emulating. """
 import numpy as np
 from math import radians
+import  math
 from threading import Thread
 import time
 import rospy
@@ -25,7 +26,9 @@ def to_pose_stamped(x, y, z, roll, pitch, yaw):
     pose.pose.position.y = y
     pose.pose.position.z = z
 
-    quaternion = tf.transformations.quaternion_from_euler(radians(roll), radians(pitch), radians(yaw))
+    # quaternion = tf.transformations.quaternion_from_euler(radians(roll), radians(pitch), radians(yaw))
+    # yaw is already in radians
+    quaternion = tf.transformations.quaternion_from_euler(radians(roll), radians(pitch), yaw)
     pose.pose.orientation.x = quaternion[0]
     pose.pose.orientation.y = quaternion[1]
     pose.pose.orientation.z = quaternion[2]
@@ -92,11 +95,12 @@ class DroneCjInjector:
         self.agent = Agent(self.tf_prefix, [self.pos[0:2]], self.res, self.env_limits)
         self.pathfinder = None
         self.matrix = matrix
+        self.drone_yaw = math.radians(0)
         # Init publisher
         self.Cj_injector_pub = rospy.Publisher('/' + self.tf_prefix + "/Cj_injcetor", PoseStamped,
                                                queue_size=1)  # hover message publisher
 
-    def update_pos(self, drone_pos, new_matrix, next_point, corrners_array, act_as_flag):
+    def update_pos(self, drone_pos, new_matrix, next_point, drone_yaw, corrners_array, act_as_flag):
         """This function is being called in DroneInjector, every time a pose is recieved for this drone.
             :param
                 new_drone_pos - received from Father's subscriber.
@@ -112,20 +116,24 @@ class DroneCjInjector:
             Astar_Movement = PathBuilder.build_trj(drone_pos, self.env_limits, self.res, self.matrix, corrners_array,
                                                    next_point)
             self.agent.astar_path = Astar_Movement
+            # temp_yaw = np.random.rand() * np.pi / 4
+            temp_yaw = drone_yaw + (np.pi / 2) # todo: A function which computing the yaw angle should be placed here
+            self.drone_yaw = np.mod(temp_yaw, 2*np.pi)  # limit the rotation by maximum angle
 
-        temp_yaw = np.random.rand() * np.pi / 4 # todo: A function which computing the yaw angle should be placed here
-
-        self.agent.preform_step_sys_sim(drone_pos, temp_yaw, self.matrix)
+        print self.drone_yaw
+        self.agent.preform_step_sys_sim(drone_pos, self.drone_yaw, self.matrix)
 
         # self.next_pose[0] = self.pos[0]/m_to_cm # Only for debug - inject input to output
         # self.next_pose[1] = self.pos[1]/m_to_cm # Only for debug - inject input to output
+        # self.next_pose[5] = 0 # Only for debug
 
         self.next_pose[0] = self.agent.next_pos[0][0]/m_to_cm
         self.next_pose[1] = self.agent.next_pos[0][1]/m_to_cm
-        self.next_pose[2] = 0.35 # hard coded Z height
-        self.next_pose[3] = self.pos[3]
-        self.next_pose[4] = self.pos[4]
-        self.next_pose[5] = self.agent.current_heading
+        self.next_pose[5] = self.drone_yaw
+        self.next_pose[2] = 0.35  # hard coded Z height
+        # return to original angle after rotation
+        if act_as_flag:
+            self.drone_yaw = drone_yaw
 
         x = self.next_pose[0]
         y = self.next_pose[1]
@@ -183,7 +191,7 @@ class DroneInjector:
         self.res = resolution
         self.num_of_drones = len(prefix_takeoff_dict_input.keys())  # get number of drones
         self.env_limits = env_limits_input
-        self.POI_time_thresh = 3 #sec
+        self.POI_time_thresh = 2 #sec
         self.last_time_POI_called = rospy.Time.now().to_sec()
         self.interesting_points_list_xy = []
         self.corner_points_list_xy = []
@@ -255,7 +263,7 @@ class DroneInjector:
                     goal = cur_pos[0]
 
                 # drone.update_pos(pos, self.matrix, pos[0:2], corner_points_list_xy)
-                drone.update_pos(cur_pos, self.matrix, goal, self.corner_points_list_xy, self.POI_enabled)
+                drone.update_pos(cur_pos, self.matrix, goal, yaw, self.corner_points_list_xy, self.POI_enabled)
 
                 if self.POI_enabled and self.interesting_points_list_xy != []:
                     del self.interesting_points_list_xy[g_idx]
