@@ -27,7 +27,7 @@ cj_injection_flag = False
 cj_injection_message = None
 
 
-# def check_direction():
+# def check_direction() :
 #     global listener, tfBuffer, cj_injection_message
 #
 #     speed = 0.20  # default speed m/s
