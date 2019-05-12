@@ -108,12 +108,16 @@ class GridPOI:
     def is_tail_in_corner(self, i, j, matrix):
         if matrix[i][j] == 1:
             if matrix[i + 1][j] == 1 and matrix[i][j + 1] == 1 and matrix[i + 1][j + 1] != 1:
+                # return True, [-2, -2]
                 return True, [-1, -1]
             elif matrix[i + 1][j] == 1 and matrix[i][j - 1] == 1 and matrix[i + 1][j - 1] != 1:
+                # return True, [-2, 2]
                 return True, [-1, 1]
             elif matrix[i - 1][j] == 1 and matrix[i][j - 1] == 1 and matrix[i - 1][j - 1] != 1:
+                # return True, [2, 2]
                 return True, [1, 1]
             elif matrix[i - 1][j] == 1 and matrix[i][j + 1] == 1 and matrix[i - 1][j + 1] != 1:
+                # return True, [2, -2]
                 return True, [1, -1]
             else:
                 return False, []

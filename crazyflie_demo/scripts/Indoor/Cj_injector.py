@@ -96,6 +96,9 @@ class DroneCjInjector:
         self.pathfinder = None
         self.matrix = matrix
         self.drone_yaw = math.radians(0)
+        self.rot_enabled = False
+        self.rot_time_thresh = 10 # sec
+        self.last_time_rot_called = rospy.Time.now().to_sec()
         # Init publisher
         self.Cj_injector_pub = rospy.Publisher('/' + self.tf_prefix + "/Cj_injcetor", PoseStamped,
                                                queue_size=1)  # hover message publisher
@@ -111,16 +114,20 @@ class DroneCjInjector:
         self.matrix = new_matrix
         self.pos[0] = drone_pos[0][0]
         self.pos[1] = drone_pos[0][1]
+
+        self.rot_enabled = False
+        if (rospy.Time.now().to_sec() - self.last_time_rot_called) >= self.rot_time_thresh:
+            self.rot_enabled = True
+            # temp_yaw = np.random.rand() * np.pi / 4
+            temp_yaw = drone_yaw + (np.pi / 2)
+            self.drone_yaw = np.mod(temp_yaw, 2 * np.pi)  # limit the rotation by maximum angle
+            self.last_time_rot_called = rospy.Time.now().to_sec()
+
         # Assume that new_pos = [x,y,z,r,p,y]
         if act_as_flag:
-            Astar_Movement = PathBuilder.build_trj(drone_pos, self.env_limits, self.res, self.matrix, corrners_array,
-                                                   next_point)
+            Astar_Movement = PathBuilder.build_trj(drone_pos, self.env_limits, self.res, self.matrix, corrners_array, next_point)
             self.agent.astar_path = Astar_Movement
-            # temp_yaw = np.random.rand() * np.pi / 4
-            temp_yaw = drone_yaw + (np.pi / 2) # todo: A function which computing the yaw angle should be placed here
-            self.drone_yaw = np.mod(temp_yaw, 2*np.pi)  # limit the rotation by maximum angle
 
-        print self.drone_yaw
         self.agent.preform_step_sys_sim(drone_pos, self.drone_yaw, self.matrix)
 
         # self.next_pose[0] = self.pos[0]/m_to_cm # Only for debug - inject input to output
@@ -131,9 +138,9 @@ class DroneCjInjector:
         self.next_pose[1] = self.agent.next_pos[0][1]/m_to_cm
         self.next_pose[5] = self.drone_yaw
         self.next_pose[2] = 0.35  # hard coded Z height
-        # return to original angle after rotation
-        if act_as_flag:
-            self.drone_yaw = drone_yaw
+        # # return to original angle after rotation
+        # if self.rot_enabled:
+        #     self.drone_yaw = drone_yaw
 
         x = self.next_pose[0]
         y = self.next_pose[1]

@@ -178,8 +178,8 @@ def handler(cf_handler):
     time.sleep(0.5)
     cf_handler.takeoff(targetHeight=initialZ, duration=4.0)
     time.sleep(5.0)
-    # cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
-    cf_handler.goTo(goal=[0.3, 0.0, 0.0], yaw=0, duration=0.1, relative=True)  # move a bit forward before
+    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
+    # cf_handler.goTo(goal=[0.3, 0.0, 0.0], yaw=0, duration=0.1, relative=True)  # move a bit forward before
     time.sleep(3)
 
     x, y, yaw = 0, 0, 0

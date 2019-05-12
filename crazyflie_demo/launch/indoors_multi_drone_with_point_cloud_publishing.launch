@@ -22,8 +22,8 @@ A few notes:
 
 
     <!-- for first CF -->
-    <arg name="uri1" default="radio://0/120/2M/E7E7E7E701"/> <!-- To activate cj injector using the bag file of cf1 change the last number to 3  -->
-    <arg name="frame1" default="cf1"/>
+    <arg name="uri1" default="radio://0/120/2M/E7E7E7E704"/> <!-- To activate cj injector using the bag file of cf1 change the last number to 3  -->
+    <arg name="frame1" default="cf4"/>
     <arg name="frame1_active" default="0"/> <!-- To activate with real drone change to 1 -->
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX1" default="0.0"/>
@@ -70,11 +70,11 @@ A few notes:
 
     <!-- arguments for indoor mapping  -->
     <arg name="x_min" value="0"/>
-    <arg name="x_max" default="450"/> <!-- 250 -->
+    <arg name="x_max" default="500"/> <!-- 250 -->
     <arg name="y_min" default="0"/>
-    <arg name="y_max" default="450"/> <!-- 250 -->
+    <arg name="y_max" default="500"/> <!-- 250 -->
     <arg name="env_lim" default="[$(arg x_min), $(arg x_max), $(arg y_min), $(arg y_max)]"/>
-    <arg name="resolution" default="10"/>
+    <arg name="resolution" default="20"/>
     <arg name="env_space" default="50"/>
     <arg name="nDrones" default="1"/>
 
