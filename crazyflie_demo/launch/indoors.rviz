@@ -17,12 +17,13 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: PointCloud2_CF6
+    SyncSource: PointCloud2_CF4
   - Class: rviz/Displays
     Help Height: 75
     Name: Displays
     Property Tree Widget:
-      Expanded: ~
+      Expanded:
+        - /Grid1
       Splitter Ratio: 0.5
     Tree Height: 781
 Toolbars:
@@ -45,7 +46,7 @@ Visualization Manager:
         Y: 0
         Z: 0
       Plane: XY
-      Plane Cell Count: 10
+      Plane Cell Count: 20
       Reference Frame: <Fixed Frame>
       Value: true
     - Class: rviz/TF
@@ -53,9 +54,9 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        cf6:
+        cf4:
           Value: true
-        cf6_takeoff:
+        cf4_takeoff:
           Value: true
         world:
           Value: true
@@ -66,8 +67,8 @@ Visualization Manager:
       Show Names: true
       Tree:
         world:
-          cf6_takeoff:
-            cf6:
+          cf4_takeoff:
+            cf4:
               {}
       Update Interval: 0
       Value: true
@@ -306,25 +307,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 9.44770241
+      Distance: 13.1612148
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.527922928
-        Y: 1.40320134
-        Z: 0.605859101
+        X: 1.09669185
+        Y: 1.66081715
+        Z: 0.625220299
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 1.00479662
+      Pitch: 1.18479669
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.62039542
+      Yaw: 3.62539363
     Saved: ~
 Window Geometry:
   Displays:

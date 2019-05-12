@@ -322,6 +322,7 @@ def handler(cf_handler):
                     time.sleep(land_duration)
                     break
                 else:
+                    rospy.logdebug("going to: {}".format([x, y, z, yaw]))
                     cf_handler.goTo(goal=[x * 1.075, y * 1.075, z], yaw=yaw, duration=duration, relative=False)
                 # else:
                 #     rospy.logwarn("cannot move - obstacle in the way")
