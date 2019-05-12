@@ -356,8 +356,6 @@ if __name__ == '__main__':
     rospy.init_node('maze_TOF_explorer', log_level=rospy.DEBUG)  # log_level=rospy.DEBUG
 
     prefix = rospy.get_param("~tf_prefix")
-    # rospy.Subscriber('/' + prefix + '/log_ranges', GenericLogData, get_ranges)
-    # rospy.Subscriber('/' + prefix + '/Cj_injcetor', PoseStamped, Cj_injector)
 
     # rospy.Subscriber("/cmd_vel", Twist, twist_callback)
 
