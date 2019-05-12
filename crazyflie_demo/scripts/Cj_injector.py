@@ -172,11 +172,11 @@ class DroneInjector:
         #                       [----t----, ----x---, ---y---, --z--, yaw]
         path_maze_left_side = [[step_time * 3, 0 * step, 4.5 * step, 0.35, 0],  # start in (0,300,0.35)
                                [step_time * 9, 5 * step, 4.5 * step, 0.35, 0],
-                               [step_time * 3, 5 * step, 6.5 * step, 0.35, 0],
-                               [step_time * 3, 7.5 * step, 6.5 * step, 0.35, 0],
+                               [step_time * 4, 5 * step, 6.8 * step, 0.35, 0],
+                               [step_time * 4, 7.5 * step, 6.8 * step, 0.35, 0],
                                [step_time * 4, 7.5 * step, 4 * step, 0.35, 0],
-                               [step_time * 3, 6.5 * step, 4 * step, 0.35, 0],
-                               [step_time * 3, 4.5 * step, 4 * step, 0.35, 0],
+                               [step_time * 4, 6.5 * step, 4 * step, 0.35, 0],
+                               [step_time * 4, 4.5 * step, 4 * step, 0.35, 0],
                                [step_time * 6, 0 * step, 4.5 * step, 0.35, 0],
                                [step_time * 2, 0 * step, 4 * step, 0, 0],
                                ]
