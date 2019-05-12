@@ -22,19 +22,21 @@ A few notes:
 
 
     <!-- for first CF -->
-    <arg name="uri1" default="radio://0/120/2M/E7E7E7E707"/>
-    <arg name="frame1" default="cf7"/>
+    <arg name="uri1" default="radio://0/120/2M/E7E7E7E704"/>
+    <arg name="frame1" default="cf4"/>
     <arg name="frame1_active" default="1"/>
+    <arg name="frame1__listening_to_key_board" default="1"/>
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX1" default="0.0"/>
-    <arg name="initY1" default="2.4"/>
+    <arg name="initY1" default="3.0"/>
     <arg name="initZ1" default="0"/>
 
 
     <!-- for second CF    -->
-    <arg name="uri2" default="radio://0/120/2M/E7E7E7E704"/>
-    <arg name="frame2" default="cf4"/>
+    <arg name="uri2" default="radio://0/120/2M/E7E7E7E706"/>
+    <arg name="frame2" default="cf6"/>
     <arg name="frame2_active" default="0"/>
+    <arg name="frame2__listening_to_key_board" default="0"/>
     <arg name="traj_list2" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX2" default="0.0"/>
     <arg name="initY2" default="2.4"/>
@@ -133,9 +135,9 @@ A few notes:
         </node>
 
         <!--            Fix vrpn axes - broadcasts tf frame "cf#_fixed" FOR IT TO WORK THE RIGID BODY NAME MUST BE CF#_VRPN -->
-<!--        <node name="explorer" pkg="crazyflie_demo" type="tf_fixer.py" output="screen">-->
-<!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
-<!--        </node>-->
+        <!--        <node name="explorer" pkg="crazyflie_demo" type="tf_fixer.py" output="screen">-->
+        <!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
+        <!--        </node>-->
         <!--        Tf_broadcast a static transform with offset between a drone launch point and world-->
         <node pkg="tf" type="static_transform_publisher" name="world_to_$(arg frame1)_takeoff"
               args="$(arg initX1) $(arg initY1) 0 0 0 0 1 world $(arg frame1)_takeoff 100"/>
@@ -158,6 +160,7 @@ A few notes:
         <!--        Start keyboard controller. -->
         <node name="motion_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">
             <param name="tf_prefix" value="$(arg frame1)"/>
+            <param name="listen_to_keyboard" value="$(arg frame1__listening_to_key_board)"/>
         </node>
 
         <!--        Publish TOF sensors readings as pointcloud-->
@@ -202,9 +205,9 @@ A few notes:
         </node>
 
         <!--        Fix vrpn axes - broadcasts tf frame "cf#_fixed" FOR IT TO WORK THE RIGID BODY NAME MUST BE CF#_VRPN -->
-<!--        <node name="explorer" pkg="crazyflie_demo" type="tf_fixer.py" output="screen">-->
-<!--            <param name="tf_prefix" value="$(arg frame2)"/>-->
-<!--        </node>-->
+        <!--        <node name="explorer" pkg="crazyflie_demo" type="tf_fixer.py" output="screen">-->
+        <!--            <param name="tf_prefix" value="$(arg frame2)"/>-->
+        <!--        </node>-->
 
         <!--        Tf_broadcast a static transform with offset between a drone launch point and world-->
         <node pkg="tf" type="static_transform_publisher" name="world_to_$(arg frame2)_takeoff"
@@ -220,6 +223,7 @@ A few notes:
         <!--        Start keyboard controller. -->
         <node name="motion_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">
             <param name="tf_prefix" value="$(arg frame2)"/>
+            <param name="listen_to_keyboard" value="$(arg frame2__listening_to_key_board)"/>
         </node>
 
         <!--        Tf_broadcast a specific drone with world-->
@@ -312,7 +316,7 @@ A few notes:
         </node>
     </group>
 
-<!--    ***************************************************** FRAME 4 *******************************************************-->
+    <!--    ***************************************************** FRAME 4 *******************************************************-->
     <group ns="$(arg frame4)" if="$(eval arg('frame4_active') ==1)">
         <node pkg="crazyflie_driver" type="crazyflie_add" name="crazyflie_add" output="screen">
             <param name="uri" value="$(arg uri4)"/>
