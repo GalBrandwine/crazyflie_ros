@@ -442,8 +442,12 @@ A few notes:
             <param name="env_space" value="$(arg env_space)"/>
 <!--            <rosparam param="env_space" subst_value="True">[$(arg env_space)]</rosparam>-->
             <param name="nDrones" value="$(arg nDrones)"/>
-
         </node>
+
+        <!--<node name="http_server" pkg="crazyflie_demo" type="HTTP_server.py" output="screen">-->
+            <!--<param name="nDrones" value="$(arg nDrones)"/>-->
+            <!--<param name="drone_name_0" value="$(arg frame1)"/>-->
+        <!--</node>-->
 
     </group>
 
