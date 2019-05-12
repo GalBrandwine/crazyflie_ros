@@ -14,8 +14,7 @@ import tf2_ros
 # from crazyflie_driver.msg import Hover
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import Twist
-from math import atan2, sqrt, pow
-from math import pi, sin, cos
+from math import pi
 from tf.transformations import euler_from_quaternion
 
 import crazyflie
@@ -38,23 +37,6 @@ cj_injection_message = None
 keyboard_flag = False
 
 
-def twist_callback(msg):
-    global kb_x, kb_y, kb_z, kb_yaw, keyboard_flag
-    def_duration = 2.0
-    land_duration = 1.5
-
-    # rospy.loginfo("Received a /cmd_vel message!")
-    # rospy.loginfo("Linear Components: [%f, %f, %f]" % (msg.linear.x, msg.linear.y, msg.linear.z))
-    # rospy.loginfo("Angular Components: [%f, %f, %f]" % (msg.angular.x, msg.angular.y, msg.angular.z))
-
-    kb_x = msg.linear.x
-    kb_y = msg.linear.y
-    kb_z = msg.linear.z
-    kb_yaw = msg.angular.z
-
-    keyboard_flag = True
-
-
 def Cj_injector(msg):
     global cj_injection_message, cj_injection_flag
     # rospy.logdebug("Cj_recieved...")
@@ -63,82 +45,82 @@ def Cj_injector(msg):
     # rospy.loginfo(msg)
 
 
-def check_direction():
-    global listener, tfBuffer, cj_injection_message
-
-    speed = 0.20  # default speed m/s
-    rot_speed = 0.5  # default rot speed sec/radian
-    min_duration = 2.0  # minimum time [sec] for single trajectory
-    duration = default_duration = 2  # sec
-    trans = None
-    try:
-        trans = tfBuffer.lookup_transform(prefix, 'world', rospy.Time(0))
-    except:
-        rospy.logwarn("tf lookup -- {} not found".format(prefix))
-    if trans != None:
-        cj_local_coord = PoseStamped()
-        cj_local_coord = tf2_geometry_msgs.do_transform_pose(cj_injection_message, trans)
-        # rospy.loginfo(cj_local_coord)
-        heading = atan2(cj_local_coord.pose.position.y, cj_local_coord.pose.position.x)
-        # rospy.loginfo(heading)
-
-        distance = sqrt(pow(cj_local_coord.pose.position.x, 2) + pow(cj_local_coord.pose.position.y, 2))
-        duration = distance / speed  # #calculate required time for this motion
-        # rospy.logdebug("in check_direction: before if: [{},{}]".format(heading, duration))
-        if duration < min_duration:
-            duration = min_duration
-
-        q = (cj_local_coord.pose.orientation.x,
-             cj_local_coord.pose.orientation.y,
-             cj_local_coord.pose.orientation.z,
-             cj_local_coord.pose.orientation.w)
-
-        euler = euler_from_quaternion(q, axes='sxyz')
-
-        rotation_yaw = abs(euler[2])
-
-        duration_yaw = rotation_yaw / rot_speed
-        # rospy.logdebug("in check_direction: duration_yaw: {}".format(duration_yaw))
-        # rospy.logdebug("in check_direction: duration: {}".format(duration))
-        if duration_yaw > duration:
-            duration = duration_yaw
-
-        # rospy.logdebug("in check_direction. returning: [{},{}]".format(heading, duration))
-        return [heading, duration]
-    else:
-        rospy.logerr("in check_direction: transform is None")
-        return [0, duration]
-
-
-def collision_direction_wc(collision_sensor_angle):
-    evade_distance = 0.07  # distance to go opposite direction of wall - meters
-
-    global prefix
-    trans = None
-    try:
-        trans = tfBuffer.lookup_transform(prefix, 'world', rospy.Time(0))
-    except:
-        rospy.logwarn("tf lookup -- {} not found".format(prefix))
-    if trans != None:
-        q = (trans.transform.rotation.x,
-             trans.transform.rotation.y,
-             trans.transform.rotation.z,
-             trans.transform.rotation.w)
-
-        euler = euler_from_quaternion(q, axes='sxyz')
-        yaw = euler[2]
-
-        collision_angle_wc = collision_sensor_angle + yaw
-        if collision_angle_wc < -2 * pi:
-            collision_angle_wc += 2 * pi
-
-        if collision_angle_wc > 2 * pi:
-            collision_angle_wc -= 2 * pi
-
-        y = evade_distance * sin(collision_angle_wc)
-        x = evade_distance * cos(collision_angle_wc)
-        avoid_goal = [-x, y]
-        return avoid_goal
+# def check_direction():
+#     global listener, tfBuffer, cj_injection_message
+#
+#     speed = 0.20  # default speed m/s
+#     rot_speed = 0.5  # default rot speed sec/radian
+#     min_duration = 2.0  # minimum time [sec] for single trajectory
+#     duration = default_duration = 2  # sec
+#     trans = None
+#     try:
+#         trans = tfBuffer.lookup_transform(prefix, 'world', rospy.Time(0))
+#     except:
+#         rospy.logwarn("tf lookup -- {} not found".format(prefix))
+#     if trans != None:
+#         cj_local_coord = PoseStamped()
+#         cj_local_coord = tf2_geometry_msgs.do_transform_pose(cj_injection_message, trans)
+#         # rospy.loginfo(cj_local_coord)
+#         heading = atan2(cj_local_coord.pose.position.y, cj_local_coord.pose.position.x)
+#         # rospy.loginfo(heading)
+#
+#         distance = sqrt(pow(cj_local_coord.pose.position.x, 2) + pow(cj_local_coord.pose.position.y, 2))
+#         duration = distance / speed  # #calculate required time for this motion
+#         # rospy.logdebug("in check_direction: before if: [{},{}]".format(heading, duration))
+#         if duration < min_duration:
+#             duration = min_duration
+#
+#         q = (cj_local_coord.pose.orientation.x,
+#              cj_local_coord.pose.orientation.y,
+#              cj_local_coord.pose.orientation.z,
+#              cj_local_coord.pose.orientation.w)
+#
+#         euler = euler_from_quaternion(q, axes='sxyz')
+#
+#         rotation_yaw = abs(euler[2])
+#
+#         duration_yaw = rotation_yaw / rot_speed
+#         # rospy.logdebug("in check_direction: duration_yaw: {}".format(duration_yaw))
+#         # rospy.logdebug("in check_direction: duration: {}".format(duration))
+#         if duration_yaw > duration:
+#             duration = duration_yaw
+#
+#         # rospy.logdebug("in check_direction. returning: [{},{}]".format(heading, duration))
+#         return [heading, duration]
+#     else:
+#         rospy.logerr("in check_direction: transform is None")
+#         return [0, duration]
+#
+#
+# def collision_direction_wc(collision_sensor_angle):
+#     evade_distance = 0.07  # distance to go opposite direction of wall - meters
+#
+#     global prefix
+#     trans = None
+#     try:
+#         trans = tfBuffer.lookup_transform(prefix, 'world', rospy.Time(0))
+#     except:
+#         rospy.logwarn("tf lookup -- {} not found".format(prefix))
+#     if trans != None:
+#         q = (trans.transform.rotation.x,
+#              trans.transform.rotation.y,
+#              trans.transform.rotation.z,
+#              trans.transform.rotation.w)
+#
+#         euler = euler_from_quaternion(q, axes='sxyz')
+#         yaw = euler[2]
+#
+#         collision_angle_wc = collision_sensor_angle + yaw
+#         if collision_angle_wc < -2 * pi:
+#             collision_angle_wc += 2 * pi
+#
+#         if collision_angle_wc > 2 * pi:
+#             collision_angle_wc -= 2 * pi
+#
+#         y = evade_distance * sin(collision_angle_wc)
+#         x = evade_distance * cos(collision_angle_wc)
+#         avoid_goal = [-x, y]
+#         return avoid_goal
 
 
 def get_xyz_yaw(cj_injection_message):
@@ -316,14 +298,22 @@ def handler(cf_handler):
 
 
 class Cf:
+    """ A class for holding a drone (listeners, publishers data..). """
+
     def __init__(self, prefix, initialZ=0.35):
         self.cf = crazyflie.Crazyflie("/" + prefix, "world")
         self.initialZ = initialZ
         self.ranges_sub = rospy.Subscriber('/' + prefix + '/log_ranges', GenericLogData, self.get_ranges)
         self.Cj_injection_sub = rospy.Subscriber('/' + prefix + '/Cj_injcetor', PoseStamped, self.Cj_injector)
-        self. ranges = [None, None, None, None, None]
+        self.keyboard_listener = rospy.Subscriber("/cmd_vel", Twist, self.twist_callback)
+
+        self.ranges = [None, None, None, None, None]
+        self.keyboard_flag = False
+        self.keyboard = [None, None, None, None, None]
 
     def set_param(self):
+        """Simple cf.setParam wrapper. """
+
         self.cf.setParam("commander/enHighLevel", 1)
         self.cf.setParam("stabilizer/estimator", 2)  # Use EKF
 
@@ -336,14 +326,14 @@ class Cf:
         self.cf.setParam("kalman/initialY", 0)
         self.cf.setParam("kalman/initialZ", 0)
         self.cf.setParam("kalman/resetEstimation", 1)
-        ########
+
         time.sleep(0.2)
         self.cf.setParam("kalman/resetEstimation", 0)
         time.sleep(0.5)
         self.cf.setParam("stabilizer/controller", 2)  # 2=Use mellinger controller
         time.sleep(0.2)
 
-    def get_ranges(msg):
+    def get_ranges(self, msg):
         # todo continue with this late!!!!!! move global into object
         global front, back, up, left, right, zrange, ranges
         weight_old = 0.65  # the weight given to old values in filter 0-1
@@ -355,22 +345,39 @@ class Cf:
         left = weight_old * left + weight_new * msg.values[3] / 1000
         right = weight_old * right + weight_new * msg.values[4] / 1000
         # zrange = msg.values[5] / 1000
-        ranges = [back, left, front, right, up]
+        self.ranges = [back, left, front, right, up]
+
+    def twist_callback(self, msg):
+        global kb_x, kb_y, kb_z, kb_yaw, keyboard_flag
+        def_duration = 2.0
+        land_duration = 1.5
+
+        # rospy.loginfo("Received a /cmd_vel message!")
+        # rospy.loginfo("Linear Components: [%f, %f, %f]" % (msg.linear.x, msg.linear.y, msg.linear.z))
+        # rospy.loginfo("Angular Components: [%f, %f, %f]" % (msg.angular.x, msg.angular.y, msg.angular.z))
+
+        kb_x = msg.linear.x
+        kb_y = msg.linear.y
+        kb_z = msg.linear.z
+        kb_yaw = msg.angular.z
+
+        self.keyboard_flag = True
+        self.keyboard = [kb_x, kb_y, kb_z, kb_yaw]
 
 
 if __name__ == '__main__':
     rospy.init_node('maze_TOF_explorer', log_level=rospy.DEBUG)  # log_level=rospy.DEBUG
 
     prefix = rospy.get_param("~tf_prefix")
-    rospy.Subscriber('/' + prefix + '/log_ranges', GenericLogData, get_ranges)
-    rospy.Subscriber('/' + prefix + '/Cj_injcetor', PoseStamped, Cj_injector)
+    # rospy.Subscriber('/' + prefix + '/log_ranges', GenericLogData, get_ranges)
+    # rospy.Subscriber('/' + prefix + '/Cj_injcetor', PoseStamped, Cj_injector)
 
-    rospy.Subscriber("/cmd_vel", Twist, twist_callback)
+    # rospy.Subscriber("/cmd_vel", Twist, twist_callback)
 
     tfBuffer = tf2_ros.Buffer()  # initialize tf buffer for transform lookup
     listener = tf2_ros.TransformListener(tfBuffer)
 
-    cf = Cf(prefix, initialZ=.35)
+    cf = Cf(prefix, initialZ=0.35)
     rospy.wait_for_service("/" + prefix + '/update_params')
     rospy.loginfo("found update_params service")
 
