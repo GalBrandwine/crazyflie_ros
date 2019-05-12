@@ -22,12 +22,12 @@ A few notes:
 
 
     <!-- for first CF -->
-    <arg name="uri1" default="radio://0/120/2M/E7E7E7E703"/>
-    <arg name="frame1" default="cf3"/>
+    <arg name="uri1" default="radio://0/120/2M/E7E7E7E707"/>
+    <arg name="frame1" default="cf7"/>
     <arg name="frame1_active" default="1"/>
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX1" default="0.0"/>
-    <arg name="initY1" default="1.8"/>
+    <arg name="initY1" default="2.4"/>
     <arg name="initZ1" default="0"/>
 
 
