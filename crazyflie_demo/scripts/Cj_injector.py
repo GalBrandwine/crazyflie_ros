@@ -227,8 +227,8 @@ class DroneInjector:
         t1 = Thread(target=injector, args=(self.cj_injector_container[0], path_straight_line_360_go_back,))
         threads.append(t1)
 
-        # t2 = Thread(target=injector, args=(self.cj_injector_container[1], path_maze_left_side,))
-        # threads.append(t2)
+        t2 = Thread(target=injector, args=(self.cj_injector_container[1], path_maze_right_side,))
+        threads.append(t2)
 
         # start all threads.
         for t in threads:

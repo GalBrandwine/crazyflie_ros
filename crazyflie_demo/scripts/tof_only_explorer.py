@@ -23,26 +23,9 @@ from crazyflie_driver.msg import GenericLogData
 
 speed = 0.25
 
-global front, back, up, left, right, zrange, cj_injection_flag, cj_injection_message
-front = back = up = left = right = zrange = 0.0
-
-global kb_x, kb_y, kb_z, kb_yaw
-kb_x = kb_y = kb_z = kb_yaw = 0
-
-global ranges
-ranges = [0, 0, 0, 0]
+global cj_injection_flag, cj_injection_message
 cj_injection_flag = False
 cj_injection_message = None
-
-keyboard_flag = False
-
-
-def Cj_injector(msg):
-    global cj_injection_message, cj_injection_flag
-    # rospy.logdebug("Cj_recieved...")
-    cj_injection_flag = True
-    cj_injection_message = msg
-    # rospy.loginfo(msg)
 
 
 # def check_direction():
@@ -123,48 +106,13 @@ def Cj_injector(msg):
 #         return avoid_goal
 
 
-def get_xyz_yaw(cj_injection_message):
-    """Transform Cj injection into drone coordinates"""
-    trans = None
-    try:
-        trans = tfBuffer.lookup_transform(prefix + '_takeoff', 'world', rospy.Time(0))
-    except:
-        rospy.logwarn("tf lookup -- {} not found".format(prefix + '_takeoff'))
-    if trans is not None:
-        cj_local_coord = PoseStamped()
-        cj_local_coord = tf2_geometry_msgs.do_transform_pose(cj_injection_message, trans)
-
-        quaternion = (
-            cj_local_coord.pose.orientation.x,
-            cj_local_coord.pose.orientation.y,
-            cj_local_coord.pose.orientation.z,
-            cj_local_coord.pose.orientation.w)
-        euler = euler_from_quaternion(quaternion)
-
-        x = cj_local_coord.pose.position.x
-        y = cj_local_coord.pose.position.y
-        z = cj_local_coord.pose.position.z
-        roll = euler[0]
-        pitch = euler[1]
-        yaw = euler[2]
-
-        return [x, y, z, yaw]
-    else:
-        return False
-
-
 def handler(cf_handler):
     r = rospy.Rate(5)
     time.sleep(0.5)
     cf_handler.cf.takeoff(targetHeight=cf_handler.initialZ, duration=4.0)
     time.sleep(5.0)
 
-    x, y, yaw = 0, 0, 0
-    z = cf_handler.initialZ
-
-    global keyboard_flag
     global cj_injection_message, cj_injection_flag
-    global front, back, up, left, right, zrange
 
     dist_threshold = 0.15
     def_duration = 2.0
@@ -186,13 +134,21 @@ def handler(cf_handler):
     avoid_c_duration = 1.0
 
     try:
+        # move a bit forward
         cf_handler.cf_handler.goTo(goal=[0.3, 0.0, 0.0], yaw=0, duration=avoid_c_duration,
-                                   relative=True)  # move a bit forward
+                                   relative=True)
         time.sleep(3)
 
         while not rospy.is_shutdown():
 
             # todo add while ranges < distance got_to....
+            # move forward until right corridor
+            while cf_handler.ranges[3] <= 0.5:
+                cf_handler.cf_handler.goTo(goal=[0.3, 0.0, 0.0], yaw=0, duration=avoid_c_duration,
+                                           relative=True)
+                rospy.logdebug("Right range is: {}".format(cf_handler.ranges[3]))
+
+            break
 
             if min(ranges) > 0 and (rospy.Time.now() - last_collision).to_sec() > 2.0:
 
@@ -237,54 +193,57 @@ def handler(cf_handler):
                     cf_handler.stop()
                     break
 
-            if keyboard_flag is True:
-                keyboard_flag = False
+            if cf_handler.keyboard_flag is True:
+                cf_handler.keyboard_flag = False
                 kb_step = 0.3  # meters each cmd_vel message
+
+                [kb_x, kb_y, kb_z, kb_yaw] = cf_handler.keyboard
+
                 cont_rot_yaw = 0
                 if kb_x > 0:
-                    cf_handler.goTo(goal=[kb_step, 0.0, 0.0], yaw=cont_rot_yaw, duration=def_duration, relative=True)
+                    cf_handler.cf.goTo(goal=[kb_step, 0.0, 0.0], yaw=cont_rot_yaw, duration=def_duration, relative=True)
                 elif kb_x < 0:
-                    cf_handler.goTo(goal=[-1 * kb_step, 0.0, 0.0], yaw=cont_rot_yaw, duration=def_duration,
-                                    relative=True)
+                    cf_handler.cf.goTo(goal=[-1 * kb_step, 0.0, 0.0], yaw=cont_rot_yaw, duration=def_duration,
+                                       relative=True)
                 elif kb_yaw < 0:
-                    cf_handler.goTo(goal=[0.0, -1 * kb_step, 0.0], yaw=cont_rot_yaw, duration=def_duration,
-                                    relative=True)
+                    cf_handler.cf.goTo(goal=[0.0, -1 * kb_step, 0.0], yaw=cont_rot_yaw, duration=def_duration,
+                                       relative=True)
                 elif kb_yaw > 0:
-                    cf_handler.goTo(goal=[0.0, kb_step, 0.0], yaw=cont_rot_yaw, duration=def_duration, relative=True)
+                    cf_handler.cf.goTo(goal=[0.0, kb_step, 0.0], yaw=cont_rot_yaw, duration=def_duration, relative=True)
                 elif kb_y > 0:
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=pi / 2, duration=def_duration + 1.0,
-                                    relative=True)  # slow down yaw rotation
+                    cf_handler.cf.goTo(goal=[0.0, 0.0, 0.0], yaw=pi / 2, duration=def_duration + 1.0,
+                                       relative=True)  # slow down yaw rotation
                 elif kb_y < 0:
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=-1 * pi / 2, duration=def_duration + 1.0,
-                                    relative=True)  # slow down yaw rotation
+                    cf_handler.cf.goTo(goal=[0.0, 0.0, 0.0], yaw=-1 * pi / 2, duration=def_duration + 1.0,
+                                       relative=True)  # slow down yaw rotation
                 elif kb_x == 0 and kb_y == 0:
-                    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=1.0, relative=True)  # stop in place
+                    cf_handler.cf.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=1.0, relative=True)  # stop in place
 
                 if kb_z != 0:
-                    cf_handler.land(targetHeight=0.0, duration=land_duration)
+                    cf_handler.cf.land(targetHeight=0.0, duration=land_duration)
                     time.sleep(land_duration - 0.5)
-                    cf_handler.stop()
+                    cf_handler.cf.stop()
 
             # If Cj injection received:
-            if cj_injection_flag is True:
-                cj_injection_flag = False
-                # get Cj_injection in drone coordinates
-                [x, y, z, yaw] = get_xyz_yaw(cj_injection_message)
-                [direction, duration] = check_direction()
-
-                # rospy.logdebug("Cj direction is {}".format(direction))
-                rospy.logdebug("Cj duration is {}".format(duration))
-
-                # obstacle_free=avoid_collision()
-                # if obstacle_free == True:
-                cf_handler.goTo(goal=[x * 1.075, y * 1.075, z], yaw=yaw, duration=duration, relative=False)
-                # else:
-                #     rospy.logwarn("cannot move - obstacle in the way")
+            # if cj_injection_flag is True:
+            #     cf_handler.cj_injection_flag = False
+            #     # get Cj_injection in drone coordinates
+            #     [x, y, z, yaw] = get_xyz_yaw(cj_injection_message)
+            #     [direction, duration] = check_direction()
+            #
+            #     # rospy.logdebug("Cj direction is {}".format(direction))
+            #     rospy.logdebug("Cj duration is {}".format(duration))
+            #
+            #     # obstacle_free=avoid_collision()
+            #     # if obstacle_free == True:
+            #     cf_handler.goTo(goal=[x * 1.075, y * 1.075, z], yaw=yaw, duration=duration, relative=False)
+            #     # else:
+            #     #     rospy.logwarn("cannot move - obstacle in the way")
 
             r.sleep()
 
         rospy.loginfo('********EXITING*********')
-        cf_handler.stop()
+        cf_handler.cf.stop()
         # break
 
     except Exception as e:
@@ -307,6 +266,10 @@ class Cf:
         self.Cj_injection_sub = rospy.Subscriber('/' + prefix + '/Cj_injcetor', PoseStamped, self.Cj_injector)
         self.keyboard_listener = rospy.Subscriber("/cmd_vel", Twist, self.twist_callback)
 
+        self.tfBuffer = tf2_ros.Buffer()  # initialize tf buffer for transform lookupupdate_params
+        self.listener = tf2_ros.TransformListener(self.tfBuffer)
+        self.cj_injection_flag = False
+        self.Cj_injection = [None, None, None, None, None]
         self.ranges = [None, None, None, None, None]
         self.keyboard_flag = False
         self.keyboard = [None, None, None, None, None]
@@ -348,14 +311,6 @@ class Cf:
         self.ranges = [back, left, front, right, up]
 
     def twist_callback(self, msg):
-        global kb_x, kb_y, kb_z, kb_yaw, keyboard_flag
-        def_duration = 2.0
-        land_duration = 1.5
-
-        # rospy.loginfo("Received a /cmd_vel message!")
-        # rospy.loginfo("Linear Components: [%f, %f, %f]" % (msg.linear.x, msg.linear.y, msg.linear.z))
-        # rospy.loginfo("Angular Components: [%f, %f, %f]" % (msg.angular.x, msg.angular.y, msg.angular.z))
-
         kb_x = msg.linear.x
         kb_y = msg.linear.y
         kb_z = msg.linear.z
@@ -363,6 +318,38 @@ class Cf:
 
         self.keyboard_flag = True
         self.keyboard = [kb_x, kb_y, kb_z, kb_yaw]
+
+    def Cj_injector(self, msg):
+        """Callback for each Cj_injection. """
+
+        self.cj_injection_flag = True
+        """Transform Cj injection into drone coordinates"""
+        trans = None
+        try:
+            trans = self.tfBuffer.lookup_transform(prefix + '_takeoff', 'world', rospy.Time(0))
+        except:
+            rospy.logwarn("tf lookup -- {} not found".format(prefix + '_takeoff'))
+        if trans is not None:
+            cj_local_coord = tf2_geometry_msgs.do_transform_pose(msg, trans)
+
+            quaternion = (
+                cj_local_coord.pose.orientation.x,
+                cj_local_coord.pose.orientation.y,
+                cj_local_coord.pose.orientation.z,
+                cj_local_coord.pose.orientation.w)
+            euler = euler_from_quaternion(quaternion)
+
+            x = cj_local_coord.pose.position.x
+            y = cj_local_coord.pose.position.y
+            z = cj_local_coord.pose.position.z
+            roll = euler[0]
+            pitch = euler[1]
+            yaw = euler[2]
+
+            self.Cj_injection = [x, y, z, yaw]
+        else:
+            rospy.logwarn("transform is None!")
+            self.Cj_injection = [None, None, None, None, None]
 
 
 if __name__ == '__main__':
@@ -374,9 +361,6 @@ if __name__ == '__main__':
 
     # rospy.Subscriber("/cmd_vel", Twist, twist_callback)
 
-    tfBuffer = tf2_ros.Buffer()  # initialize tf buffer for transform lookup
-    listener = tf2_ros.TransformListener(tfBuffer)
-
     cf = Cf(prefix, initialZ=0.35)
     rospy.wait_for_service("/" + prefix + '/update_params')
     rospy.loginfo("found update_params service")
@@ -386,3 +370,5 @@ if __name__ == '__main__':
 
     rospy.loginfo("launching threads")
     handler(cf)
+
+    rospy.spin()
