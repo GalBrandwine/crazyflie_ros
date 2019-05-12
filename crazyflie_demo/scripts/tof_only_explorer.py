@@ -3,7 +3,6 @@
 
 # initializes drone initial position 0,0,0
 # launch drone to fixed height initialZ [m]
-# collision avoidance #todo fix coordinate system currently works only without rotation
 # command drone using KB in WORLD coordinatesz
 
 import time
