@@ -70,7 +70,7 @@ class Grid:
             self.topics_arr.append("/{}/point_cloud".format(drone_name))
         self.drone_name_arr = []
         self.floor_thr = 32
-        self.sens_limit = 100
+        self.sens_limit = 200
         self.rate = 2 #Hz
 
         for i, id in enumerate(initial_pos_dict):

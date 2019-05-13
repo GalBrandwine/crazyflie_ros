@@ -89,7 +89,7 @@ class Agent:
         if self.goal_orianted_flag:
             optinal_goal_list = self.non_scaned_list(self.current_pos, 5 * self.scanning_range, matrix)
             if optinal_goal_list.__len__() > 0:
-                vec = optinal_goal_list[0] - self.current_pos
+                vec = np.subtract(optinal_goal_list[0], self.current_pos)
                 goal_vec = vec / np.linalg.norm(vec)
                 rep_att_vec = rep_att_vec + goal_vec
             else:

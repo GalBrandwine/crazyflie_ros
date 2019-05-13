@@ -10,9 +10,8 @@ USAGE:
 
 <launch>
     <!-- for first CF -->
-    <arg name="uri1" default="radio://0/120/2M/E7E7E7E703"/>
-    <arg name="frame1" default="cf3"/>
-    <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
+    <arg name="uri1" default="radio://0/120/2M/E7E7E7E705"/>
+    <arg name="frame1" default="cf5"/>
     <arg name="initX1" default="0"/>
     <arg name="initY1" default="0"/>
     <arg name="initZ1" default="0"/>
@@ -64,7 +63,7 @@ USAGE:
         </node>
 
         <!--        Hands avoidance presentation-->
-        <node name="hands_avoidance_presentation" pkg="crazyflie_demo" type="hands_avoidance_presentation.py"
+        <node name="hands_avoidance_presentation" pkg="crazyflie_demo" type="tof_only_explorer.py"
               output="screen">
             <param name="tf_prefix" value="$(arg frame1)"/>
         </node>

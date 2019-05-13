@@ -130,13 +130,13 @@ class DroneCjInjector:
 
         self.agent.preform_step_sys_sim(drone_pos, self.drone_yaw, self.matrix)
 
-        # self.next_pose[0] = self.pos[0]/m_to_cm # Only for debug - inject input to output
-        # self.next_pose[1] = self.pos[1]/m_to_cm # Only for debug - inject input to output
-        # self.next_pose[5] = 0 # Only for debug
+        self.next_pose[0] = self.pos[0]/m_to_cm # Only for debug - inject input to output
+        self.next_pose[1] = self.pos[1]/m_to_cm # Only for debug - inject input to output
+        self.next_pose[5] = 0 # Only for debug
 
-        self.next_pose[0] = self.agent.next_pos[0][0]/m_to_cm
-        self.next_pose[1] = self.agent.next_pos[0][1]/m_to_cm
-        self.next_pose[5] = self.drone_yaw
+        # self.next_pose[0] = self.agent.next_pos[0][0]/m_to_cm
+        # self.next_pose[1] = self.agent.next_pos[0][1]/m_to_cm
+        # self.next_pose[5] = self.drone_yaw
         self.next_pose[2] = 0.35  # hard coded Z height
         # # return to original angle after rotation
         # if self.rot_enabled:

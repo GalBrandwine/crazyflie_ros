@@ -20,6 +20,7 @@ def handle_pose():
     while not rospy.is_shutdown() and (first_trans_cf == None):
         try:
             first_trans_cf = tfBuffer.lookup_transform('world', tf_prefix, rospy.Time(0))
+            r.sleep()
         except:
             pass
 
@@ -28,6 +29,7 @@ def handle_pose():
     while not rospy.is_shutdown() and (first_trans_vrpn == None):
         try:
             first_trans_vrpn = tfBuffer.lookup_transform('world', tf_prefix + '_vrpn', rospy.Time(0))
+            r.sleep()
         except:
             pass
 

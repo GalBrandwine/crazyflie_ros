@@ -107,23 +107,23 @@ def logger_handler(tf_prefix):
         """working, but Remember: there's a buf with tf_ref-wold coordinate's. """
 
         try:  # if optitrack message exists
-            trans = tfBuffer.lookup_transform('world', tf_prefix + '_vrpn', rospy.Time(0))
+            trans = tfBuffer.lookup_transform('world', tf_prefix + '_fixed', rospy.Time(0))
 
             q = (trans.transform.rotation.x,
                  trans.transform.rotation.y,
                  trans.transform.rotation.z,
                  trans.transform.rotation.w)
 
-            euler = euler_from_quaternion(q, axes='sxzy')
+            euler = euler_from_quaternion(q, axes='sxyz')
 
             # translation : x, z, y
             # rotation : x, -z , y
-            t.ref_x = -1 * trans.transform.translation.z
-            t.ref_y = trans.transform.translation.x
-            t.ref_z = trans.transform.translation.y
+            t.ref_x = trans.transform.translation.x
+            t.ref_y = trans.transform.translation.y
+            t.ref_z = trans.transform.translation.z
             t.ref_roll = euler[0]
-            t.ref_pitch = -1 * euler[2]
-            t.ref_yaw = euler[1]
+            t.ref_pitch = euler[1]
+            t.ref_yaw = euler[2]
 
         except:
             t.ref_x = 0

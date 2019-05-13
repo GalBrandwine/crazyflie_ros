@@ -22,8 +22,8 @@ USAGE:
 
 
     <!-- for first CF -->
-    <arg name="uri1" default="radio://0/120/2M/E7E7E7E704"/>
-    <arg name="frame1" default="cf4"/>
+    <arg name="uri1" default="radio://0/120/2M/E7E7E7E701"/>
+    <arg name="frame1" default="cf1"/>
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX1" default="0"/>
     <arg name="initY1" default="0"/>
@@ -31,8 +31,8 @@ USAGE:
 
 
     <!-- for second CF    -->
-    <arg name="uri2" default="radio://0/120/2M/E7E7E7E706"/>
-    <arg name="frame2" default="cf6"/>
+    <arg name="uri2" default="radio://0/120/2M/E7E7E7E707"/>
+    <arg name="frame2" default="cf7"/>
     <arg name="traj_list2" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX2" default="0"/>
     <arg name="initY2" default="0"/>                    <!-- REMEMBER!!!!!!         -->
@@ -112,22 +112,8 @@ USAGE:
             <!--            Pass a 'list' as ros param-->
             <rosparam param="traj_list" subst_value="True">$(arg traj_list)</rosparam>
         </node>
-
-        <!--        Start keyboard controller. -->
-        <!--        <node name="keyboard_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">-->
-        <!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
-        <!--        </node>-->
-
-        <!--        Publish TOF sensors readings as pointcloud-->
-        <!--        <node name="points_publisher" pkg="crazyflie_demo" type="publish_scan.py" output="screen">-->
-        <!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
-        <!--        </node>-->
-        <!--        Rotem.py capture all ros data of a certain CF and wrap it with python object.-->
-        <!--        <node name="drone_data_parser" pkg="crazyflie_demo" type="rotem.py" output="screen">-->
-        <!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
-        <!--        </node>-->
-
     </group>
+
     <!--    *************************************************************************************************************-->
     <group ns="$(arg frame2)">
         <node pkg="crazyflie_driver" type="crazyflie_add" name="crazyflie_add" output="screen">
@@ -175,21 +161,8 @@ USAGE:
             <!--            Pass a 'list' as ros param-->
             <rosparam param="traj_list" subst_value="True">$(arg traj_list3)</rosparam>
         </node>
-
-        <!--        Start keyboard controller. -->
-        <!--        <node name="keyboard_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">-->
-        <!--            <param name="tf_prefix" value="$(arg frame3)"/>-->
-        <!--        </node>-->
-
-        <!--        Publish TOF sensors readings as pointcloud-->
-        <!--        <node name="points_publisher" pkg="crazyflie_demo" type="publish_scan.py" output="screen">-->
-        <!--            <param name="tf_prefix" value="$(arg frame3)"/>-->
-        <!--        </node>-->
-        <!--        Rotem.py capture all ros data of a certain CF and wrap it with python object.-->
-        <!--        <node name="drone_data_parser" pkg="crazyflie_demo" type="rotem.py" output="screen">-->
-        <!--            <param name="tf_prefix" value="$(arg frame3)"/>-->
-        <!--        </node>-->
     </group>
+
     <!--    *************************************************************************************************************-->
     <group ns="$(arg frame3)">
         <node pkg="crazyflie_driver" type="crazyflie_add" name="crazyflie_add" output="screen">
@@ -237,21 +210,6 @@ USAGE:
             <!--            Pass a 'list' as ros param-->
             <rosparam param="traj_list" subst_value="True">$(arg traj_list3)</rosparam>
         </node>
-
-        <!--        Start keyboard controller. -->
-        <!--        <node name="keyboard_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">-->
-        <!--            <param name="tf_prefix" value="$(arg frame3)"/>-->
-        <!--        </node>-->
-
-        <!--        Publish TOF sensors readings as pointcloud-->
-        <!--        <node name="points_publisher" pkg="crazyflie_demo" type="publish_scan.py" output="screen">-->
-        <!--            <param name="tf_prefix" value="$(arg frame3)"/>-->
-        <!--        </node>-->
-        <!--        Rotem.py capture all ros data of a certain CF and wrap it with python object.-->
-        <!--        <node name="drone_data_parser" pkg="crazyflie_demo" type="rotem.py" output="screen">-->
-        <!--            <param name="tf_prefix" value="$(arg frame3)"/>-->
-        <!--        </node>-->
-
     </group>
 
 
