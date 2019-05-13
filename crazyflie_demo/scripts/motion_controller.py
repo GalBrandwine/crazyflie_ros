@@ -324,7 +324,8 @@ def handler(cf_handler):
                     break
                 else:
                     rospy.logdebug("going to: {}".format([x, y, z, yaw]))
-                    cf_handler.goTo(goal=[x * 1.075, y * 1.075, z], yaw=yaw, duration=duration, relative=False)
+                    #### SCALE FACTOR IS 1.156 = 1 / 0.865 = 1 / scale factor in tf_broadcaster
+                    cf_handler.goTo(goal=[x * 1.156, y * 1.156, z], yaw=yaw, duration=duration, relative=False)
                 # else:
                 #     rospy.logwarn("cannot move - obstacle in the way")
 
