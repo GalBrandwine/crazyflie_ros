@@ -1,9 +1,7 @@
+#!/usr/bin/env python
 import math
 import numpy as np
 from bresenham import bresenham
-import copy
-import rospy
-from std_msgs.msg import String
 
 class Node:
 
@@ -17,8 +15,7 @@ class Node:
 
 class Astar:
 
-    def __init__(self, scanning_range, x_lim, y_lim, matrix, res):
-        self.scanning_range = scanning_range
+    def __init__(self, x_lim, y_lim, matrix, res):
         self.x_lim = x_lim
         self.y_lim = y_lim
         self.matrix = matrix
@@ -162,8 +159,8 @@ class Astar:
 
         okways = []
         allx, ally, allcost, allmidxs = [], [], [], []
-        pradius = self.scanning_range
-        # pradius = math.sqrt((nstart.x - ngoal.x) ** 2 + (nstart.y - ngoal.y) ** 2)
+        # pradius = self.scanning_range
+        pradius = math.sqrt((nstart.x - ngoal.x) ** 2 + (nstart.y - ngoal.y) ** 2)
         for j, jend in enumerate(zip(mx, my)):
             dcost = math.sqrt((nstart.x - jend[0]) ** 2 + (nstart.y - jend[1]) ** 2)
             if dcost <= pradius: # Not mandatory if... Only to speed up!
@@ -217,42 +214,26 @@ class Astar:
         return i, j
 
 
-def build_trj(pos, scanning_range, x_lim, y_lim, res, matrix, temp_corner_points_list_xy, temp_interesting_points_list_xy, ref_pos):
+def build_trj(pos, env_limits, res, matrix, temp_corner_points_list_xy, goal):
+
+    x_lim = env_limits[0:2]
+    y_lim = env_limits[2:4]
+    astar = Astar(x_lim, y_lim, matrix, res)
+
+    gx = goal[0]
+    gy = goal[1]
+
+    astar_movement, corner_idxs = astar.PlanningAlg(pos[0][0], pos[0][1], gx, gy, temp_corner_points_list_xy)
+
+    # if len(corner_idxs) >= 3:
+    #     for ci in corner_idxs:
+    #         if ci != -1:
+    #             temp_corner_points_list_xy[ci] = []
+    #
+    #     temp_corner_points_list_xy = filter(None, temp_corner_points_list_xy)
 
 
-    Astar_Movement = []
-    astar = Astar(scanning_range, x_lim, y_lim, matrix, res)
+    Astar_Movement = astar_movement[1:]
 
-    if len(temp_interesting_points_list_xy) > 0:
-
-        for idx, elem in enumerate(temp_interesting_points_list_xy):
-
-            if np.random.rand(1) < 0.1:
-                g_idx = np.random.randint(len(temp_interesting_points_list_xy))
-            else:
-                g_idx = 0
-            gx = temp_interesting_points_list_xy[g_idx][0]
-            gy = temp_interesting_points_list_xy[g_idx][1]
-
-            # g_idx = idx
-            # gx = elem[0]
-            # gy = elem[1]
-            # if (np.linalg.norm(ref_pos[0] - [gx, gy]) < scanning_range):
-            #     break
-
-        del temp_interesting_points_list_xy[g_idx]
-
-        astar_movement, corner_idxs = astar.PlanningAlg(pos[0][0], pos[0][1], gx, gy, temp_corner_points_list_xy)
-
-        if len(corner_idxs) >= 3:
-            for ci in corner_idxs:
-                if ci != -1:
-                    temp_corner_points_list_xy[ci] = []
-
-            temp_corner_points_list_xy = filter(None, temp_corner_points_list_xy)
-
-        Astar_Movement.append(astar_movement[1:])
-    else:
-        Astar_Movement.append([])
-
-    return Astar_Movement, temp_corner_points_list_xy, temp_interesting_points_list_xy
+    # return Astar_Movement, temp_corner_points_list_xy
+    return Astar_Movement

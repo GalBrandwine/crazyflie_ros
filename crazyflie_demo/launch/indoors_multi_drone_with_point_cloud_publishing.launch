@@ -22,13 +22,13 @@ A few notes:
 
 
     <!-- for first CF -->
-    <arg name="uri1" default="radio://0/120/2M/E7E7E7E704"/>
-    <arg name="frame1" default="cf4"/>
+    <arg name="uri1" default="radio://0/120/2M/E7E7E7E703"/>
+    <arg name="frame1" default="cf3"/>
     <arg name="frame1_active" default="1"/>
     <arg name="frame1__listening_to_key_board" default="1"/>
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX1" default="0.0"/>
-    <arg name="initY1" default="3.0"/>
+    <arg name="initY1" default="2.4"/>
     <arg name="initZ1" default="0"/>
 
 
@@ -42,6 +42,7 @@ A few notes:
     <arg name="initY2" default="2.4"/>
     <arg name="initZ2" default="0"/>
 
+
     <!-- for third CF    -->
     <arg name="uri3" default="radio://0/120/2M/E7E7E7E708"/>
     <arg name="frame3" default="cf8"/>
@@ -50,6 +51,7 @@ A few notes:
     <arg name="initX3" default="0.0"/>
     <arg name="initY3" default="1.8"/>
     <arg name="initZ3" default="0"/>
+
 
     <!-- for forth CF    -->
     <arg name="uri4" default="radio://0/120/2M/E7E7E7E709"/>
@@ -60,15 +62,17 @@ A few notes:
     <arg name="initY4" default="2.4"/>
     <arg name="initZ4" default="0"/>
 
+
     <!-- arguments for indoor mapping  -->
-    <arg name="x_min" default="0"/>
-    <arg name="x_max" default="250"/>
+    <arg name="x_min" value="0"/>
+    <arg name="x_max" default="500"/> <!-- 250 -->
     <arg name="y_min" default="0"/>
-    <arg name="y_max" default="250"/>
+    <arg name="y_max" default="500"/> <!-- 250 -->
     <arg name="env_lim" default="[$(arg x_min), $(arg x_max), $(arg y_min), $(arg y_max)]"/>
     <arg name="resolution" default="10"/>
     <arg name="env_space" default="50"/>
-    <arg name="nDrones" default="2"/>
+    <arg name="nDrones" default="1"/>
+
 
     <!--    Cf's arary. for Cj_injector   input is an array of drones!
             Future develop: add drone as a message!
@@ -107,6 +111,7 @@ A few notes:
     </include>
 
 
+
     <!--    Set the name space of the CF_x to be its name-->
     <!--    Future develop: instead of : each group is one CF, make each group flock.-->
     <!--    ***************************************************** FRAME 1  ********************************************************-->
@@ -134,10 +139,12 @@ A few notes:
             </rosparam>
         </node>
 
-        <!--            Fix vrpn axes - broadcasts tf frame "cf#_fixed" FOR IT TO WORK THE RIGID BODY NAME MUST BE CF#_VRPN -->
-        <!--        <node name="explorer" pkg="crazyflie_demo" type="tf_fixer.py" output="screen">-->
-        <!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
-        <!--        </node>-->
+
+                <!--            Fix vrpn axes - broadcasts tf frame "cf#_fixed" FOR IT TO WORK THE RIGID BODY NAME MUST BE CF#_VRPN -->
+        <node name="explorer" pkg="crazyflie_demo" type="tf_fixer.py" output="screen">
+            <param name="tf_prefix" value="$(arg frame1)"/>
+        </node>
+
         <!--        Tf_broadcast a static transform with offset between a drone launch point and world-->
         <node pkg="tf" type="static_transform_publisher" name="world_to_$(arg frame1)_takeoff"
               args="$(arg initX1) $(arg initY1) 0 0 0 0 1 world $(arg frame1)_takeoff 100"/>
@@ -209,16 +216,16 @@ A few notes:
         <!--            <param name="tf_prefix" value="$(arg frame2)"/>-->
         <!--        </node>-->
 
-        <!--        Tf_broadcast a static transform with offset between a drone launch point and world-->
-        <node pkg="tf" type="static_transform_publisher" name="world_to_$(arg frame2)_takeoff"
-              args="$(arg initX2) $(arg initY2) 0 0 0 0 1 world $(arg frame2)_takeoff 100"/>
+            <!--        Tf_broadcast a static transform with offset between a drone launch point and world-->
+            <node pkg="tf" type="static_transform_publisher" name="world_to_$(arg frame2)_takeoff"
+                  args="$(arg initX2) $(arg initY2) 0 0 0 0 1 world $(arg frame2)_takeoff 100"/>
 
-        <!--            The node for actually running desired python code -->
-        <!--        <node name="crazyflie_demo_hover" pkg="crazyflie_demo" type="traj_planner.py" output="screen">-->
-        <!--            <param name="tf_prefix" value="$(arg frame2)"/>-->
-        <!--            &lt;!&ndash;            Pass a list as ros param&ndash;&gt;-->
-        <!--            <rosparam param="traj_list" subst_value="True">$(arg traj_list2)</rosparam>-->
-        <!--        </node>-->
+            <!--            The node for actually running desired python code -->
+            <!--        <node name="crazyflie_demo_hover" pkg="crazyflie_demo" type="traj_planner.py" output="screen">-->
+            <!--            <param name="tf_prefix" value="$(arg frame2)"/>-->
+            <!--            &lt;!&ndash;            Pass a list as ros param&ndash;&gt;-->
+            <!--            <rosparam param="traj_list" subst_value="True">$(arg traj_list2)</rosparam>-->
+            <!--        </node>-->
 
         <!--        Start keyboard controller. -->
         <node name="motion_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">
@@ -226,21 +233,21 @@ A few notes:
             <param name="listen_to_keyboard" value="$(arg frame2__listening_to_key_board)"/>
         </node>
 
-        <!--        Tf_broadcast a specific drone with world-->
-        <node name="tf_broadcast" pkg="crazyflie_demo" type="tf_broadcaster.py" output="screen">
-            <param name="tf_prefix" value="$(arg frame2)"/>
-            <param name="initX" value="$(arg initX2)"/>
-            <param name="initY" value="$(arg initY2)"/>
-            <param name="initZ" value="$(arg initZ2)"/>
-        </node>
-        <!--        Publish TOF sensors readings as pointcloud-->
-        <node name="points_publisher" pkg="crazyflie_demo" type="publish_scan.py" output="screen">
-            <param name="tf_prefix" value="$(arg frame2)"/>
-        </node>
-        <!--        Rotem.py capture all ros data of a certain CF and wrap it with python object.-->
-        <node name="drone_data_parser" pkg="crazyflie_demo" type="rotem.py" output="screen">
-            <param name="tf_prefix" value="$(arg frame2)"/>
-        </node>
+            <!--        Tf_broadcast a specific drone with world-->
+            <node name="tf_broadcast" pkg="crazyflie_demo" type="tf_broadcaster.py" output="screen">
+                <param name="tf_prefix" value="$(arg frame2)"/>
+                <param name="initX" value="$(arg initX2)"/>
+                <param name="initY" value="$(arg initY2)"/>
+                <param name="initZ" value="$(arg initZ2)"/>
+            </node>
+            <!--        Publish TOF sensors readings as pointcloud-->
+            <node name="points_publisher" pkg="crazyflie_demo" type="publish_scan.py" output="screen">
+                <param name="tf_prefix" value="$(arg frame2)"/>
+            </node>
+            <!--        Rotem.py capture all ros data of a certain CF and wrap it with python object.-->
+            <node name="drone_data_parser" pkg="crazyflie_demo" type="rotem.py" output="screen">
+                <param name="tf_prefix" value="$(arg frame2)"/>
+            </node>
 
         <!--        logger_by_format.py capture all topics relevant for looging into predesignd SCV.-->
         <node name="logger_by_format" pkg="crazyflie_demo" type="logger_by_format.py" output="screen">
@@ -248,67 +255,67 @@ A few notes:
         </node>
     </group>
 
-    <!--    ***************************************************** FRAME 3 ********************************************************-->
-    <group ns="$(arg frame3)" if="$(eval arg('frame3_active') ==1)">
-        <node pkg="crazyflie_driver" type="crazyflie_add" name="crazyflie_add" output="screen">
-            <param name="uri" value="$(arg uri3)"/>
-            <param name="tf_prefix" value="$(arg frame3)"/>
+        <!--    ***************************************************** FRAME 3 ********************************************************-->
+        <group ns="$(arg frame3)" if="$(eval arg('frame3_active') ==1)">
+            <node pkg="crazyflie_driver" type="crazyflie_add" name="crazyflie_add" output="screen">
+                <param name="uri" value="$(arg uri3)"/>
+                <param name="tf_prefix" value="$(arg frame3)"/>
 
-            <!--            Logging params:-->
-            <param name="enable_logging" value="True"/>
-            <param name="enable_logging_temperature" value="False"/>
-            <param name="enable_logging_magnetic_field" value="False"/>
-            <param name="enable_logging_pressure" value="False"/>
-            <param name="enable_logging_imu" value="True"/>
-            <param name="enable_logging_battery" value="False"/>
+                <!--            Logging params:-->
+                <param name="enable_logging" value="True"/>
+                <param name="enable_logging_temperature" value="False"/>
+                <param name="enable_logging_magnetic_field" value="False"/>
+                <param name="enable_logging_pressure" value="False"/>
+                <param name="enable_logging_imu" value="True"/>
+                <param name="enable_logging_battery" value="False"/>
 
-            <rosparam>
-                genericLogTopics: ["log_pos" , "log_rpy" , "log_ranges", "log_sensors" ]
-                genericLogTopicFrequencies: [20 , 20 , 20 , 20 ]
-                genericLogTopic_log_pos_Variables: ["stateEstimate.x", "stateEstimate.y", "stateEstimate.z"]
-                genericLogTopic_log_rpy_Variables: ["stabilizer.roll" , "stabilizer.pitch" , "stabilizer.yaw"]
-                genericLogTopic_log_ranges_Variables: ["range.front", "range.back", "range.up", "range.left",
-                "range.right" , "range.zrange" ]
-                genericLogTopic_log_sensors_Variables: ["motion.deltaX" , "motion.deltaY" , "motion.outlierCount" ]
-            </rosparam>
-        </node>
+                <rosparam>
+                    genericLogTopics: ["log_pos" , "log_rpy" , "log_ranges", "log_sensors" ]
+                    genericLogTopicFrequencies: [20 , 20 , 20 , 20 ]
+                    genericLogTopic_log_pos_Variables: ["stateEstimate.x", "stateEstimate.y", "stateEstimate.z"]
+                    genericLogTopic_log_rpy_Variables: ["stabilizer.roll" , "stabilizer.pitch" , "stabilizer.yaw"]
+                    genericLogTopic_log_ranges_Variables: ["range.front", "range.back", "range.up", "range.left",
+                    "range.right" , "range.zrange" ]
+                    genericLogTopic_log_sensors_Variables: ["motion.deltaX" , "motion.deltaY" , "motion.outlierCount" ]
+                </rosparam>
+            </node>
 
-        <!--        Fix vrpn axes - broadcasts tf frame "cf#_fixed" FOR IT TO WORK THE RIGID BODY NAME MUST BE CF#_VRPN -->
-        <node name="explorer" pkg="crazyflie_demo" type="tf_fixer.py" output="screen">
-            <param name="tf_prefix" value="$(arg frame3)"/>
-        </node>
+            <!--        Fix vrpn axes - broadcasts tf frame "cf#_fixed" FOR IT TO WORK THE RIGID BODY NAME MUST BE CF#_VRPN -->
+            <node name="explorer" pkg="crazyflie_demo" type="tf_fixer.py" output="screen">
+                <param name="tf_prefix" value="$(arg frame3)"/>
+            </node>
 
-        <!--        Tf_broadcast a static transform with offset between a drone launch point and world-->
-        <node pkg="tf" type="static_transform_publisher" name="world_to_$(arg frame3)_takeoff"
-              args="$(arg initX3) $(arg initY3) 0 0 0 0 1 world $(arg frame3)_takeoff 100"/>
+            <!--        Tf_broadcast a static transform with offset between a drone launch point and world-->
+            <node pkg="tf" type="static_transform_publisher" name="world_to_$(arg frame3)_takeoff"
+                  args="$(arg initX3) $(arg initY3) 0 0 0 0 1 world $(arg frame3)_takeoff 100"/>
 
-        <!--            The node for actually running desired python code -->
-        <!--        <node name="crazyflie_demo_hover" pkg="crazyflie_demo" type="traj_planner.py" output="screen">-->
-        <!--            <param name="tf_prefix" value="$(arg frame2)"/>-->
-        <!--            &lt;!&ndash;            Pass a list as ros param&ndash;&gt;-->
-        <!--            <rosparam param="traj_list" subst_value="True">$(arg traj_list2)</rosparam>-->
-        <!--        </node>-->
+            <!--            The node for actually running desired python code -->
+            <!--        <node name="crazyflie_demo_hover" pkg="crazyflie_demo" type="traj_planner.py" output="screen">-->
+            <!--            <param name="tf_prefix" value="$(arg frame2)"/>-->
+            <!--            &lt;!&ndash;            Pass a list as ros param&ndash;&gt;-->
+            <!--            <rosparam param="traj_list" subst_value="True">$(arg traj_list2)</rosparam>-->
+            <!--        </node>-->
 
-        <!--        Start keyboard controller. -->
-        <node name="motion_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">
-            <param name="tf_prefix" value="$(arg frame3)"/>
-        </node>
+            <!--        Start keyboard controller. -->
+            <node name="motion_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">
+                <param name="tf_prefix" value="$(arg frame3)"/>
+            </node>
 
-        <!--        Tf_broadcast a specific drone with world-->
-        <node name="tf_broadcast" pkg="crazyflie_demo" type="tf_broadcaster.py" output="screen">
-            <param name="tf_prefix" value="$(arg frame3)"/>
-            <param name="initX" value="$(arg initX3)"/>
-            <param name="initY" value="$(arg initY3)"/>
-            <param name="initZ" value="$(arg initZ3)"/>
-        </node>
-        <!--        Publish TOF sensors readings as pointcloud-->
-        <node name="points_publisher" pkg="crazyflie_demo" type="publish_scan.py" output="screen">
-            <param name="tf_prefix" value="$(arg frame3)"/>
-        </node>
-        <!--        Rotem.py capture all ros data of a certain CF and wrap it with python object.-->
-        <node name="drone_data_parser" pkg="crazyflie_demo" type="rotem.py" output="screen">
-            <param name="tf_prefix" value="$(arg frame3)"/>
-        </node>
+            <!--        Tf_broadcast a specific drone with world-->
+            <node name="tf_broadcast" pkg="crazyflie_demo" type="tf_broadcaster.py" output="screen">
+                <param name="tf_prefix" value="$(arg frame3)"/>
+                <param name="initX" value="$(arg initX3)"/>
+                <param name="initY" value="$(arg initY3)"/>
+                <param name="initZ" value="$(arg initZ3)"/>
+            </node>
+            <!--        Publish TOF sensors readings as pointcloud-->
+            <node name="points_publisher" pkg="crazyflie_demo" type="publish_scan.py" output="screen">
+                <param name="tf_prefix" value="$(arg frame3)"/>
+            </node>
+            <!--        Rotem.py capture all ros data of a certain CF and wrap it with python object.-->
+            <node name="drone_data_parser" pkg="crazyflie_demo" type="rotem.py" output="screen">
+                <param name="tf_prefix" value="$(arg frame3)"/>
+            </node>
 
         <!--        logger_by_format.py capture all topics relevant for looging into predesignd SCV.-->
         <node name="logger_by_format" pkg="crazyflie_demo" type="logger_by_format.py" output="screen">
@@ -384,35 +391,68 @@ A few notes:
         </node>
     </group>
 
-    <!--    &lt;!&ndash;    ***************************************************** MAPPING modules *******************************************************&ndash;&gt;-->
-    <!--     <group ns="Mapping">-->
-    <!--        <node name="grid_publisher" pkg="crazyflie_demo" type="Grid.py" output="screen">-->
-    <!--            <param name="env_lim" value="$(arg env_lim)"/>-->
-    <!--            <param name="env_space" value="$(arg env_space)"/>-->
-    <!--            <param name="resolution" value="$(arg resolution)"/>-->
+    <!--    ***************************************************** MAPPING modules *******************************************************-->
+    <group ns="Mapping">
+        <node name="grid_publisher" pkg="crazyflie_demo" type="Grid.py" output="screen">
+            <param name="env_lim" value="$(arg env_lim)"/>
+            <param name="env_space" value="$(arg env_space)"/>
+            <param name="resolution" value="$(arg resolution)"/>
+            <!---->
+            <param name="nDrones" value="$(arg nDrones)"/>
+            <param name="drone_name_0" value="$(arg frame1)"/>
+            <param name="drone_takeoff_position_0" value="[$(arg initX1), $(arg initY1), $(arg initZ1)]"/>
 
-    <!--            <param name="nDrones" value="$(arg nDrones)"/>-->
-    <!--            <param name="drone_name_0" value="$(arg frame2)"/>-->
-    <!--            <param name="drone_name_1" value="$(arg frame3)"/>-->
-    <!--        </node>-->
+            <!--            <param name="drone_name_1" value="$(arg frame2)"/>-->
+            <!--            <param name="drone_takeoff_position_1" value="[$(arg initX2), $(arg initY2), $(arg initZ2)]"/>-->
 
-    <!--        <node name="display_manager" pkg="crazyflie_demo" type="Display.py" output="screen">-->
-    <!--            <param name="env_lim" value="$(arg env_lim)"/>-->
-    <!--            <param name="env_space" value="$(arg env_space)"/>-->
-    <!--            <param name="resolution" value="$(arg resolution)"/>-->
 
-    <!--            <param name="nObstacles" value="4"/>-->
-    <!--            <param name="obs_0" value="[(0, 0), (10, 0), (10, 250), (0, 250), (0, 0)]"/>-->
-    <!--            <param name="obs_1" value="[(10, 0), (10, 10), (250, 10), (250, 0), (10, 0)]"/>-->
-    <!--            <param name="obs_2" value="[(250, 10), (240, 10), (240, 250), (250, 250), (250, 10)]"/>-->
-    <!--            <param name="obs_3" value="[(10, 250), (10, 240), (240, 240), (240, 250), (10, 250)]"/>-->
+        </node>
 
-    <!--            <param name="nDrones" value="$(arg nDrones)"/>-->
-    <!--            <param name="drone_name_0" value="$(arg frame2)"/>-->
-    <!--            <param name="drone_takeoff_position_0" value="[180, 180, 0]"/>-->
-    <!--            <param name="drone_name_1" value="$(arg frame3)"/>-->
-    <!--            <param name="drone_takeoff_position_1" value="[60, 60, 0]"/>-->
-    <!--        </node>-->
-    <!--    </group>-->
+        <node name="display_manager" pkg="crazyflie_demo" type="Display.py" output="screen">
+            <param name="env_lim" value="$(arg env_lim)"/>
+            <param name="env_space" value="$(arg env_space)"/>
+            <param name="resolution" value="$(arg resolution)"/>
+            <!---->
+            <param name="nObstacles" value="4"/>
+            <param name="obs_0" value="[(0, 0), (10, 0), (10, 250), (0, 250), (0, 0)]"/>
+            <param name="obs_1" value="[(10, 0), (10, 10), (250, 10), (250, 0), (10, 0)]"/>
+            <param name="obs_2" value="[(250, 10), (240, 10), (240, 250), (250, 250), (250, 10)]"/>
+            <param name="obs_3" value="[(10, 250), (10, 240), (240, 240), (240, 250), (10, 250)]"/>
+            <!---->
+            <param name="nDrones" value="$(arg nDrones)"/>
+            <param name="drone_name_0" value="$(arg frame1)"/>
+            <param name="drone_takeoff_position_0" value="[$(arg initX1), $(arg initY1), $(arg initZ1)]"/>
+
+            <param name="drone_name_1" value="$(arg frame2)"/>
+            <param name="drone_takeoff_position_1" value="[$(arg initX2), $(arg initY2), $(arg initZ2)]"/>
+
+        </node>
+        <!--    Cf's arary. for Cj_injector   input is an array of drones!
+                Future develop: add drone as a message!
+                INPUT: ,$(arg frame2),$(arg frame3),$(arg frame4)    -->
+
+
+        <node name="Cj_injector" pkg="crazyflie_demo" type="Cj_injector.py" output="screen">
+<!--            <param name="env_lim" value="$(arg env_lim)"/>-->
+            <rosparam param="env_lim" subst_value="True">[$(arg env_lim),]</rosparam>
+            <param name="resolution" value="$(arg resolution)"/>
+<!--            <rosparam param="resolution" subst_value="True">[$(arg resolution)]</rosparam>-->
+<!--            <param name="prefix_list" value="[$(arg frame1), $(arg frame2), $(arg frame3),$(arg frame4)]"/>-->
+<!--            <param name="prefix_list" value="[$(arg frame1)]"/>-->
+            <rosparam param="prefix_list" subst_value="True">[$(arg frame1),]</rosparam>
+            <!--            Pass all drones initial takeoff positions-->
+<!--            <param name="init_takeoff_list" value="[[$(arg initX1), $(arg initY1), $(arg initZ1)]] "/>-->
+            <rosparam param="init_takeoff_list" subst_value="True">[[$(arg initX1), $(arg initY1), $(arg initZ1)],]</rosparam>
+            <param name="env_space" value="$(arg env_space)"/>
+<!--            <rosparam param="env_space" subst_value="True">[$(arg env_space)]</rosparam>-->
+            <param name="nDrones" value="$(arg nDrones)"/>
+        </node>
+
+        <!--<node name="http_server" pkg="crazyflie_demo" type="HTTP_server.py" output="screen">-->
+            <!--<param name="nDrones" value="$(arg nDrones)"/>-->
+            <!--<param name="drone_name_0" value="$(arg frame1)"/>-->
+        <!--</node>-->
+
+    </group>
 
 </launch>

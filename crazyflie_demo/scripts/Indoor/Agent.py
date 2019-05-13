@@ -1,10 +1,11 @@
+#!/usr/bin/env python
 import numpy as np
+import math
 import rospy
-from std_msgs.msg import String
 
 class Agent:
 
-    def __init__(self, AgentID, pos, res, x_lim, y_lim):
+    def __init__(self, AgentID, pos, res, env_limits):
         self.ID = AgentID
         self.agent_alive = True
         self.is_homing = False
@@ -15,7 +16,7 @@ class Agent:
         self.step_factor = 1
         self.next_pos = pos
         self.current_pos = self.next_pos
-        self.next_heading = 0
+        self.next_heading = math.radians(0)
         self.current_heading = self.next_heading
         self.VisibilityRange = 300
         self.scanning_range = 200
@@ -25,11 +26,10 @@ class Agent:
         self.goal_orianted_flag = True #np.random.rand(1) < self.goal_orianted_flag_flip_prob
         self.reduced_neigbours_pos_list = list()
         self.astar_path = []
-        self.x_lim = x_lim
-        self.y_lim = y_lim
+        self.x_lim = env_limits[0:2]
+        self.y_lim = env_limits[2:4]
         self.res = res
-        self.attempts_cnt = 0
-        self.max_attemps = 3
+        self.dist_factor = 3
 
 
     def update_current_state(self, current_pos, current_heading):
@@ -41,46 +41,41 @@ class Agent:
         return self.next_pos, self.next_heading
 
 
-    def preform_step_sys_sim(self, current_pos, current_heading, neigbours_pos_list, matrix):
+    def preform_step_sys_sim(self, current_pos, current_heading, matrix):
         self.update_current_state(current_pos, current_heading)
-        self.reduced_neigbours_pos_list = self.neighborhood_reduction(neigbours_pos_list, matrix)
-        self.Dynam_Search_in_maze(self.reduced_neigbours_pos_list, matrix)
-        self.next_heading = np.random.rand() * np.pi / 4
+        self.Dynam_Search_in_maze(matrix)
 
 
-    def Dynam_Search_in_maze(self, NeighborsPosList, matrix):
+    def Dynam_Search_in_maze(self, matrix):
 
-        max_count_val = 15
+        max_count_val = 10
         break_counter = 0
         vec = np.zeros(2)
         flag = False
         as_flag = False
 
-        try:
-            vec = [self.astar_path[0][0]-self.current_pos[0][0],self.astar_path[0][1]-self.current_pos[0][1]]
+        if self.astar_path == []:
+            vec = np.subtract(self.next_pos[0], self.current_pos[0])
+        elif(self.is_step_legal(self.current_pos,  np.subtract(self.astar_path[0], self.current_pos[0]), matrix)):
+            vec = np.subtract(self.astar_path[0], self.current_pos[0])
             as_flag = True
-        except:
-            vec = [self.next_pos[0][0] - self.current_pos[0][0], self.next_pos[0][1] - self.current_pos[0][1]]
-        while not flag and break_counter < max_count_val:
-            break_counter = break_counter + 1
-            step = self.step_noise_size * ([0.5, 0.5] - np.random.rand(2)) + vec
-            if self.is_step_legal(self.current_pos, step, matrix):
-                flag = True
-                if np.random.rand(1) < 0.8:
-                    for neighbor_pos in NeighborsPosList:
-                        if self.outOfLimit_Ando(neighbor_pos, step):
-                            flag = False
-                            break
-                        if not self.is_step_in_corridor(step, neighbor_pos, matrix):
-                            flag = False
-                            break
-                    else:
-                        break
 
-        if break_counter < max_count_val:
-            self.next_pos = self.current_pos + step
-            if as_flag and self.astar_path != 0:
-                del self.astar_path[0]
+        if self.astar_path != [] and np.linalg.norm(np.subtract(self.current_pos[0], self.next_pos[0])) > self.dist_factor * self.step_noise_size\
+                and self.is_step_legal(self.current_pos,  np.subtract(self.next_pos[0], self.current_pos[0]), matrix):
+            vec = np.subtract(self.next_pos[0], self.current_pos[0])
+
+        if sum(vec) != 0:
+            while not flag and break_counter < max_count_val:
+                break_counter = break_counter + 1
+                step = self.step_noise_size * ([0.5, 0.5] - np.random.rand(2)) + vec
+                if self.is_step_legal(self.current_pos, step, matrix):
+                    flag = True
+                    break
+
+            if break_counter < max_count_val:
+                self.next_pos = self.current_pos + vec
+                if as_flag and self.astar_path != []:
+                    del self.astar_path[0]
 
 
 # This is the important function, that should be rewriten
@@ -94,7 +89,7 @@ class Agent:
         if self.goal_orianted_flag:
             optinal_goal_list = self.non_scaned_list(self.current_pos, 5 * self.scanning_range, matrix)
             if optinal_goal_list.__len__() > 0:
-                vec = optinal_goal_list[0] - self.current_pos
+                vec = np.subtract(optinal_goal_list[0], self.current_pos)
                 goal_vec = vec / np.linalg.norm(vec)
                 rep_att_vec = rep_att_vec + goal_vec
             else:
