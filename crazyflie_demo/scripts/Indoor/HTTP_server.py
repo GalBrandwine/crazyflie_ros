@@ -5,6 +5,8 @@ from time import sleep
 import rospy
 from nav_msgs.msg import OccupancyGrid
 import numpy as np
+from sensor_msgs.msg import CompressedImage
+
 
 PORT_NUMBER = 8080
 
@@ -25,6 +27,9 @@ class RequestHandler(BaseHTTPRequestHandler):
         # (the occupancy grid contains the information about the free, ubknown and wall areas).
         self.grid_subscriber = rospy.Subscriber("/indoor/occupancy_grid_topic", OccupancyGrid,
                                         callback=self.grid_parser, callback_args="/indoor/occupancy_grid_topic")
+
+        self.frame_sub = rospy.Subscriber('/indoor/vehicle_frame_topic', CompressedImage,
+                                          callback=self.frame_parser)
 
     def do_GET(self):
         self.send_response(200)
@@ -58,6 +63,9 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     # Update additional data: drones location, car path and location, etc.
     def update_matrix_additional_data(self):
+        pass
+
+    def frame_parser(self):
         pass
 
 
