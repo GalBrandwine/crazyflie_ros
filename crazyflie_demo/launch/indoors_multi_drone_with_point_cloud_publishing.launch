@@ -22,8 +22,8 @@ A few notes:
 
 
     <!-- for first CF -->
-    <arg name="uri1" default="radio://0/120/2M/E7E7E7E703"/>
-    <arg name="frame1" default="cf3"/>
+    <arg name="uri1" default="radio://0/120/2M/E7E7E7E708"/>
+    <arg name="frame1" default="cf8"/>
     <arg name="frame1_active" default="1"/>
     <arg name="frame1__listening_to_key_board" default="1"/>
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
@@ -43,8 +43,8 @@ A few notes:
     <arg name="initZ2" default="0"/>
 
     <!-- for third CF    -->
-    <arg name="uri3" default="radio://0/120/2M/E7E7E7E708"/>
-    <arg name="frame3" default="cf8"/>
+    <arg name="uri3" default="radio://0/120/2M/E7E7E7E707"/>
+    <arg name="frame3" default="cf7"/>
     <arg name="frame3_active" default="0"/>
     <arg name="traj_list3" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX3" default="0.0"/>

@@ -131,7 +131,7 @@ class DroneInjector:
         """
         threads = []
         step = 0.60  # m
-        step_time = 1.8
+        step_time = 1.0
 
         # simple straight line, then turn 360, then go back
         #                       [----t----, ----x---, ---y---, --z--, yaw]
@@ -151,44 +151,41 @@ class DroneInjector:
         ]
 
         #                       [----t----, ----x---, ---y---, --z--, yaw]
-        path_maze_right_side = [[step_time* 0.5, 0 * step, 4.0 * step, 0.35, 0], #first point
-                                [step_time * 1, 0 * step, 4.4 * step, 0.35, 0],
-                                [step_time * 3, 1.5 * step, 4.4 * step, 0.35, 0],
-                                [step_time * 3, 3 * step, 4.4 * step, 0.35, 0],
-                                [step_time * 3, 4.25 * step, 4.4 * step, 0.35, 0],
-                                [step_time * 4, 4.25 * step, 2.8 * step, 0.35, 0],
-                                [step_time * 3, 3 * step, 2.8 * step, 0.35, 0],
-                                [step_time * 3, 1.9 * step, 2.8 * step, 0.35, 0],
-                                [step_time * 2, 1.9 * step, 2.2 * step, 0.35, 0],
-                                [step_time * 2, 1.9 * step, 2.8 * step, 0.35, 0],
-                                [step_time * 3, 3 * step, 2.8 * step, 0.35, 0],
-                                [step_time * 3, 4.25 * step, 2.8 * step, 0.35, 0],
-                                [step_time * 2, 4.25 * step, 2 * step, 0.35, 0],
-                                [step_time * 2, 5.05 * step, 2 * step, 0.35, 0],
-                                [step_time * 2, 4.25 * step, 2 * step, 0.35, 0],
-                                [step_time * 2, 4.25 * step, 3 * step, 0.35, 0],
-                                [step_time * 3, 4.25 * step, 4.1 * step, 0.35, 0],
-                                [step_time * 3, 2.75 * step, 4.1 * step, 0.35, 0],
-                                [step_time * 3, 1.25 * step, 4.1 * step, 0.35, 0],
-                                [step_time * 3, 0 * step, 4.1 * step, 0.35, 0],
-                                [step_time * 1, 0 * step, 4 * step, 0.35, 0],
+        path_maze_right_side = [[step_time* 0.5, 0 * step, 4.0 * step, 0.35, 0], #first point x=0 y=4
+                                [step_time * 0.8, 0 * step, 3.8 * step, 0.35, 0],
+                                [step_time * 4, 1 * step, 3.8 * step, 0.35, 0],
+                                [step_time * 4, 2 * step, 3.8 * step, 0.35, 0],
+                                [step_time * 4.8, 3.2 * step, 3.8 * step, 0.35, 0],
+                                [step_time * 6, 3.2 * step, 5.3 * step, 0.35, 0],
+                                [step_time * 2, 2.7 * step, 5.3 * step, 0.35, 0],
+                                [step_time * 2.4, 3.3 * step, 5.3 * step, 0.35, 0],
+                                [step_time * 6, 3.3 * step, 3.8 * step, 0.35, 0],
+                                [step_time * 5.2, 4.6 * step, 3.8 * step, 0.35, 0],
+                                [step_time * 4.8, 4.6 * step, 5 * step, 0.35, 0],
+                                [step_time * 4.8, 4.6 * step, 6.2 * step, 0.35, 0],
+                                [step_time * 4.8, 5.8 * step, 6.2 * step, 0.35, 0],
+                                [step_time * 5.2, 7.1 * step, 6.2 * step, 0.35, 0],
+                                [step_time * 4.8, 7.1 * step, 5 * step, 0.35, 0],
+                                [step_time * 4.8, 7.1 * step, 3.8 * step, 0.35, 0],
+                                [step_time * 1.6, 7.1 * step, 3.4 * step, 0.35, 0],
+                                [step_time * 4, 8.1 * step, 3.4 * step, 0.35, 0],
+                                [step_time * 4, 8.1 * step, 2.4 * step, 0.35, 0],
+                                [step_time * 3.4, 8.1 * step, 3.25 * step, 0.35, 0],
+                                [step_time * 4.8, 6.9 * step, 3.25 * step, 0.35, 0],
+                                [step_time * 4.8, 5.7 * step, 3.25 * step, 0.35, 0],
+                                [step_time * 4, 4.7 * step, 3.25 * step, 0.35, 0],
+                                [step_time * 3.2, 4.7 * step, 2.45 * step, 0.35, 0],
+                                [step_time * 3.2, 4.7 * step, 1.65 * step, 0.35, 0],
+                                [step_time * 4, 3.7 * step, 1.65 * step, 0.35, 0],
+                                [step_time * 4, 4.7 * step, 1.65 * step, 0.35, 0],
+                                [step_time * 4, 4.7 * step, 2.65 * step, 0.35, 0],
+                                [step_time * 4, 4.7 * step, 3.65 * step, 0.35, 0],
+                                [step_time * 4.8, 3.5 * step, 3.65 * step, 0.35, 0],
+                                [step_time * 4.8, 2.3 * step, 3.65 * step, 0.35, 0],
+                                [step_time * 4.8, 1.1 * step, 3.65 * step, 0.35, 0],
+                                [step_time * 4.4, 0 * step, 3.65 * step, 0.35, 0],
+
                                 ]
-        #
-        # [step_time * 1, 0 * step, 4.4 * step, 0.35, 0],
-        # [step_time * 4, 2 * step, 4.4 * step, 0.35, 0],
-        # [step_time * 5, 4.25 * step, 4.4 * step, 0.35, 0],
-        # [step_time * 4, 4.25 * step, 2.8 * step, 0.35, 0],
-        # [step_time * 5, 1.75 * step, 2.8 * step, 0.35, 0],
-        # [step_time * 1, 1.75 * step, 2.3 * step, 0.35, 0],
-        # [step_time * 1, 1.75 * step, 2.8 * step, 0.35, 0],
-        # [step_time * 5, 4.25 * step, 2.8 * step, 0.35, 0],
-        # [step_time * 2, 4.25 * step, 2 * step, 0.35, 0],
-        # [step_time * 2, 5.05 * step, 2 * step, 0.35, 0],
-        # [step_time * 2, 4.25 * step, 2 * step, 0.35, 0],
-        # [step_time * 5, 4.25 * step, 4.1 * step, 0.35, 0],
-        # [step_time * 4, 2.25 * step, 4.1 * step, 0.35, 0],
-        # [step_time * 5, 0 * step, 4.1 * step, 0.35, 0],
-        # [step_time * 1, 0 * step, 4 * step, 0.35, 0],
 
         #                       [----t----, ----x---, ---y---, --z--, yaw]
         path_maze_left_side = [[step_time * 3, 0 * step, 4.5 * step, 0.35, 0],  # start in (0,300,0.35)
@@ -205,8 +202,8 @@ class DroneInjector:
         t1 = Thread(target=injector, args=(self.cj_injector_container[0], path_maze_right_side,))
         threads.append(t1)
 
-        t2 = Thread(target=injector, args=(self.cj_injector_container[1], path_maze_left_side,))
-        threads.append(t2)
+        # t2 = Thread(target=injector, args=(self.cj_injector_container[1], path_maze_left_side,))
+        # threads.append(t2)
 
         # start all threads.
         for t in threads:

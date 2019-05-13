@@ -224,11 +224,11 @@ def handler(cf_handler):
     #       Cj_injection and before that Cj order will go to drone,
     #       we will check if theres a futoristic collision within that path.
 
-    dist_threshold = 0.15  # minimum distance to trigger collission avoidance [meters]
+    dist_threshold = 0.1  # minimum distance to trigger collission avoidance [meters]
 
     def_duration = 1.8
     land_duration = 1.5
-    avoid_c_duration = 1.0
+    avoid_c_duration = 1.5
 
     try:
 
