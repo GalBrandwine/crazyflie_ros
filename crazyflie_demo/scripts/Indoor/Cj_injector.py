@@ -194,6 +194,7 @@ class DroneInjector:
     """
 
     def __init__(self, prefix_takeoff_dict_input, env_limits_input, resolution, rate=15):
+        rospy.loginfo(env_limits_input)
         self.cj_injector_container = []
         self.res = resolution
         self.num_of_drones = len(prefix_takeoff_dict_input.keys())  # get number of drones

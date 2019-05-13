@@ -15,6 +15,8 @@ import threading
 from geometry_msgs.msg import Pose
 import tf2_ros
 from tf.transformations import euler_from_quaternion
+import csv
+import copy
 
 
 m_to_cm = 100
@@ -40,20 +42,21 @@ class drone_pc:
 
 class Grid:
 
-    def __init__(self, border_polygon, res, nDrones, initial_pos_dict):
+    def __init__(self, grid_border, res, nDrones, initial_pos_dict, useRefEnv, excelPath):
 
-        self.x_lim = [border_polygon[0][0], border_polygon[0][0]]
-        self.y_lim = [border_polygon[0][1], border_polygon[0][1]]
+        self.x_lim = [grid_border[0][0], grid_border[0][0]]
+        self.y_lim = [grid_border[0][1], grid_border[0][1]]
 
-        for i in range(1, border_polygon.__len__()):
-            if self.x_lim[0] > border_polygon[i][0]:
-                self.x_lim[0] = border_polygon[i][0]
-            if self.x_lim[1] < border_polygon[i][0]:
-                self.x_lim[1] = border_polygon[i][0]
-            if self.y_lim[0] > border_polygon[i][1]:
-                self.y_lim[0] = border_polygon[i][1]
-            if self.y_lim[1] < border_polygon[i][1]:
-                self.y_lim[1] = border_polygon[i][1]
+        for i in range(1, grid_border.__len__()):
+            if self.x_lim[0] > grid_border[i][0]:
+                self.x_lim[0] = grid_border[i][0]
+            if self.x_lim[1] < grid_border[i][0]:
+                self.x_lim[1] = grid_border[i][0]
+            if self.y_lim[0] > grid_border[i][1]:
+                self.y_lim[0] = grid_border[i][1]
+            if self.y_lim[1] < grid_border[i][1]:
+                self.y_lim[1] = grid_border[i][1]
+
 
         self.res = res
         self.matrix = np.zeros([np.int64(np.ceil((self.x_lim[1]-self.x_lim[0])/self.res)), np.int64(np.ceil((self.y_lim[1]-self.y_lim[0])/self.res))])
@@ -72,6 +75,12 @@ class Grid:
         self.floor_thr = 32
         self.sens_limit = 200
         self.rate = 2 #Hz
+        self.useRefEnv = useRefEnv
+        self.excelPath = excelPath
+        self.grid_maze = copy.deepcopy(self.matrix)
+        self.maze_res = 7.6
+        if useRefEnv:
+            self.csv_to_maze()
 
         for i, id in enumerate(initial_pos_dict):
             self.drones_pos_list[id] = drone_pos(time=0, x=initial_pos_dict[id][0],
@@ -93,6 +102,28 @@ class Grid:
         # Start occupancy grid publisher
         grid_pub_thread = threading.Thread(name='grid_pub_thread', target=self.init_grid_publisher)
         grid_pub_thread.start()
+
+
+    def csv_to_maze(self):
+        datafile = open('/home/rita/catkin_ws/MazeMap.csv', 'r') # todo: relative path
+        datareader = csv.reader(datafile, delimiter=';')
+        self.maze = []
+        for srow in datareader:
+            row = [int(x) for x in srow[0].split(',')]
+            self.maze.append(row)
+        self.maze = np.array(self.maze)
+        for i_idx in range(np.shape(self.maze)[0]):
+            for j_idx in range(np.shape(self.maze)[1]):
+                if self.maze[i_idx][j_idx] == 1:
+                    x_idx = j_idx * self.maze_res
+                    y_idx = i_idx * self.maze_res
+                    i, j = self.xy_to_ij(x_idx, y_idx)
+                    self.grid_maze[i][j] = 2
+
+        # plt.figure(45645)
+        # plt.imshow(self.grid_maze, origin='lower')
+        # plt.show()
+
 
     def point_cloud_parser(self, msg, topic):
         """Each publicitation, theres' an array of 10 points."""
@@ -141,7 +172,6 @@ class Grid:
 
         except:
             rospy.logdebug("tf lookup -- {} not found".format(drone_id))
-            # print("after PC gets except")
 
         # Read data from all sensors (probably 4)
         for i in range(len(point_cloud)):
@@ -302,36 +332,24 @@ class Grid:
             self.change_tail_to_wall(0, 0)
 
 
-        if (matrix[0][matrix[0].__len__()-1] == 0 and
-                (matrix[0][matrix[0].__len__()-2] == 2 and matrix[1][matrix[0].__len__()-1] == 2)):
-            self.change_tail_to_wall(0, matrix[0].__len__()-1)
-
-
-        if (matrix[matrix.__len__()-1][matrix[0].__len__()-1] == 0 and
-                (matrix[matrix[0].__len__()-1][matrix[0].__len__()-2] == 2 and matrix[matrix[0].__len__()-2][matrix[0].__len__()-1] == 2)):
-            self.change_tail_to_wall(matrix.__len__()-1, matrix[0].__len__()-1)
-
-
-        if (matrix[matrix.__len__()-1][0] == 0 and
-                (matrix[matrix[0].__len__()-1][1] == 2 and matrix[matrix[0].__len__()-2][0] == 2)):
-            self.change_tail_to_wall(matrix.__len__()-1, 0)
 
 if __name__ == "__main__":
 
     rospy.init_node("grid_builder")
 
-    # grid = Grid([(0, 0), (570, 0), (570, 550), (0, 550), (0, 0)], 10)
     env_lim = rospy.get_param("~env_lim")
     env_space = rospy.get_param("~env_space")
     resolution = rospy.get_param("~resolution")
     nDrones = rospy.get_param("~nDrones")
+    useRefEnv = rospy.get_param("~useRefEnv")
+    excelPath = rospy.get_param("~excelPath")
 
     exec("env_lim = {}".format(env_lim))
 
     x_lim = (env_lim[0] - env_space, env_lim[1] + env_space)
     y_lim = (env_lim[2] - env_space, env_lim[3] + env_space)
 
-    polygon_border = [(x_lim[0], y_lim[0]), (x_lim[1], y_lim[0]), (x_lim[1], y_lim[1]),
+    grid_border = [(x_lim[0], y_lim[0]), (x_lim[1], y_lim[0]), (x_lim[1], y_lim[1]),
                       (x_lim[0], y_lim[1]), (x_lim[0], y_lim[0])]
 
     initial_pos_dict = dict()
@@ -341,4 +359,4 @@ if __name__ == "__main__":
         exec ("curr_drone_takeoff_pos = {}".format(curr_drone_takeoff_pos))
         initial_pos_dict[curr_drone_name] = curr_drone_takeoff_pos
 
-    grid = Grid(polygon_border, resolution, nDrones, initial_pos_dict)
+    grid = Grid(grid_border, resolution, nDrones, initial_pos_dict, int(useRefEnv), excelPath)

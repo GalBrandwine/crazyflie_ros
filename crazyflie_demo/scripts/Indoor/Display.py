@@ -14,7 +14,7 @@ import tf2_ros
 from tf.transformations import euler_from_quaternion
 
 class Display_manager:
-    def __init__(self, border_polygon, obs_array, x_lim, y_lim, res, matrix, initial_pos_dict, nDrones):
+    def __init__(self, border_polygon, x_lim, y_lim, res, matrix, initial_pos_dict, nDrones):
 
         self.nDrones = nDrones
 
@@ -24,7 +24,7 @@ class Display_manager:
         self.matrix = matrix
         self.last_matrix = matrix
         self.border_polygon = border_polygon
-        self.obs_array = obs_array
+        # self.obs_array = obs_array
 
         self.fig = plt.figure()
         mgr = plt.get_current_fig_manager()
@@ -153,7 +153,7 @@ class Display_manager:
         grid_height = int(msg.info.height / msg.info.resolution)
         grid_width = int(msg.info.width / msg.info.resolution)
         self.last_matrix = self.matrix
-        self.matrix = np.array(msg.data).reshape((grid_height, grid_width))
+        self.matrix = np.array(msg.data).reshape((grid_width, grid_height))
         keys = list(self.drones_pos_list.keys())
 
         for iDrone in range(self.nDrones):
@@ -215,10 +215,10 @@ class Display_manager:
         border_polygon_patch = PolygonPatch(self.border_polygon, facecolor='white')
         self.ax_env.add_patch(border_polygon_patch)
 
-    def plot_obs_array(self):
-        for obs in self.obs_array:
-            border_polygon_patch = PolygonPatch(obs, facecolor='orange')
-            self.ax_env.add_patch(border_polygon_patch)
+    # def plot_obs_array(self):
+    #     for obs in self.obs_array:
+    #         border_polygon_patch = PolygonPatch(obs, facecolor='orange')
+    #         self.ax_env.add_patch(border_polygon_patch)
 
     def plot_ij(self, i, j):
         pol_center = self.ij_to_xy(i, j)
@@ -305,13 +305,13 @@ if __name__ == "__main__":
     polygon_border = [(x_lim[0], y_lim[0]), (x_lim[1], y_lim[0]), (x_lim[1], y_lim[1]),
                       (x_lim[0], y_lim[1]), (x_lim[0], y_lim[0])]
 
-    obs_array = []
-
-    nObstacles = rospy.get_param("~nObstacles")
-    for iObstacle in range(nObstacles):
-        curr_polygon = rospy.get_param("~obs_{}".format(iObstacle))
-        exec("curr_polygon = {}".format(curr_polygon))
-        obs_array.append(Polygon(curr_polygon))
+    # obs_array = []
+    #
+    # nObstacles = rospy.get_param("~nObstacles")
+    # for iObstacle in range(nObstacles):
+    #     curr_polygon = rospy.get_param("~obs_{}".format(iObstacle))
+    #     exec("curr_polygon = {}".format(curr_polygon))
+    #     obs_array.append(Polygon(curr_polygon))
 
     nDrones = rospy.get_param("~nDrones")
     initial_pos_dict = dict()
@@ -324,6 +324,6 @@ if __name__ == "__main__":
     matrix = np.zeros([np.int64(np.ceil((x_lim[1] - x_lim[0]) / resolution)),
                             np.int64(np.ceil((y_lim[1] - y_lim[0]) / resolution))])
 
-    display_manager = Display_manager(polygon_border, obs_array, x_lim, y_lim, resolution, matrix, initial_pos_dict, nDrones)
+    display_manager = Display_manager(polygon_border, x_lim, y_lim, resolution, matrix, initial_pos_dict, nDrones)
 
     plt.show(block=True)
