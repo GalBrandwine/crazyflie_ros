@@ -105,7 +105,8 @@ class Grid:
 
 
     def csv_to_maze(self):
-        datafile = open('/home/rita/catkin_ws/MazeMap.csv', 'r') # todo: relative path
+        maze_path = rospy.get_param('~excelPath')
+        datafile = open(maze_path, 'r')
         datareader = csv.reader(datafile, delimiter=';')
         self.maze = []
         for srow in datareader:
