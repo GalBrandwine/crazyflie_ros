@@ -153,6 +153,7 @@ class Display_manager:
         grid_height = int(msg.info.height / msg.info.resolution)
         grid_width = int(msg.info.width / msg.info.resolution)
         self.last_matrix = self.matrix
+        # self.matrix = np.array(msg.data).reshape((grid_height, grid_width))
         self.matrix = np.array(msg.data).reshape((grid_width, grid_height))
         keys = list(self.drones_pos_list.keys())
 
@@ -323,6 +324,8 @@ if __name__ == "__main__":
 
     matrix = np.zeros([np.int64(np.ceil((x_lim[1] - x_lim[0]) / resolution)),
                             np.int64(np.ceil((y_lim[1] - y_lim[0]) / resolution))])
+    # matrix = np.zeros([np.int64(np.ceil((y_lim[1] - y_lim[0]) / resolution)),
+    #                    np.int64(np.ceil((x_lim[1] - x_lim[0]) / resolution))])
 
     display_manager = Display_manager(polygon_border, x_lim, y_lim, resolution, matrix, initial_pos_dict, nDrones)
 

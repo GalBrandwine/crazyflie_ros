@@ -206,6 +206,8 @@ class DroneInjector:
         self.POI = GridPOI(resolution, env_limits_input)
         self.matrix = np.zeros([np.int64(np.ceil((self.env_limits[1] - self.env_limits[0]) / self.res)),
                                 np.int64(np.ceil((self.env_limits[3] - self.env_limits[2]) / self.res))])
+        # self.matrix = np.zeros([np.int64(np.ceil((self.env_limits[3] - self.env_limits[2]) / self.res)),
+        #                         np.int64(np.ceil((self.env_limits[1] - self.env_limits[0]) / self.res))])
 
         # initiate DroneCjInjector per drone and add it to container
         for drone in prefix_takeoff_dict_input:
@@ -227,7 +229,8 @@ class DroneInjector:
 
         grid_height = int(msg.info.height / msg.info.resolution)
         grid_width = int(msg.info.width / msg.info.resolution)
-        self.matrix = np.array(msg.data).reshape((grid_height, grid_width))
+        # self.matrix = np.array(msg.data).reshape((grid_height, grid_width))
+        self.matrix = np.array(msg.data).reshape((grid_width, grid_height))
 
         # Set timer for POI
         self.POI_enabled = False

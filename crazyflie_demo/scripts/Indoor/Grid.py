@@ -60,6 +60,7 @@ class Grid:
 
         self.res = res
         self.matrix = np.zeros([np.int64(np.ceil((self.x_lim[1]-self.x_lim[0])/self.res)), np.int64(np.ceil((self.y_lim[1]-self.y_lim[0])/self.res))])
+        # self.matrix = np.zeros([np.int64(np.ceil((self.y_lim[1]-self.y_lim[0])/self.res)), np.int64(np.ceil((self.x_lim[1]-self.x_lim[0])/self.res))])
         self.nDrones = nDrones
         self.eps = 1  # Allowed time [sec] difference between messages
         self.drones_pos_list = dict()

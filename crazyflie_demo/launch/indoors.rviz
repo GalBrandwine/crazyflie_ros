@@ -17,7 +17,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: PointCloud2_CF3
+    SyncSource: PointCloud2_CF8
   - Class: rviz/Displays
     Help Height: 75
     Name: Displays
@@ -28,6 +28,8 @@ Panels:
         - /PointCloud2_CF31
         - /Pose_CF31
         - /Pose_CF11
+        - /Pose_CF81
+        - /PointCloud2_CF81
       Splitter Ratio: 0.5
     Tree Height: 689
 Toolbars:
@@ -58,9 +60,11 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        cf3:
+        cf8:
           Value: true
-        cf3_takeoff:
+        cf8_takeoff:
+          Value: true
+        cf8_vrpn:
           Value: true
         world:
           Value: true
@@ -71,9 +75,11 @@ Visualization Manager:
       Show Names: true
       Tree:
         world:
-          cf3_takeoff:
-            cf3:
+          cf8_takeoff:
+            cf8:
               {}
+          cf8_vrpn:
+            {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -300,6 +306,51 @@ Visualization Manager:
       Shape: Arrow
       Topic: /cf1/Cj_injcetor
       Unreliable: false
+      Value: true
+    - Alpha: 1
+      Axes Length: 1
+      Axes Radius: 0.100000001
+      Class: rviz/Pose
+      Color: 255; 255; 255
+      Enabled: true
+      Head Length: 0.300000012
+      Head Radius: 0.100000001
+      Name: Pose_CF8
+      Shaft Length: 1
+      Shaft Radius: 0.0500000007
+      Shape: Arrow
+      Topic: /cf8/Cj_injcetor
+      Unreliable: false
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: Intensity
+      Decay Time: 1.00000003e+16
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: PointCloud2_CF8
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.00999999978
+      Style: Flat Squares
+      Topic: /cf8/point_cloud
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
       Value: true
   Enabled: true
   Global Options:
