@@ -72,7 +72,7 @@ A few notes:
     <arg name="resolution" default="10"/>
     <arg name="env_space" default="50"/>
     <arg name="nDrones" default="1"/>
-    <arg name="useRefEnv" default="1"/>
+    <arg name="useRefEnv" default="0"/>
     <arg name="excelPath" default="MazeMap.csv"/>
 
 

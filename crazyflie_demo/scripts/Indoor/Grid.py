@@ -79,7 +79,7 @@ class Grid:
         self.excelPath = excelPath
         self.grid_maze = copy.deepcopy(self.matrix)
         self.maze_res = 7.6
-        if useRefEnv:
+        if self.useRefEnv:
             self.csv_to_maze()
 
         for i, id in enumerate(initial_pos_dict):
@@ -121,7 +121,7 @@ class Grid:
                     self.grid_maze[i][j] = 2
 
         # plt.figure(45645)
-        # plt.imshow(self.grid_maze, origin='lower')
+        # plt.imshow(self.grid_maze)
         # plt.show()
 
 
@@ -254,15 +254,17 @@ class Grid:
     def update_from_tof_sensing_list(self, drone_id):
         current_pos = self.drones_pos_list[drone_id]
         current_pc = self.drones_pc_list[drone_id]
+        if self.useRefEnv:
+            self.update_with_dummy_tof_sensor([[current_pos.x, current_pos.y]], current_pos.w)
+        else:
+            # Check if the current point cloud was taken close enough to last position message time
+            # (i.e. was taken from the current position of the drone).
+            if not self.is_time_equal(current_pos.time, current_pc.time):
+                return
 
-        # Check if the current point cloud was taken close enough to last position message time
-        # (i.e. was taken from the current position of the drone).
-        if not self.is_time_equal(current_pos.time, current_pc.time):
-            return
-
-        for elem in current_pc.pc_sens:
-            sensing_pos = [[self.initpos[0]+elem[0], self.initpos[1]+elem[1]]]
-            self.update_with_tof_sensor([[current_pos.x, current_pos.y]], sensing_pos)
+            for elem in current_pc.pc_sens:
+                sensing_pos = [[self.initpos[0]+elem[0], self.initpos[1]+elem[1]]]
+                self.update_with_tof_sensor([[current_pos.x, current_pos.y]], sensing_pos)
 
     def update_with_tof_sensor(self, sensor_pos, tof_sensing_pos):
         i0, j0 = self.xy_to_ij(sensor_pos[0][0], sensor_pos[0][1])
@@ -288,6 +290,25 @@ class Grid:
             wall_pos = tof_sensing_pos + d / norm_d * self.res / 1000
             i, j = self.xy_to_ij(wall_pos[0][0], wall_pos[0][1])
             self.change_tail_to_wall(i, j)
+
+
+    def update_with_dummy_tof_sensor(self, sensor_pos, yaw):
+        directions_vec = np.add([0, np.pi / 2, np.pi, 3 * np.pi / 2], yaw)
+        for phi in directions_vec:
+            dummy_tof = sensor_pos + np.multiply(self.sens_limit, [[np.cos(phi), np.sin(phi)]])
+            i0, j0 = self.xy_to_ij(sensor_pos[0][0], sensor_pos[0][1])
+            i1, j1 = self.xy_to_ij(dummy_tof[0][0], dummy_tof[0][1])
+            bres_list = list(bresenham(i0, j0, i1, j1))
+            bres_list = bres_list[:-1]
+            for ind in range(len(bres_list)):
+                i, j = bres_list[ind]
+                if 0 > i or i >= self.matrix.shape[0] or 0 > j or j >= self.matrix.shape[1]:
+                    return
+                if self.grid_maze[i][j] == 0 :
+                    self.change_tail_to_empty(i, j)
+                elif self.grid_maze[i][j] == 2:
+                    self.change_tail_to_wall(i, j)
+                    break
 
 
     def complete_wall_in_corners(self, matrix):
