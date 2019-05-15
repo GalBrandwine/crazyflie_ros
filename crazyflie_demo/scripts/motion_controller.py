@@ -387,9 +387,9 @@ if __name__ == '__main__':
     ########
     time.sleep(0.2)
     cf.setParam("kalman/resetEstimation", 0)
-    time.sleep(0.5)
+    time.sleep(0.3)
     cf.setParam("stabilizer/controller", 2)  # 2=Use mellinger controller
-    time.sleep(0.2)
+    time.sleep(0.5)
 
     rospy.loginfo("launching threads")
 
