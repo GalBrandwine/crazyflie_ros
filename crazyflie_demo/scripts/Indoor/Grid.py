@@ -3,12 +3,9 @@ import numpy as np
 import rospy
 from std_msgs.msg import String
 from sensor_msgs.msg import PointCloud2
-from crazyflie_driver.msg import GenericLogData
 import sensor_msgs.point_cloud2 as pc2
 import matplotlib.pyplot as plt
 from nav_msgs.msg import OccupancyGrid, MapMetaData
-from shapely.geometry import Point, LineString, Polygon
-from descartes import PolygonPatch
 from bresenham import bresenham
 import time
 import threading
@@ -125,9 +122,14 @@ class Grid:
                     i, j = self.xy_to_ij(x_idx, y_idx)
                     self.grid_maze[i][j] = 2
 
-        # plt.figure(45645)
-        # plt.imshow(self.grid_maze)
-        # plt.show()
+        t_grid = np.transpose(self.grid_maze)
+        f1t_grid = np.flip(t_grid, 0)
+        f2t_grid = np.flip(f1t_grid, 1)
+        self.grid_maze = f2t_grid
+
+        plt.figure(45645)
+        plt.imshow(self.grid_maze)
+        plt.show()
 
 
     def point_cloud_parser(self, msg, topic):

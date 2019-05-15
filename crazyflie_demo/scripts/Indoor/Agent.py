@@ -54,9 +54,15 @@ class Agent:
         flag = False
         as_flag = False
 
+        # if self.astar_path == []:
+        #     vec = np.subtract(self.next_pos[0], self.current_pos[0])
+        # elif(self.is_step_legal(self.current_pos,  np.subtract(self.astar_path[0], self.current_pos[0]), matrix)):
+        #     vec = np.subtract(self.astar_path[0], self.current_pos[0])
+        #     as_flag = True
+
         if self.astar_path == []:
             vec = np.subtract(self.next_pos[0], self.current_pos[0])
-        elif(self.is_step_legal(self.current_pos,  np.subtract(self.astar_path[0], self.current_pos[0]), matrix)):
+        else:
             vec = np.subtract(self.astar_path[0], self.current_pos[0])
             as_flag = True
 

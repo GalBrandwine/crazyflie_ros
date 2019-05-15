@@ -22,13 +22,13 @@ A few notes:
 
 
     <!-- for first CF -->
-    <arg name="uri1" default="radio://0/120/2M/E7E7E7E708"/>
-    <arg name="frame1" default="cf8"/>
-    <arg name="frame1_active" default="0"/>
+    <arg name="uri1" default="radio://0/120/2M/E7E7E7E709"/>
+    <arg name="frame1" default="cf9"/>
+    <arg name="frame1_active" default="1"/>
     <arg name="frame1__listening_to_key_board" default="1"/>
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
-    <arg name="initX1" default="0.0"/>
-    <arg name="initY1" default="2.4"/>
+    <arg name="initX1" default="0.381"/>
+    <arg name="initY1" default="1.905"/>
     <arg name="initZ1" default="0"/>
 
 
@@ -65,12 +65,12 @@ A few notes:
 
     <!-- arguments for indoor mapping  -->
     <arg name="x_min" value="0"/>
-    <arg name="x_max" default="450"/>
+    <arg name="x_max" default="510"/> <!-- 470 + 20 + 20 -->
     <arg name="y_min" default="0"/>
-    <arg name="y_max" default="470"/>
+    <arg name="y_max" default="490"/> <!-- 450 + 20 + 20 -->
     <arg name="env_lim" default="[$(arg x_min), $(arg x_max), $(arg y_min), $(arg y_max)]"/>
     <arg name="resolution" default="10"/>
-    <arg name="env_space" default="50"/>
+    <arg name="env_space" default="0"/>
     <arg name="nDrones" default="1"/>
     <arg name="useRefEnv" default="0"/>
 
@@ -85,18 +85,18 @@ A few notes:
     <node name="teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen"
           launch-prefix="xterm -e"/>
 
-    <!--run vrpn client -->
-    <node pkg="vrpn_client_ros" name="vrpn" output="screen" type="vrpn_client_node" required="true">
-        <rosparam subst_value="true">
-            server: $(arg server)
-            port: $(arg port)
-            update_frequency: 100.0
-            frame_id: world
-            use_server_time: false
-            broadcast_tf: true
-            refresh_tracker_frequency: 1.0 <!-- VRPN will add all trackers found on connection -->
-        </rosparam>
-    </node>
+<!--    &lt;!&ndash;run vrpn client &ndash;&gt;-->
+<!--    <node pkg="vrpn_client_ros" name="vrpn" output="screen" type="vrpn_client_node" required="true">-->
+<!--        <rosparam subst_value="true">-->
+<!--            server: $(arg server)-->
+<!--            port: $(arg port)-->
+<!--            update_frequency: 100.0-->
+<!--            frame_id: world-->
+<!--            use_server_time: false-->
+<!--            broadcast_tf: true-->
+<!--            refresh_tracker_frequency: 1.0 &lt;!&ndash; VRPN will add all trackers found on connection &ndash;&gt;-->
+<!--        </rosparam>-->
+<!--    </node>-->
 
 
     <!--    Activate the server.-->
@@ -167,10 +167,10 @@ A few notes:
         <node name="points_publisher" pkg="crazyflie_demo" type="publish_scan.py" output="screen">
             <param name="tf_prefix" value="$(arg frame1)"/>
         </node>
-        <!--        Rotem.py capture all ros data of a certain CF and wrap it with python object.-->
-        <node name="drone_data_parser" pkg="crazyflie_demo" type="rotem.py" output="screen">
-            <param name="tf_prefix" value="$(arg frame1)"/>
-        </node>
+<!--        &lt;!&ndash;        Rotem.py capture all ros data of a certain CF and wrap it with python object.&ndash;&gt;-->
+<!--        <node name="drone_data_parser" pkg="crazyflie_demo" type="rotem.py" output="screen">-->
+<!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
+<!--        </node>-->
 
         <!--        logger_by_format.py capture all topics relevant for looging into predesignd SCV.-->
         <node name="logger_by_format" pkg="crazyflie_demo" type="logger_by_format.py" output="screen">
