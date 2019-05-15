@@ -7,7 +7,7 @@ import tf
 from geometry_msgs.msg import PoseStamped
 from math import radians
 from std_msgs.msg import Empty
-
+from time import sleep
 
 def to_pose_stamped(x, y, z, roll, pitch, yaw):
     pose = PoseStamped()
@@ -131,7 +131,7 @@ class DroneInjector:
         """
         threads = []
         step =  0.3048  # one ft in meters
-        step_time = 1.0
+        step_time = 1.05
 
         # simple straight line, then turn 360, then go back
         #                       [----t----, ----x---, ---y---, --z--, yaw]
@@ -151,45 +151,45 @@ class DroneInjector:
         ]
 
         #                       [----t----, ----x---, ---y---, --z--, yaw]
-        path_maze_right_side = [[step_time*0.5,0.25*step,6* step,0.35,0], #first point
+        path_maze_second_drone = [[step_time*7,0.25*step,6* step,0.35,0], #first point
                                 [step_time * 1.575, 1.75 * step, 6 * step, 0.35, 0],
                                 [step_time * 1.575, 3.25 * step, 6 * step, 0.35, 0],
                                 [step_time * 1.05, 4.25 * step, 6 * step, 0.35, 0],
                                 [step_time * 2.1, 4.25 * step, 8 * step, 0.35, 0],
-                                [step_time * 1.05, 4.25 * step, 9 * step, 0.35, 0],
-                                [step_time * 1.3125, 3 * step, 9 * step, 0.35, 0],
-                                [step_time * 1.3125, 4.25 * step, 9 * step, 0.35, 0],
-                                [step_time * 1.575, 4.25 * step, 7.5 * step, 0.35, 0],
-                                [step_time * 1.575, 4.25 * step, 6 * step, 0.35, 0],
-                                [step_time * 2.625, 6.75 * step, 6 * step, 0.35, 0],
-                                [step_time * 2.205, 6.75 * step, 8.1 * step, 0.35, 0],
-                                [step_time * 2.2575, 6.75 * step, 10.25 * step, 0.35, 0],
-                                [step_time * 1.575, 8.25 * step, 10.25 * step, 0.35, 0],
-                                [step_time * 1.8375, 10 * step, 10.25 * step, 0.35, 0],
-                                [step_time * 1.575, 11.5 * step, 10.25 * step, 0.35, 0],
-                                [step_time * 1.575, 11.5 * step, 8.75 * step, 0.35, 0],
-                                [step_time * 1.575, 11.5 * step, 7.25 * step, 0.35, 0],
-                                [step_time * 2.1, 11.5 * step, 5.25 * step, 0.35, 0],
-                                [step_time * 1.575, 13 * step, 5.25 * step, 0.35, 0],
-                                [step_time * 1.575, 13 * step, 3.75 * step, 0.35, 0],
-                                [step_time * 1.8375, 13 * step, 5.5 * step, 0.35, 0],
-                                [step_time * 2.1, 11 * step, 5.5 * step, 0.35, 0],
-                                [step_time * 2.1, 9 * step, 5.5 * step, 0.35, 0],
-                                [step_time * 2.1, 7 * step, 5.5 * step, 0.35, 0],
-                                [step_time * 1.05, 6 * step, 5.5 * step, 0.35, 0],
-                                [step_time * 1.575, 6 * step, 4 * step, 0.35, 0],
-                                [step_time * 1.575, 6 * step, 2.5 * step, 0.35, 0],
-                                [step_time * 2.1, 4 * step, 2.5 * step, 0.35, 0],
-                                [step_time * 2.1, 6 * step, 2.5 * step, 0.35, 0],
-                                [step_time * 1.8375, 6 * step, 4.25 * step, 0.35, 0],
-                                [step_time * 1.8375, 6 * step, 6 * step, 0.35, 0],
-                                [step_time * 2.1, 4 * step, 6 * step, 0.35, 0],
-                                [step_time * 2.1, 2 * step, 6 * step, 0.35, 0],
-                                [step_time * 1.8375, 0.25 * step, 6 * step, 0.35, 0],
+                                [step_time * 1.05, 4.25 * step, 9 * step, 0.35, 45],
+                                [step_time * 1.3125, 3 * step, 9 * step, 0.35, 45],
+                                [step_time * 1.3125, 4.25 * step, 9 * step, 0.35, 45],
+                                [step_time * 1.575, 4.25 * step, 7.5 * step, 0.35, 90],
+                                [step_time * 1.575, 4.25 * step, 6 * step, 0.35, 90],
+                                [step_time * 2.625, 6.75 * step, 6 * step, 0.35, 90],
+                                [step_time * 2.205, 6.75 * step, 8.1 * step, 0.35, 135],
+                                [step_time * 2.2575, 6.75 * step, 10.25 * step, 0.35, 135],
+                                [step_time * 1.575, 8.25 * step, 10.25 * step, 0.35, 135],
+                                [step_time * 1.8375, 10 * step, 10.25 * step, 0.35, 180],
+                                [step_time * 1.575, 11.5 * step, 10.25 * step, 0.35, 180],
+                                [step_time * 1.575, 11.5 * step, 8.75 * step, 0.35, 180],
+                                [step_time * 1.575, 11.5 * step, 7.25 * step, 0.35, 180],
+                                [step_time * 2.1, 11.5 * step, 5.25 * step, 0.35, 225],
+                                [step_time * 1.575, 13 * step, 5.25 * step, 0.35, 225],
+                                [step_time * 1.575, 13 * step, 3.75 * step, 0.35, 225],
+                                [step_time * 1.8375, 13 * step, 5.5 * step, 0.35, 270],
+                                [step_time * 2.1, 11 * step, 5.5 * step, 0.35, 270],
+                                [step_time * 2.1, 9 * step, 5.5 * step, 0.35, 270],
+                                [step_time * 2.1, 7 * step, 5.5 * step, 0.35, 315],
+                                [step_time * 1.05, 6 * step, 5.5 * step, 0.35, 315],
+                                [step_time * 1.575, 6 * step, 4 * step, 0.35, 315],
+                                [step_time * 1.575, 6 * step, 2.5 * step, 0.35, 360],
+                                [step_time * 2.1, 4 * step, 2.5 * step, 0.35, 360],
+                                [step_time * 2.1, 6 * step, 2.5 * step, 0.35, 360],
+                                [step_time * 1.8375, 6 * step, 4.25 * step, 0.35, 360],
+                                [step_time * 1.8375, 6 * step, 6 * step, 0.35, 360],
+                                [step_time * 2.1, 4 * step, 6 * step, 0.35, 360],
+                                [step_time * 2.1, 2 * step, 6 * step, 0.35, 360],
+                                [step_time * 1.8375, 0.25 * step, 6 * step, 0.35, 360],
                                 ]
 
         #                       [----t----, ----x---, ---y---, --z--, yaw]
-        path_maze_left_side = [ [step_time*0.5,0.25*step,6* step,0.35,0],
+        path_maze_first_drone = [ [step_time*0.5,     1.0*step,6* step,0.35,0], #first drone x >0
                                 [step_time * 2.1, 2.25 * step, 6 * step, 0.35, 0],
                                 [step_time * 2.1, 4.25 * step, 6 * step, 0.35, 0],
                                 [step_time * 2.3625, 6.5 * step, 6 * step, 0.35, 0],
@@ -222,15 +222,17 @@ class DroneInjector:
                                 [step_time * 2.3625, 0.25 * step, 6 * step, 0.35, 0],
                                 ]
 
-        # t1 = Thread(target=injector, args=(self.cj_injector_container[0], path_maze_right_side,))
-        # threads.append(t1)
+        t1 = Thread(target=injector, args=(self.cj_injector_container[0], path_maze_first_drone,))
+        threads.append(t1)
 
-        t2 = Thread(target=injector, args=(self.cj_injector_container[1], path_maze_left_side,))
+        t2 = Thread(target=injector, args=(self.cj_injector_container[1], path_maze_second_drone,))
         threads.append(t2)
 
         # start all threads.
         for t in threads:
             t.start()
+
+
 
         # stop workers
         for t in threads:
