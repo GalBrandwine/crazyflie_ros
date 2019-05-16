@@ -53,7 +53,7 @@ class Agent:
         vec = np.zeros(2)
         flag = False
         as_flag = False
-        noise_fac = 3
+        noise_fac = 2
 
         # if self.astar_path == []:
         #     vec = np.subtract(self.next_pos[0], self.current_pos[0])
@@ -74,7 +74,7 @@ class Agent:
             as_flag = True
 
 
-        while break_counter < 20 and as_flag and sum(vec) != 0:
+        while break_counter < 10 and as_flag and sum(vec) != 0:
             break_counter = break_counter + 1
             step = self.step_noise_size * noise_fac * ([0.5, 0.5] - np.random.rand(2)) + vec
             if self.is_step_legal(self.current_pos, step, matrix):

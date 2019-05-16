@@ -22,25 +22,26 @@ A few notes:
 
 
     <!-- for first CF -->
-    <arg name="uri1" default="radio://0/120/2M/E7E7E7E710"/>
-    <arg name="frame1" default="cf10"/>
+    <arg name="uri1" default="radio://0/120/2M/E7E7E7E712"/>
+    <arg name="frame1" default="cf12"/>
     <arg name="frame1_active" default="1"/>
     <arg name="frame1__listening_to_key_board" default="1"/>
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX1" default="0.381"/>
-<!--    <arg name="initY1" default="1.905"/>-->
+<!--    <arg name="initY1" default="1.905"/>-->  <!--yello point-->
     <arg name="initY1" default="0.9906"/>
     <arg name="initZ1" default="0"/>
 
 
     <!-- for second CF    -->
-    <arg name="uri2" default="radio://0/120/2M/E7E7E7E706"/>
-    <arg name="frame2" default="cf6"/>
-    <arg name="frame2_active" default="0"/>
-    <arg name="frame2__listening_to_key_board" default="0"/>
+    <arg name="uri2" default="radio://0/120/2M/E7E7E7E711"/>
+    <arg name="frame2" default="cf11"/>
+    <arg name="frame2_active" default="1"/>
+    <arg name="frame2__listening_to_key_board" default="1"/>
     <arg name="traj_list2" default="[$(arg traj1),$(arg traj2)]"/>
-    <arg name="initX2" default="0.0"/>
-    <arg name="initY2" default="2.4"/>
+    <arg name="initX2" default="0.381"/>
+<!--    <arg name="initY2" default="1.905"/>  &lt;!&ndash; yello point &ndash;&gt;-->
+    <arg name="initY2" default="4.0386"/>
     <arg name="initZ2" default="0"/>
 
 
@@ -72,7 +73,7 @@ A few notes:
     <arg name="env_lim" default="[$(arg x_min), $(arg x_max), $(arg y_min), $(arg y_max)]"/>
     <arg name="resolution" default="10"/>
     <arg name="env_space" default="0"/>
-    <arg name="nDrones" default="1"/>
+    <arg name="nDrones" default="2"/>
     <arg name="useRefEnv" default="0"/>
 
 
@@ -238,10 +239,10 @@ A few notes:
             <node name="points_publisher" pkg="crazyflie_demo" type="publish_scan.py" output="screen">
                 <param name="tf_prefix" value="$(arg frame2)"/>
             </node>
-            <!--        Rotem.py capture all ros data of a certain CF and wrap it with python object.-->
-            <node name="drone_data_parser" pkg="crazyflie_demo" type="rotem.py" output="screen">
-                <param name="tf_prefix" value="$(arg frame2)"/>
-            </node>
+<!--            &lt;!&ndash;        Rotem.py capture all ros data of a certain CF and wrap it with python object.&ndash;&gt;-->
+<!--            <node name="drone_data_parser" pkg="crazyflie_demo" type="rotem.py" output="screen">-->
+<!--                <param name="tf_prefix" value="$(arg frame2)"/>-->
+<!--            </node>-->
 
         <!--        logger_by_format.py capture all topics relevant for looging into predesignd SCV.-->
         <node name="logger_by_format" pkg="crazyflie_demo" type="logger_by_format.py" output="screen">
@@ -391,16 +392,13 @@ A few notes:
             <param name="env_lim" value="$(arg env_lim)"/>
             <param name="env_space" value="$(arg env_space)"/>
             <param name="resolution" value="$(arg resolution)"/>
+            <param name="useRefEnv" value="$(arg useRefEnv)"/>
+            <param name="excelPath" value="$(find crazyflie_demo)/resources/MazeMap.csv"/>
             <param name="nDrones" value="$(arg nDrones)"/>
             <param name="drone_name_0" value="$(arg frame1)"/>
             <param name="drone_takeoff_position_0" value="[$(arg initX1), $(arg initY1), $(arg initZ1)]"/>
-            <param name="useRefEnv" value="$(arg useRefEnv)"/>
-            <param name="excelPath" value="$(find crazyflie_demo)/resources/MazeMap.csv"/>
-
-
-            <!--            <param name="drone_name_1" value="$(arg frame2)"/>-->
-            <!--            <param name="drone_takeoff_position_1" value="[$(arg initX2), $(arg initY2), $(arg initZ2)]"/>-->
-
+            <param name="drone_name_1" value="$(arg frame2)"/>
+            <param name="drone_takeoff_position_1" value="[$(arg initX2), $(arg initY2), $(arg initZ2)]"/>
 
         </node>
 
@@ -408,17 +406,9 @@ A few notes:
             <param name="env_lim" value="$(arg env_lim)"/>
             <param name="env_space" value="$(arg env_space)"/>
             <param name="resolution" value="$(arg resolution)"/>
-<!--            &lt;!&ndash;&ndash;&gt;-->
-<!--            <param name="nObstacles" value="4"/>-->
-<!--            <param name="obs_0" value="[(0, 0), (10, 0), (10, 250), (0, 250), (0, 0)]"/>-->
-<!--            <param name="obs_1" value="[(10, 0), (10, 10), (250, 10), (250, 0), (10, 0)]"/>-->
-<!--            <param name="obs_2" value="[(250, 10), (240, 10), (240, 250), (250, 250), (250, 10)]"/>-->
-<!--            <param name="obs_3" value="[(10, 250), (10, 240), (240, 240), (240, 250), (10, 250)]"/>-->
-<!--            &lt;!&ndash;&ndash;&gt;-->
             <param name="nDrones" value="$(arg nDrones)"/>
             <param name="drone_name_0" value="$(arg frame1)"/>
             <param name="drone_takeoff_position_0" value="[$(arg initX1), $(arg initY1), $(arg initZ1)]"/>
-
             <param name="drone_name_1" value="$(arg frame2)"/>
             <param name="drone_takeoff_position_1" value="[$(arg initX2), $(arg initY2), $(arg initZ2)]"/>
 
@@ -434,10 +424,10 @@ A few notes:
 <!--            <rosparam param="resolution" subst_value="True">[$(arg resolution)]</rosparam>-->
 <!--            <param name="prefix_list" value="[$(arg frame1), $(arg frame2), $(arg frame3),$(arg frame4)]"/>-->
 <!--            <param name="prefix_list" value="[$(arg frame1)]"/>-->
-            <rosparam param="prefix_list" subst_value="True">[$(arg frame1),]</rosparam>
+            <rosparam param="prefix_list" subst_value="True">[[$(arg frame1)], [$(arg frame2)],]</rosparam>
             <!--            Pass all drones initial takeoff positions-->
 <!--            <param name="init_takeoff_list" value="[[$(arg initX1), $(arg initY1), $(arg initZ1)]] "/>-->
-            <rosparam param="init_takeoff_list" subst_value="True">[[$(arg initX1), $(arg initY1), $(arg initZ1)],]</rosparam>
+            <rosparam param="init_takeoff_list" subst_value="True">[[$(arg initX1), $(arg initY1), $(arg initZ1)],[$(arg initX2), $(arg initY2), $(arg initZ2)],]</rosparam>
             <param name="env_space" value="$(arg env_space)"/>
 <!--            <rosparam param="env_space" subst_value="True">[$(arg env_space)]</rosparam>-->
             <param name="nDrones" value="$(arg nDrones)"/>

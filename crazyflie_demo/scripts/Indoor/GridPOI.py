@@ -22,7 +22,7 @@ class GridPOI:
         # ax_2.imshow(np.transpose(bin_matrix), origin='lower')
 
         interesting_points_list_ij, interesting_points_list_xy = self.find_interesting_points(matrix)
-        rospy.logdebug("POI:{}".format(interesting_points_list_xy))
+        # rospy.logdebug("POI:{}".format(interesting_points_list_xy))
         corner_points_list_ij, corner_points_list_xy = self.find_corner_points(matrix)
 
         return [interesting_points_list_ij, interesting_points_list_xy, corner_points_list_ij, corner_points_list_xy]
@@ -95,7 +95,7 @@ class GridPOI:
                 cnt_unexplored = cnt_unexplored + 1
         # if ((cnt_wall == 4) and (cnt_unexplored == 1)):
         #     return False
-        if (cnt_unexplored >= 1) and (cnt_wall >= 1):  # or cnt_unexplored >= 4:
+        if ((cnt_unexplored >= 1) and (cnt_wall >= 1)):
             return True
         else:
             return False

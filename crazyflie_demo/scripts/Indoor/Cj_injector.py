@@ -120,9 +120,9 @@ class DroneCjInjector:
             self.rot_enabled = True
             # temp_yaw = np.random.rand() * np.pi / 4
             self.drone_yaw = drone_yaw + (np.pi / 2)
-            rospy.logdebug("angle {}".format(self.drone_yaw))
+            # rospy.logdebug("angle {}".format(self.drone_yaw))
             self.drone_yaw = np.mod(self.drone_yaw, 2 * np.pi)  # limit the rotation by maximum angle
-            rospy.logdebug("angle after mod {}".format(self.drone_yaw))
+            # rospy.logdebug("angle after mod {}".format(self.drone_yaw))
             self.last_time_rot_called = rospy.Time.now().to_sec()
 
         # Assume that new_pos = [x,y,z,r,p,y]
@@ -199,7 +199,6 @@ class DroneInjector:
     """
 
     def __init__(self, prefix_takeoff_dict_input, env_limits_input, resolution, rate=15):
-        rospy.loginfo(env_limits_input)
         self.cj_injector_container = []
         self.res = resolution
         self.num_of_drones = len(prefix_takeoff_dict_input.keys())  # get number of drones
@@ -321,10 +320,16 @@ if __name__ == '__main__':
     limits_from_launch_file = [x_lim[0], x_lim[1], y_lim[0], y_lim[1]]
 
     prefix_takeoff_dict = dict()
+
     for iDrone in range(nDrones):
+
+        rospy.logdebug("iDrone{} ".format(iDrone))
+
         pref = prefix_list_from_launch_file[iDrone]
+        rospy.logdebug("Prefix{} ".format(prefix_list_from_launch_file[iDrone]))
         curr_takeoff = initial_takeoff_list_from_launch_file[iDrone]
-        prefix_takeoff_dict[pref] = curr_takeoff
+        rospy.logdebug("Takeoff{} ".format(initial_takeoff_list_from_launch_file[iDrone]))
+        prefix_takeoff_dict[pref[0]] = curr_takeoff
 
     drone_container = DroneInjector(prefix_takeoff_dict, limits_from_launch_file, res_from_launch_file, 15)
 

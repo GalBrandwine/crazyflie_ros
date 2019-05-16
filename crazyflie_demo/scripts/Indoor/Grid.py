@@ -287,7 +287,8 @@ class Grid:
             i, j = bres_list[ind]
             if 0 > i or i >= self.matrix.shape[0] or 0 > j or j >= self.matrix.shape[1]:
                 return
-            if self.matrix[i][j] == 0 and np.linalg.norm(np.subtract([i, j], [i0, j0])) < (self.sens_limit / self.res):
+            # if self.matrix[i][j] == 0 and np.linalg.norm(np.subtract([i, j], [i0, j0])) < (self.sens_limit / self.res):
+            if np.linalg.norm(np.subtract([i, j], [i0, j0])) < (self.sens_limit / self.res):
             # if self.matrix[i][j] == 0 and np.linalg.norm(np.subtract([xs[ind], ys[ind]], sensor_pos)) < (self.sens_limit):
                 self.change_tail_to_empty(i, j)
         d = np.subtract(tof_sensing_pos, sensor_pos)

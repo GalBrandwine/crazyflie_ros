@@ -17,7 +17,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: PointCloud2_CF9
+    SyncSource: PointCloud2_CF12
   - Class: rviz/Displays
     Help Height: 75
     Name: Displays
@@ -26,8 +26,10 @@ Panels:
         - /Grid1
         - /TF1
         - /PointCloud2_CF31
-        - /Pose_CF92
-        - /PointCloud2_CF92
+        - /Pose_CF101
+        - /PointCloud2_CF101
+        - /PointCloud2_CF121
+        - /Pose_CF121
       Splitter Ratio: 0.5
     Tree Height: 689
 Toolbars:
@@ -58,9 +60,9 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        cf10:
+        cf12:
           Value: true
-        cf10_takeoff:
+        cf12_takeoff:
           Value: true
         world:
           Value: true
@@ -71,8 +73,8 @@ Visualization Manager:
       Show Names: true
       Tree:
         world:
-          cf10_takeoff:
-            cf10:
+          cf12_takeoff:
+            cf12:
               {}
       Update Interval: 0
       Value: true
@@ -399,7 +401,7 @@ Visualization Manager:
       Enabled: true
       Head Length: 0.300000012
       Head Radius: 0.100000001
-      Name: Pose_CF9
+      Name: Pose_CF10
       Shaft Length: 1
       Shaft Radius: 0.0500000007
       Shape: Arrow
@@ -424,7 +426,7 @@ Visualization Manager:
       Max Intensity: 4096
       Min Color: 0; 0; 0
       Min Intensity: 0
-      Name: PointCloud2_CF9
+      Name: PointCloud2_CF10
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
@@ -435,6 +437,96 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
+      Value: true
+    - Alpha: 1
+      Axes Length: 1
+      Axes Radius: 0.100000001
+      Class: rviz/Pose
+      Color: 255; 255; 255
+      Enabled: true
+      Head Length: 0.300000012
+      Head Radius: 0.100000001
+      Name: Pose_CF11
+      Shaft Length: 1
+      Shaft Radius: 0.0500000007
+      Shape: Arrow
+      Topic: /cf11/Cj_injcetor
+      Unreliable: false
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: Intensity
+      Decay Time: 1.00000003e+16
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: PointCloud2_CF11
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.00999999978
+      Style: Flat Squares
+      Topic: /cf11/point_cloud
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: Intensity
+      Decay Time: 1.00000003e+16
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: PointCloud2_CF12
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.00999999978
+      Style: Flat Squares
+      Topic: /cf12/point_cloud
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Alpha: 1
+      Axes Length: 1
+      Axes Radius: 0.100000001
+      Class: rviz/Pose
+      Color: 255; 255; 255
+      Enabled: true
+      Head Length: 0.300000012
+      Head Radius: 0.100000001
+      Name: Pose_CF12
+      Shaft Length: 1
+      Shaft Radius: 0.0500000007
+      Shape: Arrow
+      Topic: /cf12/Cj_injcetor
+      Unreliable: false
       Value: true
   Enabled: true
   Global Options:
