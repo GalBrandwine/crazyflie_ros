@@ -131,107 +131,87 @@ class DroneInjector:
         """
         threads = []
         step =  0.3048  # one ft in meters
-        step_time = 1.05
+        step_time = 1.1
 
-        # simple straight line, then turn 360, then go back
         #                       [----t----, ----x---, ---y---, --z--, yaw]
-        path_straight_line_360_go_back = [
-            [step_time * 1, 0 * step, 8 * step, 0.35, 0],  # start in (0,180,0.35)
-            [step_time * 2, 2 * step, 8 * step, 0.35, 0],  # go forward
-            [step_time * 2, 4 * step, 8 * step, 0.35, 0],  # go forward
-            [step_time * 2, 6 * step, 8 * step, 0.35, 0],  # go forward
-            [step_time * 2, 6 * step, 8 * step, 0.35, 90],  # turn
-            [step_time * 2, 6 * step, 8 * step, 0.35, 180],  # turn
-            [step_time * 2, 6 * step, 8 * step, 0.35, 90],  # turn
-            [step_time * 2, 6 * step, 8 * step, 0.35, 0],  # turn
-            [step_time * 2, 4 * step, 8 * step, 0.35, 0],  # go back home
-            [step_time * 2, 2 * step, 8 * step, 0.35, 0],  # go forward
-            [step_time * 2, 0 * step, 8 * step, 0.35, 0],  # go land
-            [step_time * 2, 0 * step, 8 * step, 0, 0],  # go land
+        path_maze_frame2 = [
+            [step_time * 1, 1 * step, 6.5 * step, 0.35, 0],
+            [step_time * 1.3125, 2.25 * step, 6.5 * step, 0.35, 45],
+            [step_time * 1.3125, 3.5 * step, 6.5 * step, 0.35, 0],
+            [step_time * 1.3125, 3.5 * step, 7.75 * step, 0.35, 45],
+            [step_time * 1.3125, 3.5 * step, 9 * step, 0.35, 90],
+            [step_time * 1.8375, 1.75 * step, 9 * step, 0.35, 45],
+            [step_time * 0.525, 1.75 * step, 9.5 * step, 0.35, 0],
+            [step_time * 1.05, 2.75 * step, 9.5 * step, 0.35, 45],
+            [step_time * 1.3125, 2.75 * step, 10.75 * step, 0.35, 0],
+            [step_time * 1.575, 2.75 * step, 12.25 * step, 0.35, 45],
+            [step_time * 0.7875, 2 * step, 12.25 * step, 0.35, 0],
+            [step_time * 2.1, 2 * step, 14.25 * step, 0.35, 45],
+            [step_time * 1.8375, 3.75 * step, 14.25 * step, 0.35, 90],
+            [step_time * 2.1, 3.75 * step, 12.25 * step, 0.35, 45],
+            [step_time * 1.575, 5.25 * step, 12.25 * step, 0.35, 0],
+            [step_time * 1.575, 6.75 * step, 12.25 * step, 0.35, 45],
+
         ]
 
         #                       [----t----, ----x---, ---y---, --z--, yaw]
-        path_maze_second_drone = [
-                                    [step_time * 7.35, 0.25 * step, 6 * step, 0.35, 0],
-                                    [step_time * 1.575, 1.75 * step, 6 * step, 0.35, 0],
-                                    [step_time * 1.575, 3.25 * step, 6 * step, 0.35, 0],
-                                    [step_time * 1.05, 4.25 * step, 6 * step, 0.35, 0],
-                                    [step_time * 2.1, 4.25 * step, 8 * step, 0.35, 0],
-                                    [step_time * 1.05, 4.25 * step, 9 * step, 0.35, 0],
-                                    [step_time * 1.3125, 3 * step, 9 * step, 0.35, 45],
-                                    [step_time * 1.3125, 4.25 * step, 9 * step, 0.35, 0],
-                                    [step_time * 1.575, 4.25 * step, 7.5 * step, 0.35, 0],
-                                    [step_time * 1.575, 4.25 * step, 6 * step, 0.35, 0],
-                                    [step_time * 2.625, 6.75 * step, 6 * step, 0.35, 0],
-                                    [step_time * 2.205, 6.75 * step, 8.1 * step, 0.35, 0],
-                                    [step_time * 2.2575, 6.75 * step, 10.25 * step, 0.35, 0],
-                                    [step_time * 1.575, 8.25 * step, 10.25 * step, 0.35, 0],
-                                    [step_time * 1.8375, 10 * step, 10.25 * step, 0.35, 0],
-                                    [step_time * 1.575, 11.5 * step, 10.25 * step, 0.35, 0],
-                                    [step_time * 1.575, 11.5 * step, 8.75 * step, 0.35, 0],
-                                    [step_time * 1.575, 11.5 * step, 7.25 * step, 0.35, 0],
-                                    [step_time * 2.1, 11.5 * step, 5.25 * step, 0.35, 0],
-                                    [step_time * 1.575, 13 * step, 5.25 * step, 0.35, 0],
-                                    [step_time * 1.575, 13 * step, 3.75 * step, 0.35, 0],
-                                    [step_time * 1.8375, 13 * step, 5.5 * step, 0.35, 0],
-                                    [step_time * 2.1, 11 * step, 5.5 * step, 0.35, 0],
-                                    [step_time * 2.1, 9 * step, 5.5 * step, 0.35, 0],
-                                    [step_time * 2.1, 7 * step, 5.5 * step, 0.35, 0],
-                                    [step_time * 1.05, 6 * step, 5.5 * step, 0.35, 0],
-                                    [step_time * 1.575, 6 * step, 4 * step, 0.35, 0],
-                                    [step_time * 1.575, 6 * step, 2.5 * step, 0.35, 0],
-                                    [step_time * 2.1, 4 * step, 2.5 * step, 0.35, 0],
-                                    [step_time * 2.1, 6 * step, 2.5 * step, 0.35, 0],
-                                    [step_time * 1.8375, 6 * step, 4.25 * step, 0.35, 0],
-                                    [step_time * 1.8375, 6 * step, 6 * step, 0.35, 0],
-                                    [step_time * 2.1, 4 * step, 6 * step, 0.35, 0],
-                                    [step_time * 2.1, 2 * step, 6 * step, 0.35, 0],
-                                    [step_time * 1.8375, 0.25 * step, 6 * step, 0.35, 0],
-                                ]
+        path_maze_frame1 = [
+            [step_time * 1, 2.75 * step, 5.25 * step, 0.35, 0],
+            [step_time * 1.8375, 4.5 * step, 5.25 * step, 0.35, 0],
+            [step_time * 1.8375, 6.25 * step, 5.25 * step, 0.35, 45],
+            [step_time * 1.3125, 6.25 * step, 4 * step, 0.35, 0],
+            [step_time * 1.05, 6.25 * step, 3 * step, 0.35, 45],
+            [step_time * 1.575, 4.75 * step, 3 * step, 0.35, 0],
+            [step_time * 1.575, 3.25 * step, 3 * step, 0.35, 45],
+            [step_time * 1.05, 3.25 * step, 2 * step, 0.35, 0],
+            [step_time * 1.575, 4.75 * step, 2 * step, 0.35, 45],
+            [step_time * 1.575, 6.25 * step, 2 * step, 0.35, 0],
+            [step_time * 1.575, 7.75 * step, 2 * step, 0.35, 45],
+            [step_time * 1.575, 9.25 * step, 2 * step, 0.35, 90],
+            [step_time * 0.525, 9.25 * step, 2.5 * step, 0.35, 45],
+            [step_time * 2.1, 7.25 * step, 2.5 * step, 0.35, 0],
+        ]
+
 
         #                       [----t----, ----x---, ---y---, --z--, yaw]
-        path_maze_first_drone = [
-                                [step_time * 0.525, 1 * step, 6 * step, 0.35, 0],
-                                [step_time * 1.8375, 2.75 * step, 6 * step, 0.35, 0],
-                                [step_time * 2.1, 4.75 * step, 6 * step, 0.35, 0],
-                                [step_time * 2.1, 6.75 * step, 6 * step, 0.35, 0],
-                                [step_time * 2.1, 6.75 * step, 8 * step, 0.35, 0],
-                                [step_time * 2.1, 6.75 * step, 10 * step, 0.35, 0],
-                                [step_time * 2.1, 6.75 * step, 12 * step, 0.35, 0],
-                                [step_time * 2.1, 4.75 * step, 12 * step, 0.35, 0],
-                                [step_time * 2.3625, 2.5 * step, 12 * step, 0.35, 0],
-                                [step_time * 2.1, 2.5 * step, 14 * step, 0.35, 0],
-                                [step_time * 2.1, 4.5 * step, 14 * step, 0.35, 0],
-                                [step_time * 2.1, 4.5 * step, 12 * step, 0.35, 0],
-                                [step_time * 1.575, 6 * step, 12 * step, 0.35, 0],
-                                [step_time * 1.575, 7.5 * step, 12 * step, 0.35, 0],
-                                [step_time * 2.1, 7.5 * step, 14 * step, 0.35, 0],
-                                [step_time * 1.575, 9 * step, 14 * step, 0.35, 0],
-                                [step_time * 1.8375, 10.75 * step, 14 * step, 0.35, 0],
-                                [step_time * 1.8375, 12.5 * step, 14 * step, 0.35, 0],
-                                [step_time * 1.05, 13.5 * step, 14 * step, 0.35, 0],
-                                [step_time * 1.575, 13.5 * step, 12.5 * step, 0.35, 0],
-                                [step_time * 1.575, 12 * step, 12.5 * step, 0.35, 0],
-                                [step_time * 1.3125, 10.75 * step, 12.5 * step, 0.35, 0],
-                                [step_time * 0.525, 10.75 * step, 13 * step, 0.35, 0],
-                                [step_time * 1.3125, 9.5 * step, 13 * step, 0.35, 0],
-                                [step_time * 1.8375, 7.75 * step, 13 * step, 0.35, 0],
-                                [step_time * 1.05, 6.75 * step, 13 * step, 0.35, 0],
-                                [step_time * 2.1, 6.75 * step, 11 * step, 0.35, 0],
-                                [step_time * 1.8375, 6.75 * step, 9.25 * step, 0.35, 0],
-                                [step_time * 1.8375, 6.75 * step, 7.5 * step, 0.35, 0],
-                                [step_time * 1.575, 6.75 * step, 6 * step, 0.35, 0],
-                                [step_time * 2.1, 4.75 * step, 6 * step, 0.35, 0],
-                                [step_time * 2.1, 2.75 * step, 6 * step, 0.35, 0],
-                                [step_time * 1.05, 1.75 * step, 6 * step, 0.35, 0],
-                                [step_time * 0.7875, 1 * step, 6 * step, 0.35, 0],
-                            ]
+        path_maze_frame3 = [
+            [step_time * 1, 0.25 * step, 5.25 * step, 0.35, 0],
+            [step_time * 1.8375, 2 * step, 5.25 * step, 0.35, 0],
+            [step_time * 1.8375, 3.75 * step, 5.25 * step, 0.35, 0],
+            [step_time * 1.575, 5.25 * step, 5.25 * step, 0.35, 0],
+            [step_time * 1.575, 6.75 * step, 5.25 * step, 0.35, 0],
+            [step_time * 2.1, 6.75 * step, 7.25 * step, 0.35, 0],
+            [step_time * 2.1, 6.75 * step, 9.25 * step, 0.35, 0],
+            [step_time * 2.1, 8.75 * step, 9.25 * step, 0.35, 0],
+            [step_time * 2.1, 10.75 * step, 9.25 * step, 0.35, 0],
+            [step_time * 2.1, 12.75 * step, 9.25 * step, 0.35, 0],
+            [step_time * 1.05, 12.75 * step, 10.25 * step, 0.35, 0],
+            [step_time * 1.05, 13.75 * step, 10.25 * step, 0.35, 0],
+            [step_time * 2.1, 13.75 * step, 8.25 * step, 0.35, 0],
+            [step_time * 1.3125, 12.5 * step, 8.25 * step, 0.35, 0],
+            [step_time * 1.3125, 11.25 * step, 8.25 * step, 0.35, 0],
+            [step_time * 2.1, 11.25 * step, 6.25 * step, 0.35, 0],
+            [step_time * 1.8375, 11.25 * step, 4.5 * step, 0.35, 0],
+            [step_time * 2.1, 13.25 * step, 4.5 * step, 0.35, 0],
+            [step_time * 1.575, 13.25 * step, 3 * step, 0.35, 0],
+            [step_time * 2.1, 11.25 * step, 3 * step, 0.35, 0],
+            [step_time * 1.8375, 11.25 * step, 4.75 * step, 0.35, 0],
+            [step_time * 1.8375, 11.25 * step, 6.5 * step, 0.35, 0],
+            [step_time * 1.8375, 11.25 * step, 8.25 * step, 0.35, 0],
+            [step_time * 1.575, 11.25 * step, 9.75 * step, 0.35, 0],
+            [step_time * 1.3125, 10 * step, 9.75 * step, 0.35, 0],
+            [step_time * 1.3125, 8.75 * step, 9.75 * step, 0.35, 0],
+            [step_time * 1.05, 8.75 * step, 10.75 * step, 0.35, 0],
+        ]
 
-        t1 = Thread(target=injector, args=(self.cj_injector_container[0], path_maze_first_drone,))
+        t1 = Thread(target=injector, args=(self.cj_injector_container[0], path_maze_frame1,))
         threads.append(t1)
 
-        t2 = Thread(target=injector, args=(self.cj_injector_container[1], path_maze_second_drone,))
+        t2 = Thread(target=injector, args=(self.cj_injector_container[1], path_maze_frame2,))
         threads.append(t2)
+
+        t3 = Thread(target=injector, args=(self.cj_injector_container[2], path_maze_frame3,))
+        threads.append(t3)
 
         # start all threads.
         for t in threads:
