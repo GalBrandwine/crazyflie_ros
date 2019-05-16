@@ -53,35 +53,38 @@ class Agent:
         vec = np.zeros(2)
         flag = False
         as_flag = False
+        noise_fac = 3
 
         # if self.astar_path == []:
         #     vec = np.subtract(self.next_pos[0], self.current_pos[0])
         # elif(self.is_step_legal(self.current_pos,  np.subtract(self.astar_path[0], self.current_pos[0]), matrix)):
         #     vec = np.subtract(self.astar_path[0], self.current_pos[0])
         #     as_flag = True
+        # if self.astar_path != [] and np.linalg.norm(np.subtract(self.current_pos[0], self.next_pos[0])) > self.dist_factor * self.step_noise_size\
+        #         and self.is_step_legal(self.current_pos,  np.subtract(self.next_pos[0], self.current_pos[0]), matrix):
+        #     vec = np.subtract(self.next_pos[0], self.current_pos[0])
 
         if self.astar_path == []:
             vec = np.subtract(self.next_pos[0], self.current_pos[0])
-        else:
+        elif self.astar_path != [] and np.linalg.norm(np.subtract(self.current_pos[0], self.next_pos[0])) > self.dist_factor * self.step_noise_size\
+                and self.is_step_legal(self.current_pos,  np.subtract(self.next_pos[0], self.current_pos[0]), matrix):
+            vec = np.subtract(self.next_pos[0], self.current_pos[0])
+        elif self.astar_path != []:
             vec = np.subtract(self.astar_path[0], self.current_pos[0])
             as_flag = True
 
-        if self.astar_path != [] and np.linalg.norm(np.subtract(self.current_pos[0], self.next_pos[0])) > self.dist_factor * self.step_noise_size\
-                and self.is_step_legal(self.current_pos,  np.subtract(self.next_pos[0], self.current_pos[0]), matrix):
-            vec = np.subtract(self.next_pos[0], self.current_pos[0])
 
-        if sum(vec) != 0:
-            while not flag and break_counter < max_count_val:
-                break_counter = break_counter + 1
-                step = self.step_noise_size * ([0.5, 0.5] - np.random.rand(2)) + vec
-                if self.is_step_legal(self.current_pos, step, matrix):
-                    flag = True
-                    break
+        while break_counter < 20 and as_flag and sum(vec) != 0:
+            break_counter = break_counter + 1
+            step = self.step_noise_size * noise_fac * ([0.5, 0.5] - np.random.rand(2)) + vec
+            if self.is_step_legal(self.current_pos, step, matrix):
+                vec = step
+                break
 
-            if break_counter < max_count_val:
-                self.next_pos = self.current_pos + vec
-                if as_flag and self.astar_path != []:
-                    del self.astar_path[0]
+        if break_counter < max_count_val:
+            self.next_pos = self.current_pos + vec
+            if as_flag and self.astar_path != []:
+                del self.astar_path[0]
 
 
 # This is the important function, that should be rewriten
