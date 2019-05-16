@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import numpy as np
+import rospy
 
 
 class GridPOI:
@@ -21,6 +22,7 @@ class GridPOI:
         # ax_2.imshow(np.transpose(bin_matrix), origin='lower')
 
         interesting_points_list_ij, interesting_points_list_xy = self.find_interesting_points(matrix)
+        rospy.logdebug("POI:{}".format(interesting_points_list_xy))
         corner_points_list_ij, corner_points_list_xy = self.find_corner_points(matrix)
 
         return [interesting_points_list_ij, interesting_points_list_xy, corner_points_list_ij, corner_points_list_xy]
@@ -45,8 +47,8 @@ class GridPOI:
 
     def find_corners_tails(self, matrix):
         tail_list = list()
-        for i in range(1, matrix.__len__() - 1):
-            for j in range(1, matrix[i].__len__() - 1):
+        for i in range(1, matrix.__len__() - 2):
+            for j in range(1, matrix[i].__len__() - 2):
                 cflag, add_num = self.is_tail_in_corner(i, j, matrix)
                 if cflag:
                     cidx = list(np.add([i, j], add_num))
@@ -67,13 +69,13 @@ class GridPOI:
     def find_interesting_tail(self, matrix):
         tail_list = list()
         sequence_cnt = np.zeros(np.shape(matrix))
-        for i in range(1, matrix.__len__() - 1):
-            for j in range(1, matrix[i].__len__() - 1):
+        for i in range(1, matrix.__len__() - 2):
+            for j in range(1, matrix[i].__len__() - 2):
                 if self.is_tail_interesting(i, j, matrix):
-                    if sequence_cnt[i - 1][j - 1] == 0 and sequence_cnt[i][j - 1] == 0 and sequence_cnt[i - 1][j] == 0:
-                        tail_list.append([i, j])
-                        sequence_cnt[i][j] = 1
-                    # tail_list.append([i, j])
+                    # if sequence_cnt[i - 1][j - 1] == 0 and sequence_cnt[i][j - 1] == 0 and sequence_cnt[i - 1][j] == 0:
+                    #     tail_list.append([i, j])
+                    #     sequence_cnt[i][j] = 1
+                    tail_list.append([i, j])
         return tail_list
 
     def is_tail_interesting(self, i, j, matrix):
@@ -85,13 +87,15 @@ class GridPOI:
         cnt_wall = 0
         cnt_unexplored = 0
         for k in range(len(ind_list)):
-            if (matrix[i][j] == 1) and (matrix[ind_list[k][0] + i][ind_list[k][1] + j] == 2):
+            # if (matrix[i][j] == 1) and (matrix[ind_list[k][0] + i][ind_list[k][1] + j] == 2):
+            #     cnt_wall = cnt_wall + 1
+            if (matrix[i][j] == 1) and (matrix[ind_list[k][0] + i + ind_list[k][0]][ind_list[k][1] + j + ind_list[k][1]] == 2):
                 cnt_wall = cnt_wall + 1
             if (matrix[i][j] == 1) and (matrix[ind_list[k][0] + i][ind_list[k][1] + j] == 0):
                 cnt_unexplored = cnt_unexplored + 1
         # if ((cnt_wall == 4) and (cnt_unexplored == 1)):
         #     return False
-        if ((cnt_wall >= 1) and (cnt_unexplored >= 1)):  # or cnt_unexplored >= 4:
+        if (cnt_unexplored >= 1) and (cnt_wall >= 1):  # or cnt_unexplored >= 4:
             return True
         else:
             return False

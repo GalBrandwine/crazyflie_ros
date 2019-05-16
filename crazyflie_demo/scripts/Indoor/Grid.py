@@ -292,7 +292,7 @@ class Grid:
                 self.change_tail_to_empty(i, j)
         d = np.subtract(tof_sensing_pos, sensor_pos)
         norm_d = np.linalg.norm(d)
-        if norm_d > 0 and np.linalg.norm(np.subtract([i1, j1], [i0, j0])) < (self.sens_limit / self.res):
+        if norm_d > 0 and (np.linalg.norm(np.subtract([i1, j1], [i0, j0])) <= (self.sens_limit / self.res)) and 0 < i1 < self.matrix.shape[0] and 0 < j1 < self.matrix.shape[1]:
         # if norm_d > 0 and np.linalg.norm(np.subtract(tof_sensing_pos, sensor_pos)) < (self.sens_limit):
             wall_pos = tof_sensing_pos + d / norm_d * self.res / 1000
             i, j = self.xy_to_ij(wall_pos[0][0], wall_pos[0][1])

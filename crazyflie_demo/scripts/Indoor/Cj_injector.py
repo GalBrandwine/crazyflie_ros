@@ -97,7 +97,7 @@ class DroneCjInjector:
         self.matrix = matrix
         self.drone_yaw = math.radians(0)
         self.rot_enabled = False
-        self.rot_time_thresh = 25  # sec
+        self.rot_time_thresh = 15  # sec
         self.last_time_rot_called = rospy.Time.now().to_sec()
         # Init publisher
         self.Cj_injector_pub = rospy.Publisher('/' + self.tf_prefix + "/Cj_injcetor", PoseStamped,
@@ -119,8 +119,10 @@ class DroneCjInjector:
         if (rospy.Time.now().to_sec() - self.last_time_rot_called) >= self.rot_time_thresh:
             self.rot_enabled = True
             # temp_yaw = np.random.rand() * np.pi / 4
-            temp_yaw = drone_yaw + (np.pi / 2)
-            self.drone_yaw = np.mod(temp_yaw, 2 * np.pi)  # limit the rotation by maximum angle
+            self.drone_yaw = drone_yaw + (np.pi / 2)
+            rospy.logdebug("angle {}".format(self.drone_yaw))
+            self.drone_yaw = np.mod(self.drone_yaw, 2 * np.pi)  # limit the rotation by maximum angle
+            rospy.logdebug("angle after mod {}".format(self.drone_yaw))
             self.last_time_rot_called = rospy.Time.now().to_sec()
 
         # Assume that new_pos = [x,y,z,r,p,y]
@@ -150,7 +152,9 @@ class DroneCjInjector:
         pitch = 0
         yaw = self.next_pose[5]
         pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
-        # rospy.logdebug("cj_injection injected this pose: \n{}".format(pose))
+
+        rospy.logdebug("drone pos: \n{}".format(drone_pos))
+        rospy.logdebug("drone next_point: \n{}".format(next_point))
         self.Cj_injector_pub.publish(pose)
 
 
@@ -267,13 +271,22 @@ class DroneInjector:
                 cur_pos = [[pos[0], pos[1]]]
 
                 if self.POI_enabled and self.interesting_points_list_xy != []:
+
                     g_idx = get_goal_point(cur_pos, self.interesting_points_list_xy, self.matrix, x_lim, y_lim,
                                            self.res)
+
+                    # if np.random.rand < 0.1:
+                    #     g_idx = np.random.randint(len(self.interesting_points_list_xy))
+                    # else:
+                    #     g_idx = 0
+
                     gx = self.interesting_points_list_xy[g_idx][0]
                     gy = self.interesting_points_list_xy[g_idx][1]
                     goal = [gx, gy]
                 else:
-                    goal = cur_pos[0]
+                    goal = drone.next_pose[0:2]
+
+
                 # rospy.logdebug("Cj_injector pos: {}".format(cur_pos))
                 # drone.update_pos(pos, self.matrix, pos[0:2], corner_points_list_xy)
                 drone.update_pos(cur_pos, self.matrix, goal, yaw, self.corner_points_list_xy, self.POI_enabled)

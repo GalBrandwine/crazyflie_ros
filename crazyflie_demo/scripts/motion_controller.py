@@ -206,9 +206,9 @@ def handler(cf_handler):
     # cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=0, duration=0.1, relative=True)
 
     # # Initate some movement for starting the algorithm
-    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=radians(45), duration=3, relative=True)  # move a bit forward before
-    time.sleep(3)
     cf_handler.goTo(goal=[0.3, 0.0, 0.0], yaw=0, duration=3, relative=True)  # move a bit forward before
+    time.sleep(3)
+    cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=radians(90), duration=3, relative=True)  # move a bit forward before
     time.sleep(3)
     # cf_handler.goTo(goal=[0.0, 0.0, 0.0], yaw=radians(45), duration=3, relative=True)  # move a bit forward before
     # time.sleep(3)
@@ -338,7 +338,7 @@ def handler(cf_handler):
                     break
                 else:
                     rospy.logdebug("going to: {}".format([x, y, z, yaw]))
-                    cf_handler.goTo(goal=[x * 1.075, y * 1.075, z], yaw=yaw, duration=duration, relative=False)
+                    cf_handler.goTo(goal=[x * 1.156, y * 1.156, z], yaw=yaw, duration=duration, relative=False)
                 # else:
                 #     rospy.logwarn("cannot move - obstacle in the way")
 
