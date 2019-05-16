@@ -17,13 +17,15 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: PointCloud2_CF8
   - Class: rviz/Displays
     Help Height: 78
     Name: Displays
     Property Tree Widget:
       Expanded:
         - /Grid1
+        - /PointCloud2_CF81
+        - /PointCloud2_CF91
       Splitter Ratio: 0.5
     Tree Height: 750
 Visualization Manager:
@@ -52,13 +54,29 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
+        cf8:
+          Value: true
+        cf8_takeoff:
+          Value: true
+        cf9:
+          Value: true
+        cf9_takeoff:
+          Value: true
+        world:
+          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: true
       Tree:
-        {}
+        world:
+          cf8_takeoff:
+            cf8:
+              {}
+          cf9_takeoff:
+            cf9:
+              {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -214,14 +232,14 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 10
-        Min Value: -10
+        Max Value: 1.05350411
+        Min Value: 0.279252857
         Value: true
-      Axis: Z
+      Axis: Y
       Channel Name: intensity
       Class: rviz/PointCloud2
-      Color: 255; 255; 255
-      Color Transformer: Intensity
+      Color: 50; 255; 255
+      Color Transformer: FlatColor
       Decay Time: 150
       Enabled: true
       Invert Rainbow: false
@@ -244,14 +262,14 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 10
-        Min Value: -10
+        Max Value: 99.9908447
+        Min Value: 99.9908447
         Value: true
       Axis: Z
       Channel Name: intensity
       Class: rviz/PointCloud2
-      Color: 255; 255; 255
-      Color Transformer: Intensity
+      Color: 255; 255; 100
+      Color Transformer: FlatColor
       Decay Time: 150
       Enabled: true
       Invert Rainbow: false
@@ -401,25 +419,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 6.14011431
+      Distance: 9.71007252
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 1.54710114
-        Y: 1.44246495
-        Z: -1.73133171
+        X: 1.91501069
+        Y: 0.200373173
+        Z: -1.58874965
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 1.39479649
+      Pitch: 1.54479635
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.13858008
+      Yaw: 3.13358521
     Saved: ~
 Window Geometry:
   Displays:
