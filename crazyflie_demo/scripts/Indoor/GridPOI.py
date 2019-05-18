@@ -10,6 +10,7 @@ class GridPOI:
         self.x_lim = env_limits[0:2]
         self.y_lim = env_limits[2:4]
         self.convstrct = np.ones([3, 3])
+        self.wall_fac = 3
 
     def find_POI(self, matrix):
         # temp_mat = copy.deepcopy(matrix)
@@ -89,8 +90,12 @@ class GridPOI:
         for k in range(len(ind_list)):
             # if (matrix[i][j] == 1) and (matrix[ind_list[k][0] + i][ind_list[k][1] + j] == 2):
             #     cnt_wall = cnt_wall + 1
-            if (matrix[i][j] == 1) and (matrix[ind_list[k][0] + i + ind_list[k][0]][ind_list[k][1] + j + ind_list[k][1]] == 2):
-                cnt_wall = cnt_wall + 1
+            try:
+                if (matrix[i][j] == 1) and (matrix[self.wall_fac * ind_list[k][0] + i][self.wall_fac * ind_list[k][1] + j] == 2):
+                    cnt_wall = cnt_wall + 1
+            except:
+                if (matrix[i][j] == 1) and (matrix[(self.wall_fac- 1) * ind_list[k][0] + i][(self.wall_fac - 1) * ind_list[k][1] + j] == 2):
+                    cnt_wall = cnt_wall + 1
             if (matrix[i][j] == 1) and (matrix[ind_list[k][0] + i][ind_list[k][1] + j] == 0):
                 cnt_unexplored = cnt_unexplored + 1
         # if ((cnt_wall == 4) and (cnt_unexplored == 1)):

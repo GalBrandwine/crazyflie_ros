@@ -24,7 +24,7 @@ A few notes:
     <!-- for first CF -->
     <arg name="uri1" default="radio://0/120/2M/E7E7E7E712"/>
     <arg name="frame1" default="cf12"/>
-    <arg name="frame1_active" default="1"/>
+    <arg name="frame1_active" default="0"/>
     <arg name="frame1__listening_to_key_board" default="1"/>
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX1" default="0.381"/>
@@ -36,7 +36,7 @@ A few notes:
     <!-- for second CF    -->
     <arg name="uri2" default="radio://0/120/2M/E7E7E7E711"/>
     <arg name="frame2" default="cf11"/>
-    <arg name="frame2_active" default="1"/>
+    <arg name="frame2_active" default="0"/>
     <arg name="frame2__listening_to_key_board" default="1"/>
     <arg name="traj_list2" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX2" default="0.381"/>
@@ -67,9 +67,9 @@ A few notes:
 
     <!-- arguments for indoor mapping  -->
     <arg name="x_min" value="0"/>
-    <arg name="x_max" default="510"/> <!-- 470 + 20 + 20 -->
+    <arg name="x_max" default="510"/> <!-- 15.5ft + 0.5ft + 0.5ft = 5.0292m-->
     <arg name="y_min" default="0"/>
-    <arg name="y_max" default="490"/> <!-- 450 + 20 + 20 -->
+    <arg name="y_max" default="490"/> <!-- 15ft + 0.5ft + 0.5ft = 4.8768m -->
     <arg name="env_lim" default="[$(arg x_min), $(arg x_max), $(arg y_min), $(arg y_max)]"/>
     <arg name="resolution" default="10"/>
     <arg name="env_space" default="0"/>

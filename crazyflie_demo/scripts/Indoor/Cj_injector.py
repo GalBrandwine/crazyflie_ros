@@ -53,7 +53,8 @@ def xy_to_ij(x, y, x_lim, y_lim, res):
 
 
 def get_goal_point(pos, interesting_points_list_xy, matrix, x_lim, y_lim, res):
-    g_idx = 0
+    # g_idx = 0
+    g_idx = g_idx = np.random.randint(len(interesting_points_list_xy))
     dist_arr = []
     for idx, elem in enumerate(interesting_points_list_xy):
         dist_arr.append(np.linalg.norm(np.subtract(elem, pos[0])))
@@ -153,8 +154,8 @@ class DroneCjInjector:
         yaw = self.next_pose[5]
         pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
 
-        rospy.logdebug("drone pos: \n{}".format(drone_pos))
-        rospy.logdebug("drone next_point: \n{}".format(next_point))
+        # rospy.logdebug("drone pos: \n{}".format(drone_pos))
+        # rospy.logdebug("drone next_point: \n{}".format(next_point))
         self.Cj_injector_pub.publish(pose)
 
 
@@ -233,7 +234,6 @@ class DroneInjector:
 
         grid_height = int(msg.info.height / msg.info.resolution)
         grid_width = int(msg.info.width / msg.info.resolution)
-        # self.matrix = np.array(msg.data).reshape((grid_height, grid_width))
         self.matrix = np.array(msg.data).reshape((grid_width, grid_height))
 
         # Set timer for POI
@@ -282,6 +282,7 @@ class DroneInjector:
                     gx = self.interesting_points_list_xy[g_idx][0]
                     gy = self.interesting_points_list_xy[g_idx][1]
                     goal = [gx, gy]
+                    del self.interesting_points_list_xy[g_idx]
                 else:
                     goal = drone.next_pose[0:2]
 
@@ -289,9 +290,6 @@ class DroneInjector:
                 # rospy.logdebug("Cj_injector pos: {}".format(cur_pos))
                 # drone.update_pos(pos, self.matrix, pos[0:2], corner_points_list_xy)
                 drone.update_pos(cur_pos, self.matrix, goal, yaw, self.corner_points_list_xy, self.POI_enabled)
-
-                if self.POI_enabled and self.interesting_points_list_xy != []:
-                    del self.interesting_points_list_xy[g_idx]
 
                 # rospy.logdebug("in grid_parser - drone.update:\n"
                 #                "pos: {}\n"
@@ -322,13 +320,8 @@ if __name__ == '__main__':
     prefix_takeoff_dict = dict()
 
     for iDrone in range(nDrones):
-
-        rospy.logdebug("iDrone{} ".format(iDrone))
-
         pref = prefix_list_from_launch_file[iDrone]
-        rospy.logdebug("Prefix{} ".format(prefix_list_from_launch_file[iDrone]))
         curr_takeoff = initial_takeoff_list_from_launch_file[iDrone]
-        rospy.logdebug("Takeoff{} ".format(initial_takeoff_list_from_launch_file[iDrone]))
         prefix_takeoff_dict[pref[0]] = curr_takeoff
 
     drone_container = DroneInjector(prefix_takeoff_dict, limits_from_launch_file, res_from_launch_file, 15)

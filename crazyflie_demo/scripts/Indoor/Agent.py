@@ -74,7 +74,7 @@ class Agent:
             as_flag = True
 
 
-        while break_counter < 10 and as_flag and sum(vec) != 0:
+        while break_counter < 10 and as_flag == False and sum(vec) != 0:
             break_counter = break_counter + 1
             step = self.step_noise_size * noise_fac * ([0.5, 0.5] - np.random.rand(2)) + vec
             if self.is_step_legal(self.current_pos, step, matrix):
