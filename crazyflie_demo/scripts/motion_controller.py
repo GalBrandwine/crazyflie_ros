@@ -349,6 +349,11 @@ def handler(cf_handler):
 if __name__ == '__main__':
     rospy.init_node('motion', log_level=rospy.DEBUG)  # log_level=rospy.DEBUG
 
+    # Start_delay - I have added that because it is not healthy to launch all drones in the same time.
+    start_delay = rospy.get_param("~start_delay")
+    if start_delay > 0:
+        time.sleep(start_delay)
+
     # last minute addition, listen to keyboard per drone!!
     listen_to_keyboard = rospy.get_param("~listen_to_keyboard")
     rospy.logdebug("listen_to_keyboard: {}".format(listen_to_keyboard))

@@ -26,6 +26,7 @@ A few notes:
     <arg name="frame1" default="cf08"/>
     <arg name="frame1_active" default="1"/>
     <arg name="frame1__listening_to_key_board" default="1"/>
+    <arg name="frame1_start_delay" default="0" />
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX1" default="0.3048"/>
     <arg name="initY1" default="1.6"/>
@@ -37,6 +38,7 @@ A few notes:
     <arg name="frame2_active" default="1"/>
     <arg name="frame2_start_delay" default="2" />
     <arg name="frame2__listening_to_key_board" default="1"/>
+    <arg name="frame2_launch_delay" default="1"/>
     <arg name="traj_list2" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX2" default="0.3048"/>
     <arg name="initY2" default="1.981"/>
@@ -163,6 +165,7 @@ A few notes:
         <node name="motion_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">
             <param name="tf_prefix" value="$(arg frame1)"/>
             <param name="listen_to_keyboard" value="$(arg frame1__listening_to_key_board)"/>
+            <param name="start_delay" value="$(arg frame1_start_delay)"/>
         </node>
 
         <!--        Publish TOF sensors readings as pointcloud-->
@@ -224,9 +227,10 @@ A few notes:
 
         <!--        Start keyboard controller. -->
 
-        <node name="motion_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen" launch-prefix="bash -c 'sleep $(arg frame2_start_delay); $0 $@' ">
+        <node name="motion_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">
             <param name="tf_prefix" value="$(arg frame2)"/>
             <param name="listen_to_keyboard" value="$(arg frame2__listening_to_key_board)"/>
+            <param name="start_delay" value="$(arg frame2_start_delay)"/>
         </node>
 
         <!--        Tf_broadcast a specific drone with world-->
@@ -253,7 +257,7 @@ A few notes:
 
     <!--    ***************************************************** FRAME 3 ********************************************************-->
     <group ns="$(arg frame3)" if="$(eval arg('frame3_active') ==1)">
-        <node pkg="crazyflie_driver" type="crazyflie_add" name="crazyflie_add" output="screen" launch-prefix="bash -c 'sleep $(arg frame3_start_delay); $0 $@' ">
+        <node pkg="crazyflie_driver" type="crazyflie_add" name="crazyflie_add" output="screen">
             <param name="uri" value="$(arg uri3)"/>
             <param name="tf_prefix" value="$(arg frame3)"/>
 
@@ -293,8 +297,10 @@ A few notes:
         <!--        </node>-->
 
         <!--        Start keyboard controller. -->
-        <node name="motion_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen" launch-prefix="bash -c 'sleep $(arg frame4_start_delay); $0 $@' ">
+        <node name="motion_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">
             <param name="tf_prefix" value="$(arg frame3)"/>
+            <param name="listen_to_keyboard" value="$(arg frame3__listening_to_key_board)"/>
+            <param name="start_delay" value="$(arg frame3_start_delay)"/>
         </node>
 
         <!--        Tf_broadcast a specific drone with world-->
@@ -363,6 +369,8 @@ A few notes:
         <!--        Start keyboard controller. -->
         <node name="motion_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">
             <param name="tf_prefix" value="$(arg frame4)"/>
+            <param name="listen_to_keyboard" value="$(arg frame4__listening_to_key_board)"/>
+            <param name="start_delay" value="$(arg frame4_start_delay)"/>
         </node>
 
         <!--        Tf_broadcast a specific drone with world-->
