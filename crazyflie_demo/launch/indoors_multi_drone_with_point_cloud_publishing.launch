@@ -391,7 +391,7 @@ A few notes:
             <param name="env_space" value="$(arg env_space)"/>
             <param name="resolution" value="$(arg resolution)"/>
             <param name="nDrones" value="$(arg nDrones)"/>
-            <param name="drone_name_0" value="$(arg frame1)"/>
+            <param name="drone_name_0" value="$(arg frame3)"/>
             <param name="drone_takeoff_position_0" value="[$(arg initX1), $(arg initY1), $(arg initZ1)]"/>
             <param name="useRefEnv" value="$(arg useRefEnv)"/>
             <param name="excelPath" value="$(find crazyflie_demo)/resources/MazeMap.csv"/>
@@ -415,7 +415,7 @@ A few notes:
 <!--            <param name="obs_3" value="[(10, 250), (10, 240), (240, 240), (240, 250), (10, 250)]"/>-->
 <!--            &lt;!&ndash;&ndash;&gt;-->
             <param name="nDrones" value="$(arg nDrones)"/>
-            <param name="drone_name_0" value="$(arg frame1)"/>
+            <param name="drone_name_0" value="$(arg frame3)"/>
             <param name="drone_takeoff_position_0" value="[$(arg initX1), $(arg initY1), $(arg initZ1)]"/>
 
             <param name="drone_name_1" value="$(arg frame2)"/>
@@ -442,10 +442,14 @@ A few notes:
             <param name="nDrones" value="$(arg nDrones)"/>
         </node>
 
-        <!--<node name="http_server" pkg="crazyflie_demo" type="HTTP_server.py" output="screen">-->
-            <!--<param name="nDrones" value="$(arg nDrones)"/>-->
-            <!--<param name="drone_name_0" value="$(arg frame1)"/>-->
-        <!--</node>-->
+<!--        <node name="http_server" pkg="crazyflie_demo" type="HTTP_server.py" output="screen">-->
+<!--            <param name="nDrones" value="$(arg nDrones)"/>-->
+<!--            <param name="drone_name_0" value="$(arg frame3)"/>-->
+<!--            <param name="env_lim" value="$(arg env_lim)"/>-->
+<!--            <param name="env_space" value="$(arg env_space)"/>-->
+<!--            <param name="resolution" value="$(arg resolution)"/>-->
+<!--            <param name="vehicle_start_pos" value="[0.33, 1.91]" />-->
+<!--        </node>-->
 
     </group>
 
