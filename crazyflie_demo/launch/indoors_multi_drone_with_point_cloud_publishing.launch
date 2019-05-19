@@ -69,7 +69,7 @@ A few notes:
     <arg name="x_min" value="0"/>
     <arg name="x_max" default="510"/> <!-- 15.5ft + 0.5ft + 0.5ft = 5.0292m-->
     <arg name="y_min" default="0"/>
-    <arg name="y_max" default="490"/> <!-- 15ft + 0.5ft + 0.5ft = 4.8768m -->
+    <arg name="y_max" default="510"/> <!-- 15ft + 0.5ft + 0.5ft + 0.5ft = 5.0292m -->
     <arg name="env_lim" default="[$(arg x_min), $(arg x_max), $(arg y_min), $(arg y_max)]"/>
     <arg name="resolution" default="10"/>
     <arg name="env_space" default="0"/>
