@@ -3,12 +3,9 @@ import numpy as np
 import rospy
 from std_msgs.msg import String
 from sensor_msgs.msg import PointCloud2
-from crazyflie_driver.msg import GenericLogData
 import sensor_msgs.point_cloud2 as pc2
 import matplotlib.pyplot as plt
 from nav_msgs.msg import OccupancyGrid, MapMetaData
-from shapely.geometry import Point, LineString, Polygon
-from descartes import PolygonPatch
 from bresenham import bresenham
 import time
 import threading
@@ -42,25 +39,12 @@ class drone_pc:
 
 class Grid:
 
-    def __init__(self, grid_border, res, nDrones, initial_pos_dict, useRefEnv, excelPath):
+    def __init__(self, x_lim, y_lim, res, nDrones, initial_pos_dict, useRefEnv, excelPath):
 
-        self.x_lim = [grid_border[0][0], grid_border[0][0]]
-        self.y_lim = [grid_border[0][1], grid_border[0][1]]
-
-        for i in range(1, grid_border.__len__()):
-            if self.x_lim[0] > grid_border[i][0]:
-                self.x_lim[0] = grid_border[i][0]
-            if self.x_lim[1] < grid_border[i][0]:
-                self.x_lim[1] = grid_border[i][0]
-            if self.y_lim[0] > grid_border[i][1]:
-                self.y_lim[0] = grid_border[i][1]
-            if self.y_lim[1] < grid_border[i][1]:
-                self.y_lim[1] = grid_border[i][1]
-
-
+        self.x_lim = x_lim
+        self.y_lim = y_lim
         self.res = res
         self.matrix = np.zeros([np.int64(np.ceil((self.x_lim[1]-self.x_lim[0])/self.res)), np.int64(np.ceil((self.y_lim[1]-self.y_lim[0])/self.res))])
-        # self.matrix = np.zeros([np.int64(np.ceil((self.y_lim[1]-self.y_lim[0])/self.res)), np.int64(np.ceil((self.x_lim[1]-self.x_lim[0])/self.res))])
         self.nDrones = nDrones
         self.eps = 1  # Allowed time [sec] difference between messages
         self.drones_pos_list = dict()
@@ -78,8 +62,8 @@ class Grid:
         self.rate = 2 #Hz
         self.useRefEnv = useRefEnv
         self.excelPath = excelPath
-        self.grid_maze = copy.deepcopy(self.matrix)
-        self.maze_res = 7.6
+        self.grid_maze = np.transpose(copy.deepcopy(self.matrix))
+        self.maze_res = 7.63
         if self.useRefEnv:
             self.csv_to_maze()
 
@@ -116,17 +100,23 @@ class Grid:
         for srow in datareader:
             row = [int(x) for x in srow[0].split(',')]
             self.maze.append(row)
+
         self.maze = np.array(self.maze)
+        self.maze = np.transpose(self.maze)
+        self.maze = np.flipud(self.maze)  # Flip an array vertically (axis=0)
+        self.maze = np.fliplr(self.maze)  # Flip an array horizontally (axis=1)
+
         for i_idx in range(np.shape(self.maze)[0]):
             for j_idx in range(np.shape(self.maze)[1]):
                 if self.maze[i_idx][j_idx] == 1:
-                    x_idx = j_idx * self.maze_res
-                    y_idx = i_idx * self.maze_res
+                    x_idx = (j_idx * self.maze_res)
+                    y_idx = (i_idx * self.maze_res)
                     i, j = self.xy_to_ij(x_idx, y_idx)
                     self.grid_maze[i][j] = 2
+        datafile.close()
 
-        # plt.figure(45645)
-        # plt.imshow(self.grid_maze)
+        # plt.figure(45645) # Only for debugging! Leave in comment when executing the code
+        # plt.imshow(self.grid_maze, origin='lower')
         # plt.show()
 
 
@@ -259,14 +249,14 @@ class Grid:
     def update_from_tof_sensing_list(self, drone_id):
         current_pos = self.drones_pos_list[drone_id]
         current_pc = self.drones_pc_list[drone_id]
+        # Check if the current point cloud was taken close enough to last position message time
+        # (i.e. was taken from the current position of the drone).
+        if not self.is_time_equal(current_pos.time, current_pc.time):
+            return
+
         if self.useRefEnv:
             self.update_with_dummy_tof_sensor([[current_pos.x, current_pos.y]], current_pos.w)
         else:
-            # Check if the current point cloud was taken close enough to last position message time
-            # (i.e. was taken from the current position of the drone).
-            if not self.is_time_equal(current_pos.time, current_pc.time):
-                return
-
             for elem in current_pc.pc_sens:
                 sensing_pos = [[self.initpos[0]+elem[0], self.initpos[1]+elem[1]]]
                 self.update_with_tof_sensor([[current_pos.x, current_pos.y]], sensing_pos)
@@ -284,13 +274,14 @@ class Grid:
             # i, j = self.xy_to_ij(xs[ind], ys[ind])
             i, j = bres_list[ind]
             if 0 > i or i >= self.matrix.shape[0] or 0 > j or j >= self.matrix.shape[1]:
-                return
-            if self.matrix[i][j] == 0 and np.linalg.norm(np.subtract([i, j], [i0, j0])) < (self.sens_limit / self.res):
+                break
+            # if self.matrix[i][j] == 0 and np.linalg.norm(np.subtract([i, j], [i0, j0])) < (self.sens_limit / self.res):
+            if np.linalg.norm(np.subtract([i, j], [i0, j0])) < (self.sens_limit / self.res):
             # if self.matrix[i][j] == 0 and np.linalg.norm(np.subtract([xs[ind], ys[ind]], sensor_pos)) < (self.sens_limit):
                 self.change_tail_to_empty(i, j)
         d = np.subtract(tof_sensing_pos, sensor_pos)
         norm_d = np.linalg.norm(d)
-        if norm_d > 0 and np.linalg.norm(np.subtract([i1, j1], [i0, j0])) < (self.sens_limit / self.res):
+        if norm_d > 0 and (np.linalg.norm(np.subtract([i1, j1], [i0, j0])) <= (self.sens_limit / self.res)) and 0 < i1 < self.matrix.shape[0] and 0 < j1 < self.matrix.shape[1]:
         # if norm_d > 0 and np.linalg.norm(np.subtract(tof_sensing_pos, sensor_pos)) < (self.sens_limit):
             wall_pos = tof_sensing_pos + d / norm_d * self.res / 1000
             i, j = self.xy_to_ij(wall_pos[0][0], wall_pos[0][1])
@@ -314,15 +305,14 @@ class Grid:
     def update_with_dummy_tof_sensor(self, sensor_pos, yaw):
         directions_vec = np.add([0, np.pi / 2, np.pi, 3 * np.pi / 2], yaw)
         for phi in directions_vec:
-            dummy_tof = sensor_pos + np.multiply(self.sens_limit, [[np.cos(phi), np.sin(phi)]])
+            dummy_tof = np.add(sensor_pos, np.multiply(self.sens_limit, [[np.cos(phi), np.sin(phi)]]))
             i0, j0 = self.xy_to_ij(sensor_pos[0][0], sensor_pos[0][1])
             i1, j1 = self.xy_to_ij(dummy_tof[0][0], dummy_tof[0][1])
             bres_list = list(bresenham(i0, j0, i1, j1))
-            bres_list = bres_list[:-1]
             for ind in range(len(bres_list)):
                 i, j = bres_list[ind]
                 if 0 > i or i >= self.matrix.shape[0] or 0 > j or j >= self.matrix.shape[1]:
-                    return
+                    break
                 if self.grid_maze[i][j] == 0 :
                     self.change_tail_to_empty(i, j)
                 elif self.grid_maze[i][j] == 2:
@@ -389,9 +379,6 @@ if __name__ == "__main__":
     x_lim = (env_lim[0] - env_space, env_lim[1] + env_space)
     y_lim = (env_lim[2] - env_space, env_lim[3] + env_space)
 
-    grid_border = [(x_lim[0], y_lim[0]), (x_lim[1], y_lim[0]), (x_lim[1], y_lim[1]),
-                      (x_lim[0], y_lim[1]), (x_lim[0], y_lim[0])]
-
     initial_pos_dict = dict()
     for iDrone in range(nDrones):
         curr_drone_name = rospy.get_param("~drone_name_{}".format(iDrone))
@@ -399,4 +386,4 @@ if __name__ == "__main__":
         exec ("curr_drone_takeoff_pos = {}".format(curr_drone_takeoff_pos))
         initial_pos_dict[curr_drone_name] = curr_drone_takeoff_pos
 
-    grid = Grid(grid_border, resolution, nDrones, initial_pos_dict, int(useRefEnv), excelPath)
+    grid = Grid(x_lim, y_lim, resolution, nDrones, initial_pos_dict, int(useRefEnv), excelPath)

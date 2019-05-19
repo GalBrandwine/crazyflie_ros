@@ -1,22 +1,20 @@
 #!/usr/bin/env python
 """This is a simple Cj_injector for emulating. """
+import PathBuilder
+import math
 import numpy as np
-from math import radians
-import  math
-from threading import Thread
-import time
 import rospy
 import tf
 import tf2_ros
-from GridPOI import GridPOI
 from Agent import Agent
-import PathBuilder
+from GridPOI import GridPOI
 from geometry_msgs.msg import PoseStamped
+from math import radians
 from nav_msgs.msg import OccupancyGrid
-from std_msgs.msg import Empty
 from tf.transformations import euler_from_quaternion
 
 m_to_cm = 100
+
 
 def to_pose_stamped(x, y, z, roll, pitch, yaw):
     pose = PoseStamped()
@@ -36,8 +34,9 @@ def to_pose_stamped(x, y, z, roll, pitch, yaw):
 
     return pose
 
+
 def is_los(p1, p2, matrix, x_lim, y_lim, res):
-    n = int(np.maximum(1, np.ceil(np.linalg.norm(np.subtract(p1, p2))/res)*3))
+    n = int(np.maximum(1, np.ceil(np.linalg.norm(np.subtract(p1, p2)) / res) * 3))
     x = np.linspace(p1[0][0], p2[0][0], num=n, endpoint=True)
     y = np.linspace(p1[0][1], p2[0][1], num=n, endpoint=True)
     for ind in range(1, n):
@@ -48,19 +47,21 @@ def is_los(p1, p2, matrix, x_lim, y_lim, res):
 
 
 def xy_to_ij(x, y, x_lim, y_lim, res):
-    i = int(np.floor((x - x_lim[0])/res))
+    i = int(np.floor((x - x_lim[0]) / res))
     j = int(np.floor((y - y_lim[0]) / res))
     return i, j
 
 
 def get_goal_point(pos, interesting_points_list_xy, matrix, x_lim, y_lim, res):
-    g_idx = 0
+    # g_idx = 0
+    g_idx = g_idx = np.random.randint(len(interesting_points_list_xy))
     dist_arr = []
     for idx, elem in enumerate(interesting_points_list_xy):
         dist_arr.append(np.linalg.norm(np.subtract(elem, pos[0])))
     sorted_dist_idxs = sorted(range(len(dist_arr)), key=lambda k: dist_arr[k])
     for idx in sorted_dist_idxs:
-        if is_los(pos, [[interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1]]], matrix, x_lim, y_lim, res):
+        if is_los(pos, [[interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1]]], matrix, x_lim, y_lim,
+                  res):
             g_idx = idx
             break
     return g_idx
@@ -87,9 +88,9 @@ class DroneCjInjector:
         self.tf_prefix = drone_name
         self.env_limits = env_limits
         self.res = res
-        x = drone_init_takeoff_input[0]
-        y = drone_init_takeoff_input[1]
-        z = drone_init_takeoff_input[2]
+        x = drone_init_takeoff_input[0]*m_to_cm
+        y = drone_init_takeoff_input[1]*m_to_cm
+        z = drone_init_takeoff_input[2]*m_to_cm
         self.pos = [x, y, z, 0, 0, 0]
         self.next_pose = self.pos
         self.agent = Agent(self.tf_prefix, [self.pos[0:2]], self.res, self.env_limits)
@@ -97,7 +98,7 @@ class DroneCjInjector:
         self.matrix = matrix
         self.drone_yaw = math.radians(0)
         self.rot_enabled = False
-        self.rot_time_thresh = 10 # sec
+        self.rot_time_thresh = 15  # sec
         self.last_time_rot_called = rospy.Time.now().to_sec()
         # Init publisher
         self.Cj_injector_pub = rospy.Publisher('/' + self.tf_prefix + "/Cj_injcetor", PoseStamped,
@@ -119,24 +120,27 @@ class DroneCjInjector:
         if (rospy.Time.now().to_sec() - self.last_time_rot_called) >= self.rot_time_thresh:
             self.rot_enabled = True
             # temp_yaw = np.random.rand() * np.pi / 4
-            temp_yaw = drone_yaw + (np.pi / 2)
-            self.drone_yaw = np.mod(temp_yaw, 2 * np.pi)  # limit the rotation by maximum angle
+            self.drone_yaw = drone_yaw + (np.pi / 2)
+            # rospy.logdebug("angle {}".format(self.drone_yaw))
+            self.drone_yaw = np.mod(self.drone_yaw, 2 * np.pi)  # limit the rotation by maximum angle
+            # rospy.logdebug("angle after mod {}".format(self.drone_yaw))
             self.last_time_rot_called = rospy.Time.now().to_sec()
 
         # Assume that new_pos = [x,y,z,r,p,y]
         if act_as_flag:
-            Astar_Movement = PathBuilder.build_trj(drone_pos, self.env_limits, self.res, self.matrix, corrners_array, next_point)
+            Astar_Movement = PathBuilder.build_trj(drone_pos, self.env_limits, self.res, self.matrix, corrners_array,
+                                                   next_point)
             self.agent.astar_path = Astar_Movement
 
         self.agent.preform_step_sys_sim(drone_pos, self.drone_yaw, self.matrix)
 
-        self.next_pose[0] = self.pos[0]/m_to_cm # Only for debug - inject input to output
-        self.next_pose[1] = self.pos[1]/m_to_cm # Only for debug - inject input to output
-        self.next_pose[5] = 0 # Only for debug
+        # self.next_pose[0] = self.pos[0]/m_to_cm # Only for debug - inject input to output
+        # self.next_pose[1] = self.pos[1]/m_to_cm # Only for debug - inject input to output
+        # self.next_pose[5] = 0 # Only for debug
 
-        # self.next_pose[0] = self.agent.next_pos[0][0]/m_to_cm
-        # self.next_pose[1] = self.agent.next_pos[0][1]/m_to_cm
-        # self.next_pose[5] = self.drone_yaw
+        self.next_pose[0] = self.agent.next_pos[0][0] / m_to_cm
+        self.next_pose[1] = self.agent.next_pos[0][1] / m_to_cm
+        self.next_pose[5] = self.drone_yaw
         self.next_pose[2] = 0.35  # hard coded Z height
         # # return to original angle after rotation
         # if self.rot_enabled:
@@ -149,7 +153,9 @@ class DroneCjInjector:
         pitch = 0
         yaw = self.next_pose[5]
         pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
-        # rospy.logdebug("cj_injection injected this pose: \n{}".format(pose))
+
+        # rospy.logdebug("drone pos: \n{}".format(drone_pos))
+        # rospy.logdebug("drone next_point: \n{}".format(next_point))
         self.Cj_injector_pub.publish(pose)
 
 
@@ -194,12 +200,11 @@ class DroneInjector:
     """
 
     def __init__(self, prefix_takeoff_dict_input, env_limits_input, resolution, rate=15):
-        rospy.loginfo(env_limits_input)
         self.cj_injector_container = []
         self.res = resolution
         self.num_of_drones = len(prefix_takeoff_dict_input.keys())  # get number of drones
         self.env_limits = env_limits_input
-        self.POI_time_thresh = 2 #sec
+        self.POI_time_thresh = 5  # sec
         self.last_time_POI_called = rospy.Time.now().to_sec()
         self.interesting_points_list_xy = []
         self.corner_points_list_xy = []
@@ -229,7 +234,6 @@ class DroneInjector:
 
         grid_height = int(msg.info.height / msg.info.resolution)
         grid_width = int(msg.info.width / msg.info.resolution)
-        # self.matrix = np.array(msg.data).reshape((grid_height, grid_width))
         self.matrix = np.array(msg.data).reshape((grid_width, grid_height))
 
         # Set timer for POI
@@ -261,23 +265,31 @@ class DroneInjector:
                 pitch = euler[1]
                 yaw = euler[2]
 
-                pos = [x*m_to_cm, y*m_to_cm, z*m_to_cm, roll, pitch, yaw]
+                pos = [x * m_to_cm, y * m_to_cm, z * m_to_cm, roll, pitch, yaw]
                 # rospy.loginfo("pos in Display: {}\n".format(self.pos))
                 cur_pos = [[pos[0], pos[1]]]
 
                 if self.POI_enabled and self.interesting_points_list_xy != []:
-                    g_idx = get_goal_point(cur_pos, self.interesting_points_list_xy, self.matrix, x_lim, y_lim, self.res)
+
+                    g_idx = get_goal_point(cur_pos, self.interesting_points_list_xy, self.matrix, x_lim, y_lim,
+                                           self.res)
+
+                    # if np.random.rand < 0.1:
+                    #     g_idx = np.random.randint(len(self.interesting_points_list_xy))
+                    # else:
+                    #     g_idx = 0
+
                     gx = self.interesting_points_list_xy[g_idx][0]
                     gy = self.interesting_points_list_xy[g_idx][1]
                     goal = [gx, gy]
+                    del self.interesting_points_list_xy[g_idx]
                 else:
-                    goal = cur_pos[0]
+                    goal = drone.next_pose[0:2]
 
+
+                # rospy.logdebug("Cj_injector pos: {}".format(cur_pos))
                 # drone.update_pos(pos, self.matrix, pos[0:2], corner_points_list_xy)
                 drone.update_pos(cur_pos, self.matrix, goal, yaw, self.corner_points_list_xy, self.POI_enabled)
-
-                if self.POI_enabled and self.interesting_points_list_xy != []:
-                    del self.interesting_points_list_xy[g_idx]
 
                 # rospy.logdebug("in grid_parser - drone.update:\n"
                 #                "pos: {}\n"
@@ -285,7 +297,7 @@ class DroneInjector:
                 #                "".format(pos,pos[0:2]))
 
             # except:
-                # rospy.logdebug("tf lookup -- {} not found".format(drone.tf_prefix))
+            # rospy.logdebug("tf lookup -- {} not found".format(drone.tf_prefix))
             except Exception as e:
                 pass
                 # rospy.logdebug(e)
@@ -307,11 +319,11 @@ if __name__ == '__main__':
     limits_from_launch_file = [x_lim[0], x_lim[1], y_lim[0], y_lim[1]]
 
     prefix_takeoff_dict = dict()
-    for iDrone in range(nDrones):
 
+    for iDrone in range(nDrones):
         pref = prefix_list_from_launch_file[iDrone]
         curr_takeoff = initial_takeoff_list_from_launch_file[iDrone]
-        prefix_takeoff_dict[pref] = curr_takeoff
+        prefix_takeoff_dict[pref[0]] = curr_takeoff
 
     drone_container = DroneInjector(prefix_takeoff_dict, limits_from_launch_file, res_from_launch_file, 15)
 

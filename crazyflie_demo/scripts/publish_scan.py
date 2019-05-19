@@ -21,8 +21,6 @@ global ranges_previous
 ranges_previous = [0, 0, 0, 0]
 
 
-
-
 def filter_scan():
     max_distance = 2.0  # maximum distance cutoff in meters
     outlier_threshold = 0.2  # maximum delta between two sequential readings, in meters
@@ -44,14 +42,17 @@ def get_ranges(msg):
     global prev_ranges
     global tfBuffer, listener
 
-    noise_threshold=0.1
+    noise_threshold = 0.1
 
     front = msg.values[0] / 1000
     back = msg.values[1] / 1000
     left = msg.values[3] / 1000
     right = msg.values[4] / 1000
+    z_range = msg.values[5] / 1000
 
-    curr_ranges=[front,back,left,right]
+    # rospy.logdebug("in publish scan: {}".format(msg))
+
+    curr_ranges = [front, back, left, right]
 
     inf = float('inf')
     scan.ranges = [inf, inf, inf, inf]
@@ -63,7 +64,7 @@ def get_ranges(msg):
     except Exception as e:
         rospy.loginfo(e)
 
-    if abs(curr_ranges[0]-prev_ranges[0]) > 0:
+    if abs(curr_ranges[0] - prev_ranges[0]) > 0:
         scan.ranges[2] = curr_ranges[0]
         new_data += 1
         prev_ranges[0] = curr_ranges[0]
@@ -85,9 +86,9 @@ def get_ranges(msg):
         #     front_WC.header.frame_id = "world"
         #     pub_front_WC.publish(front_WC)
 
-    if abs(curr_ranges[1]-prev_ranges[1])  > 0:
+    if abs(curr_ranges[1] - prev_ranges[1]) > 0:
         scan.ranges[0] = curr_ranges[1]
-        new_data +=1
+        new_data += 1
         prev_ranges[1] = curr_ranges[1]
         # point_back = PointStamped()
         # point_back.header.seq = seq
@@ -107,7 +108,7 @@ def get_ranges(msg):
 
     if abs(curr_ranges[2] - prev_ranges[2]) > 0:
         scan.ranges[3] = curr_ranges[2]
-        new_data +=1
+        new_data += 1
         prev_ranges[2] = curr_ranges[2]
         # point_left = PointStamped()
         # point_left.header.seq = seq
@@ -125,7 +126,7 @@ def get_ranges(msg):
         #     left_WC.header.frame_id = "world"
         #     pub_left_WC.publish(left_WC)
 
-    if abs(curr_ranges[3] - prev_ranges[3]) > 0 :
+    if abs(curr_ranges[3] - prev_ranges[3]) > 0:
         scan.ranges[1] = curr_ranges[3]
         new_data += 1
         prev_ranges[3] = curr_ranges[3]
@@ -150,7 +151,8 @@ def get_ranges(msg):
     filter_scan()  # todo using scan as global variable. overwriting values. not good.
     scan_pub.publish(scan)  # publish LaserScan message in LOCAL (drone) coordinates
 
-    if transform is not None and new_data >0 :
+    if transform is not None and new_data > 0 and z_range >= 0.32:
+        # Start publishing pointCloud only from 0.32 meters high
         pc2_msg_LC = lp.projectLaser(scan)  # convert the message of type LaserScan to a PointCloud2
         pc2_msg_WC = do_transform_cloud(pc2_msg_LC, transform)  # transform pointcloud to world coordinates
         pc2_pub.publish(pc2_msg_WC)  # publish pointcloud
@@ -159,7 +161,7 @@ def get_ranges(msg):
 
 
 if __name__ == '__main__':
-    rospy.init_node('publish_point', anonymous=False)
+    rospy.init_node('publish_point', anonymous=False, log_level=rospy.DEBUG)
 
     # Crazyflie coordinate
     # pub_front = rospy.Publisher('/' + rospy.get_param("~tf_prefix") + '/points/front', PointStamped, queue_size=1)
@@ -177,7 +179,7 @@ if __name__ == '__main__':
     pc2_pub = rospy.Publisher('/' + rospy.get_param("~tf_prefix") + '/point_cloud', PointCloud2, queue_size=1)
 
     rospy.Subscriber('/' + rospy.get_param("~tf_prefix") + '/log_ranges', GenericLogData, get_ranges)
-    prev_ranges= [0,0,0,0]
+    prev_ranges = [0, 0, 0, 0]
     seq = 0
 
     tfBuffer = tf2_ros.Buffer()

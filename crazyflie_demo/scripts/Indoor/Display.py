@@ -121,7 +121,7 @@ class Display_manager:
         for d_idx, cur_topic in enumerate(self.topics_arr):
             cur_topic_list = cur_topic.split("/")
             drone_id = [s for s in cur_topic_list if "cf" in s][0]
-            plt_index = d_idx
+            plt_index = self.drones_pos_list[drone_id].index
             try:
                 trans = self.tfBuffer.lookup_transform('world', drone_id, rospy.Time(0))
 
@@ -153,7 +153,6 @@ class Display_manager:
         grid_height = int(msg.info.height / msg.info.resolution)
         grid_width = int(msg.info.width / msg.info.resolution)
         self.last_matrix = self.matrix
-        # self.matrix = np.array(msg.data).reshape((grid_height, grid_width))
         self.matrix = np.array(msg.data).reshape((grid_width, grid_height))
         keys = list(self.drones_pos_list.keys())
 
@@ -323,9 +322,7 @@ if __name__ == "__main__":
         initial_pos_dict[curr_drone_name] = curr_drone_takeoff_pos
 
     matrix = np.zeros([np.int64(np.ceil((x_lim[1] - x_lim[0]) / resolution)),
-                            np.int64(np.ceil((y_lim[1] - y_lim[0]) / resolution))])
-    # matrix = np.zeros([np.int64(np.ceil((y_lim[1] - y_lim[0]) / resolution)),
-    #                    np.int64(np.ceil((x_lim[1] - x_lim[0]) / resolution))])
+              np.int64(np.ceil((y_lim[1] - y_lim[0]) / resolution))])
 
     display_manager = Display_manager(polygon_border, x_lim, y_lim, resolution, matrix, initial_pos_dict, nDrones)
 
