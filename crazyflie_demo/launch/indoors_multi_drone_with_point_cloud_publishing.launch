@@ -396,17 +396,16 @@ A few notes:
 
         </node>
 
-        <node name="display_manager" pkg="crazyflie_demo" type="Display.py" output="screen">
-            <param name="env_lim" value="$(arg env_lim)"/>
-            <param name="env_space" value="$(arg env_space)"/>
-            <param name="resolution" value="$(arg resolution)"/>
-            <param name="nDrones" value="$(arg nDrones)"/>
-            <param name="drone_name_0" value="$(arg frame1)"/>
-            <param name="drone_takeoff_position_0" value="[$(arg initX1), $(arg initY1), $(arg initZ1)]"/>
-            <param name="drone_name_1" value="$(arg frame2)"/>
-            <param name="drone_takeoff_position_1" value="[$(arg initX2), $(arg initY2), $(arg initZ2)]"/>
-
-        </node>
+<!--        <node name="display_manager" pkg="crazyflie_demo" type="Display.py" output="screen">-->
+<!--            <param name="env_lim" value="$(arg env_lim)"/>-->
+<!--            <param name="env_space" value="$(arg env_space)"/>-->
+<!--            <param name="resolution" value="$(arg resolution)"/>-->
+<!--            <param name="nDrones" value="$(arg nDrones)"/>-->
+<!--            <param name="drone_name_0" value="$(arg frame1)"/>-->
+<!--            <param name="drone_takeoff_position_0" value="[$(arg initX1), $(arg initY1), $(arg initZ1)]"/>-->
+<!--            <param name="drone_name_1" value="$(arg frame2)"/>-->
+<!--            <param name="drone_takeoff_position_1" value="[$(arg initX2), $(arg initY2), $(arg initZ2)]"/>-->
+<!--        </node>-->
         <!--    Cf's arary. for Cj_injector   input is an array of drones!
                 Future develop: add drone as a message!
                 INPUT: ,$(arg frame2),$(arg frame3),$(arg frame4)    -->
@@ -427,14 +426,15 @@ A few notes:
             <param name="nDrones" value="$(arg nDrones)"/>
         </node>
 
-<!--        <node name="http_server" pkg="crazyflie_demo" type="HTTP_server.py" output="screen">-->
-<!--            <param name="nDrones" value="$(arg nDrones)"/>-->
-<!--            <param name="drone_name_0" value="$(arg frame3)"/>-->
-<!--            <param name="env_lim" value="$(arg env_lim)"/>-->
-<!--            <param name="env_space" value="$(arg env_space)"/>-->
-<!--            <param name="resolution" value="$(arg resolution)"/>-->
-<!--            <param name="vehicle_start_pos" value="[0.33, 1.91]" />-->
-<!--        </node>-->
+        <node name="http_server" pkg="crazyflie_demo" type="HTTP_server.py" output="screen">
+            <param name="nDrones" value="$(arg nDrones)"/>
+            <param name="drone_name_0" value="$(arg frame1)"/>
+            <param name="drone_name_1" value="$(arg frame2)"/>
+            <param name="env_lim" value="$(arg env_lim)"/>
+            <param name="env_space" value="$(arg env_space)"/>
+            <param name="resolution" value="$(arg resolution)"/>
+            <param name="vehicle_start_pos" value="[0.33, 1.91]" />
+        </node>
 
     </group>
 
