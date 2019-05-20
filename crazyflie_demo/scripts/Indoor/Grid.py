@@ -58,12 +58,13 @@ class Grid:
             self.topics_arr.append("/{}/point_cloud".format(drone_name))
         self.drone_name_arr = []
         self.floor_thr = 32
-        self.sens_limit = 200
+        self.sens_limit = 300
         self.rate = 2 #Hz
         self.useRefEnv = useRefEnv
         self.excelPath = excelPath
-        self.grid_maze = np.transpose(copy.deepcopy(self.matrix))
-        self.maze_res = 7.63
+        self.validity_matrix = copy.deepcopy(self.matrix)
+        self.grid_maze = copy.deepcopy(self.matrix)
+        self.maze_res = 7.62
         if self.useRefEnv:
             self.csv_to_maze()
 
@@ -74,6 +75,8 @@ class Grid:
             self.drones_pos_list[id] = drone_pos(time=0, x=initial_pos_dict[id][0],
                                                  y=initial_pos_dict[id][1],
                                                  z=initial_pos_dict[id][2], w=None, index=i)
+
+        self.drones_prev_pos_list = self.drones_pos_list
 
         for iDrone in range(self.nDrones):
             # Init listeners
@@ -156,8 +159,19 @@ class Grid:
             self.pos = [x, y, z, roll, pitch, yaw]
             # rospy.loginfo("pos in Grid: {}\n".format(self.pos))
 
+            # Store previous position of drone
+            self.drones_prev_pos_list[drone_id] = self.drones_pos_list[drone_id]
+
             # Store drone position and convert it from [m] to [cm]
             self.drones_pos_list[drone_id] = drone_pos(point_cloud_last_timestamp.stamp.secs, x*m_to_cm, y*m_to_cm, z*m_to_cm, yaw, plt_index)
+
+            path_from_prev_to_cur = list(bresenham(self.drones_prev_pos_list[drone_id].x, self.drones_prev_pos_list[drone_id].y,\
+                                                   self.drones_pos_list[drone_id].x,  self.drones_pos_list[drone_id].y))
+
+            # change the tails of the path to non wall
+            for indx, valp in enumerate(path_from_prev_to_cur):
+                ip, jp = self.xy_to_ij(valp[0], valp[1])
+                self.validity_matrix[ip][jp] = 5
 
             # Change tail to be empty if the drone is in that tail.
             i, j = self.xy_to_ij(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
@@ -275,18 +289,22 @@ class Grid:
             i, j = bres_list[ind]
             if 0 > i or i >= self.matrix.shape[0] or 0 > j or j >= self.matrix.shape[1]:
                 break
-            # if self.matrix[i][j] == 0 and np.linalg.norm(np.subtract([i, j], [i0, j0])) < (self.sens_limit / self.res):
-            if np.linalg.norm(np.subtract([i, j], [i0, j0])) < (self.sens_limit / self.res):
+            # if np.linalg.norm(np.subtract([i, j], [i0, j0])) < (self.sens_limit / self.res):
+            if self.matrix[i][j] == 0 and np.linalg.norm(np.subtract([i, j], [i0, j0])) < (self.sens_limit / self.res):
             # if self.matrix[i][j] == 0 and np.linalg.norm(np.subtract([xs[ind], ys[ind]], sensor_pos)) < (self.sens_limit):
                 self.change_tail_to_empty(i, j)
-        d = np.subtract(tof_sensing_pos, sensor_pos)
-        norm_d = np.linalg.norm(d)
-        if norm_d > 0 and (np.linalg.norm(np.subtract([i1, j1], [i0, j0])) <= (self.sens_limit / self.res)) and 0 < i1 < self.matrix.shape[0] and 0 < j1 < self.matrix.shape[1]:
-        # if norm_d > 0 and np.linalg.norm(np.subtract(tof_sensing_pos, sensor_pos)) < (self.sens_limit):
-            wall_pos = tof_sensing_pos + d / norm_d * self.res / 1000
-            i, j = self.xy_to_ij(wall_pos[0][0], wall_pos[0][1])
-            # if self.time_filter(i, j, pc_time):
-            self.change_tail_to_wall(i, j)
+        if 0 < i1 < self.matrix.shape[0] and 0 < j1 < self.matrix.shape[1] and\
+                (np.linalg.norm(np.subtract([i1, j1], [i0, j0])) <= (self.sens_limit / self.res)) and\
+                self.validity_matrix[i1][j1] != 5:
+            self.change_tail_to_wall(i1, j1)
+
+        # d = np.subtract(tof_sensing_pos, sensor_pos)
+        # norm_d = np.linalg.norm(d)
+        # if norm_d > 0 and (np.linalg.norm(np.subtract([i1, j1], [i0, j0])) <= (self.sens_limit / self.res)) and 0 < i1 < self.matrix.shape[0] and 0 < j1 < self.matrix.shape[1]:
+        #     wall_pos = tof_sensing_pos + d / norm_d * self.res / 1000
+        #     i, j = self.xy_to_ij(wall_pos[0][0], wall_pos[0][1])
+        #     # if self.time_filter(i, j, pc_time):
+        #     self.change_tail_to_wall(i, j)
 
     # Apply time filter TODO: document...
     def time_filter(self, i, j, pc_time):

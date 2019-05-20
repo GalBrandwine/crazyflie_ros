@@ -381,6 +381,11 @@ if __name__ == '__main__':
 
     cf = crazyflie.Crazyflie("/" + prefix, "world")
 
+    # Start delay
+    start_delay = rospy.get_param("~start_delay")
+    if start_delay > 0:
+        time.sleep(start_delay)
+
     rospy.wait_for_service("/" + prefix + '/update_params')
     rospy.loginfo("found update_params service")
 

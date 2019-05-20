@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 """This is a simple Cj_injector for emulating. """
-import PathBuilder
 import math
 import numpy as np
+from math import radians
+
+import PathBuilder
 import rospy
 import tf
 import tf2_ros
 from Agent import Agent
 from GridPOI import GridPOI
 from geometry_msgs.msg import PoseStamped
-from math import radians
 from nav_msgs.msg import OccupancyGrid
 from tf.transformations import euler_from_quaternion
 
@@ -88,9 +89,9 @@ class DroneCjInjector:
         self.tf_prefix = drone_name
         self.env_limits = env_limits
         self.res = res
-        x = drone_init_takeoff_input[0]*m_to_cm
-        y = drone_init_takeoff_input[1]*m_to_cm
-        z = drone_init_takeoff_input[2]*m_to_cm
+        x = drone_init_takeoff_input[0] * m_to_cm
+        y = drone_init_takeoff_input[1] * m_to_cm
+        z = drone_init_takeoff_input[2] * m_to_cm
         self.pos = [x, y, z, 0, 0, 0]
         self.next_pose = self.pos
         self.agent = Agent(self.tf_prefix, [self.pos[0:2]], self.res, self.env_limits)
@@ -98,7 +99,7 @@ class DroneCjInjector:
         self.matrix = matrix
         self.drone_yaw = math.radians(0)
         self.rot_enabled = False
-        self.rot_time_thresh = 15  # sec
+        self.rot_time_thresh = 10  # sec
         self.last_time_rot_called = rospy.Time.now().to_sec()
         # Init publisher
         self.Cj_injector_pub = rospy.Publisher('/' + self.tf_prefix + "/Cj_injcetor", PoseStamped,
@@ -122,7 +123,7 @@ class DroneCjInjector:
             # temp_yaw = np.random.rand() * np.pi / 4
             self.drone_yaw = drone_yaw + (np.pi / 2)
             # rospy.logdebug("angle {}".format(self.drone_yaw))
-            self.drone_yaw = np.mod(self.drone_yaw, 2 * np.pi)  # limit the rotation by maximum angle
+            self.drone_yaw = np.mod(self.drone_yaw, np.pi)  # limit the rotation by maximum angle
             # rospy.logdebug("angle after mod {}".format(self.drone_yaw))
             self.last_time_rot_called = rospy.Time.now().to_sec()
 
@@ -208,6 +209,7 @@ class DroneInjector:
         self.last_time_POI_called = rospy.Time.now().to_sec()
         self.interesting_points_list_xy = []
         self.corner_points_list_xy = []
+        self.POI_enabled = False
         self.POI = GridPOI(resolution, env_limits_input)
         self.matrix = np.zeros([np.int64(np.ceil((self.env_limits[1] - self.env_limits[0]) / self.res)),
                                 np.int64(np.ceil((self.env_limits[3] - self.env_limits[2]) / self.res))])
@@ -285,7 +287,6 @@ class DroneInjector:
                     del self.interesting_points_list_xy[g_idx]
                 else:
                     goal = drone.next_pose[0:2]
-
 
                 # rospy.logdebug("Cj_injector pos: {}".format(cur_pos))
                 # drone.update_pos(pos, self.matrix, pos[0:2], corner_points_list_xy)
