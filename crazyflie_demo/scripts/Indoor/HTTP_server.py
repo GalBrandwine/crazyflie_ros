@@ -55,6 +55,9 @@ class RequestHandler(BaseHTTPRequestHandler):
             curr_drone_name = rospy.get_param("~drone_name_{}".format(iDrone))
             self.drone_pos_dict[curr_drone_name] = None
 
+        # Load recorded vehicle path
+        self.vehicle_path = np.loadtxt(rospy.get_param('~vehicle_recorded_path'))
+
         # Set a subscriber for the occupancy grid. The occupancy grid is a part of the data in the matrix
         # (the occupancy grid contains the information about the free, ubknown and wall areas).
         self.grid_sub = rospy.Subscriber("/indoor/occupancy_grid_topic", OccupancyGrid,
@@ -128,9 +131,8 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     # Update additional data: drones location, car path and location, etc.
     def update_matrix_additional_data(self):
-        vehicle_path = np.loadtxt('/home/bgilad/path.txt')
-        for i in range(np.shape(vehicle_path)[0]):
-            self.matrix[vehicle_path[i][0], vehicle_path[i][1]] = 5
+        for i in range(np.shape(self.vehicle_path)[0]):
+            self.matrix[self.vehicle_path[i][0], self.vehicle_path[i][1]] = 5
 
         self.update_drone_positions()
         for iDrone in range(self.nDrones):

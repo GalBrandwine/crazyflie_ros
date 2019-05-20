@@ -434,6 +434,7 @@ A few notes:
             <param name="env_space" value="$(arg env_space)"/>
             <param name="resolution" value="$(arg resolution)"/>
             <param name="vehicle_start_pos" value="[0.33, 1.91]" />
+            <param name="vehicle_recorded_path" value="$(find crazyflie_demo)/resources/vehicle_recorded_path.txt"/>
         </node>
 
     </group>
