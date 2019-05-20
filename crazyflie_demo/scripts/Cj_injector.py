@@ -143,7 +143,13 @@ class DroneInjector:
             [step_time * 1.8375, 3.75 * step, 14.25 * step, 0.3, 0],
             [step_time * 2.1, 3.75 * step, 12.25 * step, 0.3, 0],
             [step_time * 1.575, 5.25 * step, 12.25 * step, 0.3, 0],
-            [step_time * 1.575, 6.75 * step, 12.25 * step, 0.3, 0]
+            [step_time * 8, 6.75 * step, 12.25 * step, 0.3, 0],
+            [step_time * 2.1, 8.75 * step, 12.25 * step, 0.3, 0],
+            [step_time * 2.16463045344927, 10.75 * step, 12.75 * step, 0.3, 0],
+            [step_time * 2.1, 12.75 * step, 12.75 * step, 0.3, 0],
+            [step_time * 2.1, 14.75 * step, 12.75 * step, 0.3, 0],
+            [step_time * 2.1, 16.75 * step, 12.75 * step, 0.3, 0],
+            [step_time * 2.1, 18.75 * step, 12.75 * step, 0.3, 0]
 
         ]
 
@@ -161,45 +167,57 @@ class DroneInjector:
             [step_time * 1.575, 4.75 * step, 2 * step, 0.35, 0],
             [step_time * 1.575, 6.25 * step, 2 * step, 0.35, 0],
             [step_time * 1.575, 7.75 * step, 2 * step, 0.35, 0],
-            [step_time * 1.3125, 9 * step, 2 * step, 0.35, 0],
-            [step_time * 0.525, 9 * step, 2.5 * step, 0.35, 0],
-            [step_time * 2.1, 7 * step, 2.5 * step, 0.35, 0],
+            [step_time * 0.7875, 8.5 * step, 2 * step, 0.35, 0],
+            [step_time * 1.6601957715884, 7 * step, 2.5 * step, 0.35, 0],
             [step_time * 1.575, 7 * step, 4 * step, 0.35, 0],
             [step_time * 1.575, 7 * step, 5.5 * step, 0.35, 0],
             [step_time * 1.575, 7 * step, 7 * step, 0.35, 0],
             [step_time * 1.575, 7 * step, 8.5 * step, 0.35, 0],
             [step_time * 1.48492424049175, 8 * step, 9.5 * step, 0.35, 0],
-            [step_time * 2.1, 8 * step, 11.5 * step, 0.35, 0]
+            [step_time * 2, 8 * step, 11.5 * step, 0.35, 0],
+            [step_time * 1.41360576187281, 8.5 * step, 12.75 * step, 0.35, 0],
+            [step_time * 2.1, 10.5 * step, 12.75 * step, 0.35, 0],
+            [step_time * 2.1, 12.5 * step, 12.75 * step, 0.35, 0],
+            [step_time * 2.24280098314585, 14.5 * step, 12 * step, 0.35, 0],
+            [step_time * 1.575, 16 * step, 12 * step, 0.35, 0],
+            [step_time * 0.7875, 16 * step, 11.25 * step, 0.35, 0],
+            [step_time * 1.05, 17 * step, 11.25 * step, 0.35, 0]
 
         ]
 
         #                       [----t----, ----x---, ---y---, --z--, yaw]
         path_maze_frame3 = [
-            [step_time * 1, 0.25 * step, 6.5 * step, 0.3, 0],
-            [step_time * 1.8375, 2 * step, 6.5 * step, 0.3, 0],
-            [step_time * 1.8375, 3.75 * step, 6.5 * step, 0.3, 0],
-            [step_time * 1.8375, 5.5 * step, 6.5 * step, 0.3, 0],
-            [step_time * 1.575, 7 * step, 6.5 * step, 0.3, 0],
-            [step_time * 1.05, 7 * step, 7.5 * step, 0.3, 0],
-            [step_time * 1.8375, 7 * step, 9.25 * step, 0.3, 0],
-            [step_time * 2.1, 9 * step, 9.25 * step, 0.3, 0],
-            [step_time * 2.1, 11 * step, 9.25 * step, 0.3, 0],
-            [step_time * 2.11634, 13 * step, 9 * step, 0.3, 0],
-            [step_time * 1.1739, 14 * step, 9.5 * step, 0.3, 0],
-            [step_time * 1.8375, 14 * step, 7.75 * step, 0.3, 0],
-            [step_time * 1.05, 13 * step, 7.75 * step, 0.3, 0],
-            [step_time * 1.3125, 11.75 * step, 7.75 * step, 0.3, 0],
-            [step_time * 2.1, 11.75 * step, 5.75 * step, 0.3, 0],
-            [step_time * 1.8375, 11.75 * step, 4 * step, 0.3, 0],
-            [step_time * 1.05, 12.75 * step, 4 * step, 0.3, 0],
-            [step_time * 1.575, 12.75 * step, 2.5 * step, 0.3, 0],
-            [step_time * 1.05, 11.75 * step, 2.5 * step, 0.3, 0],
-            [step_time * 1.575, 11.75 * step, 4 * step, 0.3, 0],
-            [step_time * 1.575, 11.75 * step, 5.5 * step, 0.3, 0],
-            [step_time * 1.575, 11.75 * step, 7 * step, 0.3, 0],
-            [step_time * 1.575, 11.75 * step, 8.5 * step, 0.3, 0],
-            [step_time * 1.575, 10.25 * step, 8.5 * step, 0.3, 0],
-            [step_time * 1.48492424049175, 9.25 * step, 9.5 * step, 0.3, 0]
+            [step_time * 1, 0.25 * step, 6.5 * step, 0.35, 0],
+            [step_time * 1.8375, 2 * step, 6.5 * step, 0.35, 0],
+            [step_time * 1.8375, 3.75 * step, 6.5 * step, 0.35, 0],
+            [step_time * 1.8375, 5.5 * step, 6.5 * step, 0.35, 0],
+            [step_time * 1.575, 7 * step, 6.5 * step, 0.35, 0],
+            [step_time * 1.05, 7 * step, 7.5 * step, 0.35, 0],
+            [step_time * 1.8375, 7 * step, 9.25 * step, 0.35, 0],
+            [step_time * 2.1, 9 * step, 9.25 * step, 0.35, 0],
+            [step_time * 2.1, 11 * step, 9.25 * step, 0.35, 0],
+            [step_time * 2.11634265892837, 13 * step, 9 * step, 0.35, 0],
+            [step_time * 1.08231522672464, 14 * step, 9.25 * step, 0.35, 0],
+            [step_time * 1.575, 14 * step, 7.75 * step, 0.35, 0],
+            [step_time * 1.05, 13 * step, 7.75 * step, 0.35, 0],
+            [step_time * 1.3125, 11.75 * step, 7.75 * step, 0.35, 0],
+            [step_time * 2.1, 11.75 * step, 5.75 * step, 0.35, 0],
+            [step_time * 1.8375, 11.75 * step, 4 * step, 0.35, 0],
+            [step_time * 1.05, 12.75 * step, 4 * step, 0.35, 0],
+            [step_time * 1.05, 12.75 * step, 3 * step, 0.35, 0],
+            [step_time * 1.05, 11.75 * step, 3 * step, 0.35, 0],
+            [step_time * 1.05, 11.75 * step, 4 * step, 0.35, 0],
+            [step_time * 1.575, 11.75 * step, 5.5 * step, 0.35, 0],
+            [step_time * 1.575, 11.75 * step, 7 * step, 0.35, 0],
+            [step_time * 1.575, 11.75 * step, 8.5 * step, 0.35, 0],
+            [step_time * 1.575, 10.25 * step, 8.5 * step, 0.35, 0],
+            [step_time * 1.48492424049175, 9.25 * step, 9.5 * step, 0.35, 0],
+            [step_time * 1.575, 9.25 * step, 11 * step, 0.35, 0],
+            [step_time * 1.6601957715884, 9.75 * step, 12.5 * step, 0.35, 0],
+            [step_time * 2.1, 11.75 * step, 12.5 * step, 0.35, 0],
+            [step_time * 2.1, 13.75 * step, 12.5 * step, 0.35, 0],
+            [step_time * 2.1, 15.75 * step, 12.5 * step, 0.35, 0],
+            [step_time * 2.16463045344927, 17.75 * step, 12 * step, 0.35, 0]
 
         ]
 
@@ -215,7 +233,12 @@ class DroneInjector:
             [step_time * 1.575, 6.75 * step, 10.75 * step, 0.35, 0],
             [step_time * 1.575, 6.75 * step, 12.25 * step, 0.35, 0],
             [step_time * 0.742462120245875, 7.25 * step, 12.75 * step, 0.35, 0],
-            [step_time * 1.05, 8.25 * step, 12.75 * step, 0.35, 0]
+            [step_time * 1.575, 8.75 * step, 12.75 * step, 0.35, 0],
+            [step_time * 10, 10.75 * step, 12.75 * step, 0.35, 0],
+            [step_time * 2.1, 12.75 * step, 12.75 * step, 0.35, 0],
+            [step_time * 2.1, 14.75 * step, 12.75 * step, 0.35, 0],
+            [step_time * 2.1, 16.75 * step, 12.75 * step, 0.35, 0],
+            [step_time * 2.625, 18.75 * step, 11.25 * step, 0.35, 0]
 
         ]
 
