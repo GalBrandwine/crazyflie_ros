@@ -22,7 +22,7 @@ ranges_previous = [0, 0, 0, 0]
 
 
 def filter_scan():
-    max_distance = 3.0  # maximum distance cutoff in meters
+    max_distance = 2.5  # maximum distance cutoff in meters
     outlier_threshold = 0.2  # maximum delta between two sequential readings, in meters
     inf = float('inf')
     global scan

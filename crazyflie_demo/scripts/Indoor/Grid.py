@@ -15,13 +15,12 @@ from tf.transformations import euler_from_quaternion
 import csv
 import copy
 
-
 m_to_cm = 100
+
 
 # Drone position
 class drone_pos:
-    def __init__(self, time = None, x = None, y = None, z = None, w = None, index = -1):
-
+    def __init__(self, time=None, x=None, y=None, z=None, w=None, index=-1):
         self.time = time
         self.x = x
         self.y = y
@@ -44,7 +43,8 @@ class Grid:
         self.x_lim = x_lim
         self.y_lim = y_lim
         self.res = res
-        self.matrix = np.zeros([np.int64(np.ceil((self.x_lim[1]-self.x_lim[0])/self.res)), np.int64(np.ceil((self.y_lim[1]-self.y_lim[0])/self.res))])
+        self.matrix = np.zeros([np.int64(np.ceil((self.x_lim[1] - self.x_lim[0]) / self.res)),
+                                np.int64(np.ceil((self.y_lim[1] - self.y_lim[0]) / self.res))])
         self.nDrones = nDrones
         self.eps = 1  # Allowed time [sec] difference between messages
         self.drones_pos_list = dict()
@@ -58,8 +58,8 @@ class Grid:
             self.topics_arr.append("/{}/point_cloud".format(drone_name))
         self.drone_name_arr = []
         self.floor_thr = 32
-        self.sens_limit = 300
-        self.rate = 2 #Hz
+        self.sens_limit = 250
+        self.rate = 2  # Hz
         self.useRefEnv = useRefEnv
         self.excelPath = excelPath
         self.validity_matrix = copy.deepcopy(self.matrix)
@@ -85,7 +85,8 @@ class Grid:
             # self.pos_sub = rospy.Subscriber("/{}/log_pos".format(drone_name), GenericLogData,
             #                                 callback = self.pos_parser)
             self.pc_sub = rospy.Subscriber("/{}/point_cloud".format(drone_name), PointCloud2,
-                                           callback = self.point_cloud_parser, callback_args = "/{}/point_cloud".format(drone_name))
+                                           callback=self.point_cloud_parser,
+                                           callback_args="/{}/point_cloud".format(drone_name))
 
         self.tfBuffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.tfBuffer)
@@ -93,7 +94,6 @@ class Grid:
         # Start occupancy grid publisher
         grid_pub_thread = threading.Thread(name='grid_pub_thread', target=self.init_grid_publisher)
         grid_pub_thread.start()
-
 
     def csv_to_maze(self):
         maze_path = rospy.get_param('~excelPath')
@@ -122,7 +122,6 @@ class Grid:
         # plt.imshow(self.grid_maze, origin='lower')
         # plt.show()
 
-
     def point_cloud_parser(self, msg, topic):
         """Each publicitation, theres' an array of 10 points."""
         point_cloud_last_timestamp = msg.header
@@ -138,62 +137,72 @@ class Grid:
                 drone_id = [s for s in cur_topic_list if "cf" in s][0]
                 plt_index = self.drones_pos_list[drone_id].index
 
+            try:
+                trans = self.tfBuffer.lookup_transform('world', drone_id, rospy.Time(0))
 
-        try:
-            trans = self.tfBuffer.lookup_transform('world', drone_id, rospy.Time(0))
+                q = (trans.transform.rotation.x,
+                     trans.transform.rotation.y,
+                     trans.transform.rotation.z,
+                     trans.transform.rotation.w)
 
-            q = (trans.transform.rotation.x,
-                 trans.transform.rotation.y,
-                 trans.transform.rotation.z,
-                 trans.transform.rotation.w)
+                euler = euler_from_quaternion(q, axes='sxyz')
 
-            euler = euler_from_quaternion(q, axes='sxyz')
+                x = trans.transform.translation.x
+                y = trans.transform.translation.y
+                z = trans.transform.translation.z
+                roll = euler[0]
+                pitch = euler[1]
+                yaw = euler[2]
 
-            x = trans.transform.translation.x
-            y = trans.transform.translation.y
-            z = trans.transform.translation.z
-            roll = euler[0]
-            pitch = euler[1]
-            yaw = euler[2]
+                self.pos = [x, y, z, roll, pitch, yaw]
+                # rospy.loginfo("pos in Grid: {}\n".format(self.pos))
 
-            self.pos = [x, y, z, roll, pitch, yaw]
-            # rospy.loginfo("pos in Grid: {}\n".format(self.pos))
+                # Store previous position of drone
+                self.drones_prev_pos_list[drone_id] = self.drones_pos_list[drone_id]
 
-            # Store previous position of drone
-            self.drones_prev_pos_list[drone_id] = self.drones_pos_list[drone_id]
+                # Store drone position and convert it from [m] to [cm]
+                self.drones_pos_list[drone_id] = drone_pos(point_cloud_last_timestamp.stamp.secs, x * m_to_cm, y * m_to_cm,
+                                                           z * m_to_cm, yaw, plt_index)
 
-            # Store drone position and convert it from [m] to [cm]
-            self.drones_pos_list[drone_id] = drone_pos(point_cloud_last_timestamp.stamp.secs, x*m_to_cm, y*m_to_cm, z*m_to_cm, yaw, plt_index)
+                i_s, j_s = self.xy_to_ij(self.drones_prev_pos_list[drone_id].x, self.drones_prev_pos_list[drone_id].y)
+                i_g, j_g = self.xy_to_ij(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
 
-            path_from_prev_to_cur = list(bresenham(self.drones_prev_pos_list[drone_id].x, self.drones_prev_pos_list[drone_id].y,\
-                                                   self.drones_pos_list[drone_id].x,  self.drones_pos_list[drone_id].y))
+                path_from_prev_to_cur = list(bresenham(i_s, j_s, i_g, j_g))
 
-            # change the tails of the path to non wall
-            for indx, valp in enumerate(path_from_prev_to_cur):
-                ip, jp = self.xy_to_ij(valp[0], valp[1])
-                self.validity_matrix[ip][jp] = 5
+                # change the tails of the path to non wall
+                for indx, valp in enumerate(path_from_prev_to_cur[1:-1]):
+                    ip, jp = valp[0], valp[1]
+                    self.validity_matrix[ip][jp] = 5
+                    # The surrounding of drones position
+                    self.validity_matrix[ip - 1][jp - 1] = 5
+                    self.validity_matrix[ip][jp - 1] = 5
+                    self.validity_matrix[ip + 1][jp - 1] = 5
+                    self.validity_matrix[ip + 1][jp] = 5
+                    self.validity_matrix[ip + 1][jp + 1] = 5
+                    self.validity_matrix[ip][jp + 1] = 5
+                    self.validity_matrix[ip - 1][jp + 1] = 5
+                    self.validity_matrix[ip - 1][jp] = 5
 
-            # Change tail to be empty if the drone is in that tail.
-            i, j = self.xy_to_ij(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
-            if self.matrix[i][j] == 0:
-                self.change_tail_to_empty(i, j)
-                # self.empty_idxs.append([i, j])
+                # # Change tail to be empty if the drone is in that tail.
+                # i, j = self.xy_to_ij(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
+                # if self.matrix[i][j] == 0:
+                #     self.change_tail_to_empty(i, j)
+                #     # self.empty_idxs.append([i, j])
 
-        except:
-            rospy.logdebug("tf lookup -- {} not found".format(drone_id))
+            except:
+                rospy.logdebug("tf lookup -- {} not found".format(drone_id))
 
-        # Read data from all sensors (probably 4)
-        for i in range(len(point_cloud)):
-            point = point_cloud[i]
-            # rospy.loginfo([point.z*m_to_cm])
-            if point.z*m_to_cm > self.floor_thr:
-                sens.append([point.x*m_to_cm, point.y*m_to_cm, point.z*m_to_cm])
-            if sens and drone_id:
-                self.drones_pc_list[drone_id] = drone_pc(point_cloud_last_timestamp.stamp.secs, sens)
-                # Update grid using the new data
-                self.update_from_tof_sensing_list(drone_id)
-                self.complete_wall_in_corners(self.matrix)
-
+            # Read data from all sensors (probably 4)
+            for i in range(len(point_cloud)):
+                point = point_cloud[i]
+                # rospy.loginfo([point.z*m_to_cm])
+                if point.z * m_to_cm > self.floor_thr:
+                    sens.append([point.x * m_to_cm, point.y * m_to_cm, point.z * m_to_cm])
+                if sens and drone_id:
+                    self.drones_pc_list[drone_id] = drone_pc(point_cloud_last_timestamp.stamp.secs, sens)
+                    # Update grid using the new data
+                    self.update_from_tof_sensing_list(drone_id)
+                    self.complete_wall_in_corners(self.matrix)
 
     # def pos_parser(self, msg):
     #     pos_header = msg.header
@@ -212,7 +221,6 @@ class Grid:
     #     if self.matrix[i][j] == 0:
     #         self.change_tail_to_empty(i, j)
 
-
     # Initialize a publisher for occupancy grid
     def init_grid_publisher(self):
         self.grid_publisher = rospy.Publisher('/indoor/occupancy_grid_topic', OccupancyGrid, queue_size=10)
@@ -222,11 +230,11 @@ class Grid:
 
         rate = rospy.Rate(self.rate)
         while not rospy.is_shutdown():
-            m = MapMetaData() # Grid metadata
-            m.resolution = self.res # Grid resolution
-            m.width = self.x_lim[1] - self.x_lim[0] # Grid width in world CS
-            m.height = self.y_lim[1] - self.y_lim[0] # Grid height in worlds CS
-            m.origin = Pose() # The grid origin in world CS (there is no need for indoor navigation)
+            m = MapMetaData()  # Grid metadata
+            m.resolution = self.res  # Grid resolution
+            m.width = self.x_lim[1] - self.x_lim[0]  # Grid width in world CS
+            m.height = self.y_lim[1] - self.y_lim[0]  # Grid height in worlds CS
+            m.origin = Pose()  # The grid origin in world CS (there is no need for indoor navigation)
             occ_grid_msg.info = m
 
             occ_grid_msg.header.stamp = rospy.Time.now()
@@ -241,16 +249,16 @@ class Grid:
 
     # Check if two time stamps are close enough (self.eps is the threshold)
     def is_time_equal(self, t1, t2):
-        return abs(t1-t2) <= self.eps
+        return abs(t1 - t2) <= self.eps
 
     def xy_to_ij(self, x, y):
-        i = int(np.floor((x - self.x_lim[0])/self.res))
+        i = int(np.floor((x - self.x_lim[0]) / self.res))
         j = int(np.floor((y - self.y_lim[0]) / self.res))
         return i, j
 
     def ij_to_xy(self, i, j):
-        x = self.x_lim[0] + i*self.res + self.res/2
-        y = self.y_lim[0] + j*self.res + self.res/2
+        x = self.x_lim[0] + i * self.res + self.res / 2
+        y = self.y_lim[0] + j * self.res + self.res / 2
         return x, y
 
     def change_tail_to_empty(self, i, j):
@@ -272,7 +280,7 @@ class Grid:
             self.update_with_dummy_tof_sensor([[current_pos.x, current_pos.y]], current_pos.w)
         else:
             for elem in current_pc.pc_sens:
-                sensing_pos = [[self.initpos[0]+elem[0], self.initpos[1]+elem[1]]]
+                sensing_pos = [[self.initpos[0] + elem[0], self.initpos[1] + elem[1]]]
                 self.update_with_tof_sensor([[current_pos.x, current_pos.y]], sensing_pos)
 
     def update_with_tof_sensor(self, sensor_pos, tof_sensing_pos):
@@ -284,17 +292,17 @@ class Grid:
         # xs = np.linspace(sensor_pos[0][0], tof_sensing_pos[0][0], num=num_of_samples, endpoint=True)
         # ys = np.linspace(sensor_pos[0][1], tof_sensing_pos[0][1], num=num_of_samples, endpoint=True)
         for ind in range(len(bres_list)):
-        # for ind in range(1, num_of_samples):
+            # for ind in range(1, num_of_samples):
             # i, j = self.xy_to_ij(xs[ind], ys[ind])
             i, j = bres_list[ind]
             if 0 > i or i >= self.matrix.shape[0] or 0 > j or j >= self.matrix.shape[1]:
                 break
             # if np.linalg.norm(np.subtract([i, j], [i0, j0])) < (self.sens_limit / self.res):
             if self.matrix[i][j] == 0 and np.linalg.norm(np.subtract([i, j], [i0, j0])) < (self.sens_limit / self.res):
-            # if self.matrix[i][j] == 0 and np.linalg.norm(np.subtract([xs[ind], ys[ind]], sensor_pos)) < (self.sens_limit):
+                # if self.matrix[i][j] == 0 and np.linalg.norm(np.subtract([xs[ind], ys[ind]], sensor_pos)) < (self.sens_limit):
                 self.change_tail_to_empty(i, j)
-        if 0 < i1 < self.matrix.shape[0] and 0 < j1 < self.matrix.shape[1] and\
-                (np.linalg.norm(np.subtract([i1, j1], [i0, j0])) <= (self.sens_limit / self.res)) and\
+        if 0 < i1 < self.matrix.shape[0] and 0 < j1 < self.matrix.shape[1] and \
+                (np.linalg.norm(np.subtract([i1, j1], [i0, j0])) <= (self.sens_limit / self.res)) and \
                 self.validity_matrix[i1][j1] != 5:
             self.change_tail_to_wall(i1, j1)
 
@@ -331,30 +339,29 @@ class Grid:
                 i, j = bres_list[ind]
                 if 0 > i or i >= self.matrix.shape[0] or 0 > j or j >= self.matrix.shape[1]:
                     break
-                if self.grid_maze[i][j] == 0 :
+                if self.grid_maze[i][j] == 0:
                     self.change_tail_to_empty(i, j)
                 elif self.grid_maze[i][j] == 2:
                     self.change_tail_to_wall(i, j)
                     break
 
-
     def complete_wall_in_corners(self, matrix):
-        for i in range(1, matrix.__len__()-1):
-            for j in range(1, matrix[i].__len__()-1):
+        for i in range(1, matrix.__len__() - 1):
+            for j in range(1, matrix[i].__len__() - 1):
                 if matrix[i][j] == 0:
-                    if ((matrix[i - 1][j] == 2 and matrix[i][j - 1] == 2 and (matrix[i - 1][j - 1] == 1 )) or
-                        (matrix[i + 1][j] == 2 and matrix[i][j - 1] == 2 and (matrix[i + 1][j - 1] == 1 )) or
-                        (matrix[i + 1][j] == 2 and matrix[i][j + 1] == 2 and (matrix[i + 1][j + 1] == 1 )) or
-                        (matrix[i - 1][j] == 2 and matrix[i][j + 1] == 2 and (matrix[i - 1][j + 1] == 1 ))):
-                        self.change_tail_to_wall(i, j) # Originally
+                    if ((matrix[i - 1][j] == 2 and matrix[i][j - 1] == 2 and (matrix[i - 1][j - 1] == 1)) or
+                            (matrix[i + 1][j] == 2 and matrix[i][j - 1] == 2 and (matrix[i + 1][j - 1] == 1)) or
+                            (matrix[i + 1][j] == 2 and matrix[i][j + 1] == 2 and (matrix[i + 1][j + 1] == 1)) or
+                            (matrix[i - 1][j] == 2 and matrix[i][j + 1] == 2 and (matrix[i - 1][j + 1] == 1))):
+                        self.change_tail_to_wall(i, j)  # Originally
         j = 0
-        for i in range(1, matrix.__len__()-1):
+        for i in range(1, matrix.__len__() - 1):
             if (matrix[i][j] == 0 and
                     (matrix[i + 1][j] == 2 and matrix[i][j + 1] == 2 and (matrix[i + 1][j + 1] == 1)) or
                     (matrix[i - 1][j] == 2 and matrix[i][j + 1] == 2 and (matrix[i - 1][j + 1] == 1))):
                 self.change_tail_to_wall(i, j)
 
-        j = matrix[0].__len__()-1
+        j = matrix[0].__len__() - 1
         for i in range(1, matrix.__len__() - 1):
             if (matrix[i][j] == 0 and
                     (matrix[i - 1][j] == 2 and matrix[i][j - 1] == 2 and (matrix[i - 1][j - 1] == 1)) or
@@ -362,13 +369,13 @@ class Grid:
                 self.change_tail_to_wall(i, j)
 
         i = 0
-        for j in range(1, matrix[0].__len__()-1):
+        for j in range(1, matrix[0].__len__() - 1):
             if (matrix[i][j] == 0 and
                     (matrix[i + 1][j] == 2 and matrix[i][j - 1] == 2 and (matrix[i + 1][j - 1] == 1)) or
                     (matrix[i + 1][j] == 2 and matrix[i][j + 1] == 2 and (matrix[i + 1][j + 1] == 1))):
                 self.change_tail_to_wall(i, j)
 
-        i = matrix.__len__()-1
+        i = matrix.__len__() - 1
         for j in range(1, matrix[0].__len__() - 1):
             if (matrix[i][j] == 0 and
                     (matrix[i - 1][j] == 2 and matrix[i][j - 1] == 2 and (matrix[i - 1][j - 1] == 1)) or
@@ -376,9 +383,8 @@ class Grid:
                 self.change_tail_to_wall(i, j)
 
         if (matrix[0][0] == 0 and
-                    (matrix[0][1] == 2 and matrix[1][0] == 2)):
+                (matrix[0][1] == 2 and matrix[1][0] == 2)):
             self.change_tail_to_wall(0, 0)
-
 
 
 if __name__ == "__main__":
@@ -392,7 +398,7 @@ if __name__ == "__main__":
     useRefEnv = rospy.get_param("~useRefEnv")
     excelPath = rospy.get_param("~excelPath")
 
-    exec("env_lim = {}".format(env_lim))
+    exec ("env_lim = {}".format(env_lim))
 
     x_lim = (env_lim[0] - env_space, env_lim[1] + env_space)
     y_lim = (env_lim[2] - env_space, env_lim[3] + env_space)
