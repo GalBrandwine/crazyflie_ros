@@ -17,6 +17,7 @@ from geometry_msgs.msg import Twist
 from math import atan2, sqrt, pow
 from math import pi, sin, cos
 from tf.transformations import euler_from_quaternion
+from std_msgs.msg import Empty
 
 import crazyflie
 # from crazyflie_driver.msg import Hover
@@ -43,6 +44,10 @@ cj_injection_message = None
 listen_to_keyboard = False
 keyboard_flag = False
 
+
+def launch_callback(msg):
+    global cf
+    handler(cf)
 
 def twist_callback(msg):
     global kb_x, kb_y, kb_z, kb_yaw, keyboard_flag, listen_to_keyboard
@@ -200,13 +205,11 @@ def get_xyz_yaw(cj_injection_message):
 
 def handler(cf_handler):
     r = rospy.Rate(5)
-    time.sleep(0.5)
-    cf_handler.takeoff(targetHeight=initialZ, duration=4.0)
-    time.sleep(5.0)
-
     x, y, yaw = 0, 0, 0
     z = initialZ
 
+    # Activate_collision - activate it only after first movement request.
+    activate_collision = False
     global keyboard_flag
     global cj_injection_message, cj_injection_flag
     global front, back, up, left, right, zrange
@@ -229,12 +232,19 @@ def handler(cf_handler):
     def_duration = 1.8
     land_duration = 1.5
     avoid_c_duration = 1.5
-
+    rospy.loginfo("TAKEOFF DELAY")
     try:
+        # Start_delay - I have added that because it is not healthy to launch all drones in the same time.
+        start_delay = rospy.get_param("~start_delay")
+        if start_delay > 0:
+            time.sleep(start_delay)
+
+
+        cf_handler.takeoff(targetHeight=initialZ, duration=4.0)
 
         while not rospy.is_shutdown():
 
-            if min(ranges) > 0 and (rospy.Time.now() - last_collision).to_sec() > 2.0:
+            if activate_collision and min(ranges) > 0 and (rospy.Time.now() - last_collision).to_sec() > 2.0:
 
                 # if no range sensors are present all range values will be zero - skip collision
                 # minimum time delta between stop msgs due to collision in seconds
@@ -278,6 +288,7 @@ def handler(cf_handler):
                     break
 
             if keyboard_flag is True:
+                activate_collision = True
                 keyboard_flag = False
                 kb_step = 0.3  # meters each cmd_vel message
                 cont_rot_yaw = 0
@@ -308,13 +319,14 @@ def handler(cf_handler):
             # If Cj injection received:
             if cj_injection_flag is True:
                 cj_injection_flag = False
+                activate_collision = True
                 # get Cj_injection in drone coordinates
                 [x, y, z, yaw] = get_xyz_yaw(cj_injection_message)
                 [direction, duration] = check_direction()
 
                 # rospy.logdebug("Cj direction is {}".format(direction))
-                rospy.loginfo("Cj duration is {}".format(duration))
-                rospy.loginfo("Cj  is {}".format([x, y, z, yaw]))
+                # rospy.loginfo("Cj duration is {}".format(duration))
+                # rospy.loginfo("Cj  is {}".format([x, y, z, yaw]))
 
                 # obstacle_free=avoid_collision()
                 # if obstacle_free == True:
@@ -323,9 +335,11 @@ def handler(cf_handler):
                     time.sleep(land_duration)
                     break
                 else:
+                    x = x * 1.156
+                    y = y * 1.156
                     rospy.logdebug("going to: {}".format([x, y, z, yaw]))
                     #### SCALE FACTOR IS 1.156 = 1 / 0.865 = 1 / scale factor in tf_broadcaster
-                    cf_handler.goTo(goal=[x * 1.156, y * 1.156, z], yaw=yaw, duration=duration, relative=False)
+                    cf_handler.goTo(goal=[x, y, z], yaw=yaw, duration=duration, relative=False)
                 # else:
                 #     rospy.logwarn("cannot move - obstacle in the way")
 
@@ -349,19 +363,15 @@ def handler(cf_handler):
 if __name__ == '__main__':
     rospy.init_node('motion', log_level=rospy.DEBUG)  # log_level=rospy.DEBUG
 
-    # Start_delay - I have added that because it is not healthy to launch all drones in the same time.
-    start_delay = rospy.get_param("~start_delay")
-    if start_delay > 0:
-        time.sleep(start_delay)
-
-    # last minute addition, listen to keyboard per drone!!
-    listen_to_keyboard = rospy.get_param("~listen_to_keyboard")
-    rospy.logdebug("listen_to_keyboard: {}".format(listen_to_keyboard))
-
     prefix = rospy.get_param("~tf_prefix")
+    cf = crazyflie.Crazyflie("/" + prefix, "world")
+
     rospy.Subscriber('/' + prefix + '/log_ranges', GenericLogData, get_ranges)
     rospy.Subscriber('/' + prefix + '/Cj_injcetor', PoseStamped, Cj_injector)
 
+    # last minute addition, listen to keyboard per drone!!
+    listen_to_keyboard = rospy.get_param("~listen_to_keyboard")
+    rospy.logdebug("{} listen_to_keyboard: {}".format(prefix, listen_to_keyboard))
     # pub_hover = rospy.Publisher('/' + prefix + "/cmd_hover", Hover, queue_size=1)  # hover message publisher
     # msg = Hover()
     # msg.header.seq = 0
@@ -370,8 +380,6 @@ if __name__ == '__main__':
 
     tfBuffer = tf2_ros.Buffer()  # initialize tf buffer for transform lookup
     listener = tf2_ros.TransformListener(tfBuffer)
-
-    cf = crazyflie.Crazyflie("/" + prefix, "world")
 
     rospy.wait_for_service("/" + prefix + '/update_params')
     rospy.loginfo("found update_params service")
@@ -396,9 +404,11 @@ if __name__ == '__main__':
     cf.setParam("stabilizer/controller", 2)  # 2=Use mellinger controller
     time.sleep(0.5)
 
-    rospy.loginfo("launching threads")
+    rospy.loginfo("STANBY FOR LAUNCH MSG")
 
-    handler(cf)
+    rospy.Subscriber("/Cj_injection_rotation_example",  Empty , launch_callback)
+    rospy.spin()
+    #handler(cf)
     # t1 = Thread(target=handler, args=(cf,))
     # # t2 = Thread(target=keypress)
     # t1.start()

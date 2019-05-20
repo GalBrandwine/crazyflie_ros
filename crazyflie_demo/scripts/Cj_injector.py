@@ -9,6 +9,7 @@ from math import radians
 from std_msgs.msg import Empty
 from time import sleep
 
+
 def to_pose_stamped(x, y, z, roll, pitch, yaw):
     pose = PoseStamped()
     pose.header.stamp = rospy.Time.now()
@@ -39,8 +40,11 @@ class DroneCjInjector:
                                                queue_size=1)  # hover message publisher
 
 
-def injector(drone_injector, path):
+def injector(drone_injector, start_delay, path):
     """Simple threaded function for publishing point of a drone. """
+    if start_delay > 0:
+        sleep(start_delay)
+        
     for point in path:
         time_delay = point[0]
         x = point[1]
@@ -59,7 +63,7 @@ def injector(drone_injector, path):
 class DroneInjector:
     """This class will subscribe to Mj topic, and send each drone it's next Cj. """
 
-    def __init__(self, prefix_list, rate=15):
+    def __init__(self, prefix_list, drone_delay_from_launch_file):
         self.cj_injector_container = []
 
         for i, prefix in enumerate(prefix_list):
@@ -68,7 +72,8 @@ class DroneInjector:
             drone = DroneCjInjector(prefix)
             self.cj_injector_container.append(drone)
 
-        self.r = rate
+        self.drone_delay_list = drone_delay_from_launch_file
+        self.r = 15
         self.occ_map_subscriber_timestamp = None
         self.occ_map = None
 
@@ -77,10 +82,7 @@ class DroneInjector:
 
     def simple_rotation_example(self, time_delay=None):
         """Simple rotation example to make all drones rotate"""
-        time_delay = time_delay if time_delay is not None else 2  # seconds
-        # x = 0
-        # y = 0
-        # z = 0
+
         x = 0
         y = 0
         z = 0.35
@@ -100,10 +102,6 @@ class DroneInjector:
 
     def simple_rotation_example(self, time_delay=None):
         """Simple rotation example to make all drones rotate"""
-        time_delay = time_delay if time_delay is not None else 2  # seconds
-        # x = 0
-        # y = 0
-        # z = 0
         x = 1.2
         y = 1.2
         z = 0.35
@@ -111,17 +109,12 @@ class DroneInjector:
         pitch = 0
         yaw = 0
 
-        step_x = 0.5
-        step_y = 0.5
-        step_z = 0.35
-        step_yaw = 90  # deg
         for drone in self.cj_injector_container:
             pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
             drone.Cj_injector_pub.publish(pose)
-            # rospy.sleep(time_delay)
             rospy.logdebug("******************* {} rotated!".format(drone))
 
-    def simple_rectangel_example(self, time_delay=None):
+    def simple_rectangel_example(self):
         """Make all drones in DroneInjector to fly in a rectangle.
 
         Very simple and stupid example for using the injcetor.
@@ -130,9 +123,8 @@ class DroneInjector:
 
         """
         threads = []
-        step =  0.3048  # one ft in meters
-        step_time = 1.1
-
+        step = 0.3048  # one ft in meters
+        step_time = 1.07
 
         #                       [----t----, ----x---, ---y---, --z--, yaw]
         path_maze_frame1 = [
@@ -151,13 +143,13 @@ class DroneInjector:
             [step_time * 1.8375, 3.75 * step, 14.25 * step, 0.3, 0],
             [step_time * 2.1, 3.75 * step, 12.25 * step, 0.3, 0],
             [step_time * 1.575, 5.25 * step, 12.25 * step, 0.3, 0],
-            [step_time * 1.575, 6.75 * step, 12.25 * step, 0.3, 0],
+            [step_time * 1.575, 6.75 * step, 12.25 * step, 0.3, 0]
 
         ]
 
         #                       [----t----, ----x---, ---y---, --z--, yaw]
         path_maze_frame2 = [
-            [step_time * 3, 1 * step, 5.25 * step, 0.35, 0],
+            [step_time * 1, 1 * step, 5.25 * step, 0.35, 0],
             [step_time * 1.8375, 2.75 * step, 5.25 * step, 0.35, 0],
             [step_time * 1.8375, 4.5 * step, 5.25 * step, 0.35, 0],
             [step_time * 1.8375, 6.25 * step, 5.25 * step, 0.35, 0],
@@ -177,44 +169,43 @@ class DroneInjector:
             [step_time * 1.575, 7 * step, 7 * step, 0.35, 0],
             [step_time * 1.575, 7 * step, 8.5 * step, 0.35, 0],
             [step_time * 1.48492424049175, 8 * step, 9.5 * step, 0.35, 0],
-            [step_time * 2.1, 8 * step, 11.5 * step, 0.35, 0],
+            [step_time * 2.1, 8 * step, 11.5 * step, 0.35, 0]
 
         ]
 
         #                       [----t----, ----x---, ---y---, --z--, yaw]
         path_maze_frame3 = [
-            [step_time * 8, 0.25 * step, 6.5 * step, 0.35, 0],
-            [step_time * 1.8375, 2 * step, 6.5 * step, 0.35, 0],
-            [step_time * 1.8375, 3.75 * step, 6.5 * step, 0.35, 0],
-            [step_time * 1.8375, 5.5 * step, 6.5 * step, 0.35, 0],
-            [step_time * 1.575, 7 * step, 6.5 * step, 0.35, 0],
-            [step_time * 2.1, 7 * step, 8.5 * step, 0.35, 0],
-            [step_time * 2.1, 7 * step, 10.5 * step, 0.35, 0],
-            [step_time * 2.1, 9 * step, 10.5 * step, 0.35, 0],
-            [step_time * 2.1, 11 * step, 10.5 * step, 0.35, 0],
-            [step_time * 2.1, 13 * step, 10.5 * step, 0.35, 0],
-            [step_time * 0, 13 * step, 10.5 * step, 0.35, 0],
-            [step_time * 1.68082011232612, 14.25 * step, 11.5 * step, 0.35, 0],
-            [step_time * 2.1, 14.25 * step, 9.5 * step, 0.35, 0],
-            [step_time * 1.3125, 13 * step, 9.5 * step, 0.35, 0],
-            [step_time * 1.05, 12 * step, 9.5 * step, 0.35, 0],
-            [step_time * 2.1, 12 * step, 7.5 * step, 0.35, 0],
-            [step_time * 1.8375, 12 * step, 5.75 * step, 0.35, 0],
-            [step_time * 1.05, 13 * step, 5.75 * step, 0.35, 0],
-            [step_time * 1.575, 13 * step, 4.25 * step, 0.35, 0],
-            [step_time * 1.05, 12 * step, 4.25 * step, 0.35, 0],
-            [step_time * 1.8375, 12 * step, 6 * step, 0.35, 0],
-            [step_time * 1.8375, 12 * step, 7.75 * step, 0.35, 0],
-            [step_time * 1.8375, 12 * step, 9.5 * step, 0.35, 0],
-            [step_time * 1.575, 12 * step, 11 * step, 0.35, 0],
-            [step_time * 1.3125, 10.75 * step, 11 * step, 0.35, 0],
-            [step_time * 1.68082011232612, 9.5 * step, 12 * step, 0.35, 0],
+            [step_time * 1, 0.25 * step, 6.5 * step, 0.3, 0],
+            [step_time * 1.8375, 2 * step, 6.5 * step, 0.3, 0],
+            [step_time * 1.8375, 3.75 * step, 6.5 * step, 0.3, 0],
+            [step_time * 1.8375, 5.5 * step, 6.5 * step, 0.3, 0],
+            [step_time * 1.575, 7 * step, 6.5 * step, 0.3, 0],
+            [step_time * 1.05, 7 * step, 7.5 * step, 0.3, 0],
+            [step_time * 1.8375, 7 * step, 9.25 * step, 0.3, 0],
+            [step_time * 2.1, 9 * step, 9.25 * step, 0.3, 0],
+            [step_time * 2.1, 11 * step, 9.25 * step, 0.3, 0],
+            [step_time * 2.11634, 13 * step, 9 * step, 0.3, 0],
+            [step_time * 1.1739, 14 * step, 9.5 * step, 0.3, 0],
+            [step_time * 1.8375, 14 * step, 7.75 * step, 0.3, 0],
+            [step_time * 1.05, 13 * step, 7.75 * step, 0.3, 0],
+            [step_time * 1.3125, 11.75 * step, 7.75 * step, 0.3, 0],
+            [step_time * 2.1, 11.75 * step, 5.75 * step, 0.3, 0],
+            [step_time * 1.8375, 11.75 * step, 4 * step, 0.3, 0],
+            [step_time * 1.05, 12.75 * step, 4 * step, 0.3, 0],
+            [step_time * 1.575, 12.75 * step, 2.5 * step, 0.3, 0],
+            [step_time * 1.05, 11.75 * step, 2.5 * step, 0.3, 0],
+            [step_time * 1.575, 11.75 * step, 4 * step, 0.3, 0],
+            [step_time * 1.575, 11.75 * step, 5.5 * step, 0.3, 0],
+            [step_time * 1.575, 11.75 * step, 7 * step, 0.3, 0],
+            [step_time * 1.575, 11.75 * step, 8.5 * step, 0.3, 0],
+            [step_time * 1.575, 10.25 * step, 8.5 * step, 0.3, 0],
+            [step_time * 1.48492424049175, 9.25 * step, 9.5 * step, 0.3, 0]
 
         ]
 
         #                       [----t----, ----x---, ---y---, --z--, yaw]
         path_maze_frame4 = [
-            [step_time * 10, 0.25 * step, 5.25 * step, 0.35, 0],
+            [step_time * 1, 0.25 * step, 5.25 * step, 0.35, 0],
             [step_time * 1.575, 1.75 * step, 5.25 * step, 0.35, 0],
             [step_time * 1.575, 3.25 * step, 5.25 * step, 0.35, 0],
             [step_time * 1.8375, 5 * step, 5.25 * step, 0.35, 0],
@@ -224,27 +215,25 @@ class DroneInjector:
             [step_time * 1.575, 6.75 * step, 10.75 * step, 0.35, 0],
             [step_time * 1.575, 6.75 * step, 12.25 * step, 0.35, 0],
             [step_time * 0.742462120245875, 7.25 * step, 12.75 * step, 0.35, 0],
-            [step_time * 1.575, 8.75 * step, 12.75 * step, 0.35, 0],
+            [step_time * 1.05, 8.25 * step, 12.75 * step, 0.35, 0]
 
         ]
 
-        t1 = Thread(target=injector, args=(self.cj_injector_container[0], path_maze_frame1,))
+        t1 = Thread(target=injector, args=(self.cj_injector_container[0], self.drone_delay_list[0], path_maze_frame1,))
         threads.append(t1)
 
-        t2 = Thread(target=injector, args=(self.cj_injector_container[1], path_maze_frame2,))
+        t2 = Thread(target=injector, args=(self.cj_injector_container[1], self.drone_delay_list[1], path_maze_frame2,))
         threads.append(t2)
 
-        t3 = Thread(target=injector, args=(self.cj_injector_container[2], path_maze_frame3,))
+        t3 = Thread(target=injector, args=(self.cj_injector_container[2], self.drone_delay_list[2], path_maze_frame3,))
         threads.append(t3)
 
-        t4 = Thread(target=injector, args=(self.cj_injector_container[3], path_maze_frame4,))
+        t4 = Thread(target=injector, args=(self.cj_injector_container[3], self.drone_delay_list[3], path_maze_frame4,))
         threads.append(t4)
 
         # start all threads.
         for t in threads:
             t.start()
-
-
 
         # stop workers
         for t in threads:
@@ -259,11 +248,11 @@ class DroneInjector:
 
 
 if __name__ == '__main__':
-    rospy.init_node("incjetor", log_level=rospy.DEBUG)
-    Cj_injectors = []
-    prefix_list_from_launch_file = rospy.get_param("~prefix_list")
+    rospy.init_node("incjetor")#log_level=rospy.DEBUG
 
-    drone_container = DroneInjector(prefix_list_from_launch_file, 15)
+    prefix_list_from_launch_file = rospy.get_param("~prefix_list")
+    drone_delay_from_launch_file = rospy.get_param("~delay_list")
+    drone_container = DroneInjector(prefix_list_from_launch_file, drone_delay_from_launch_file)
 
     rospy.loginfo("******************* Publish /Cj_injection_rotation_example for starting the example")
 
