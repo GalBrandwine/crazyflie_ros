@@ -300,7 +300,8 @@ class DroneInjector:
             # except:
             # rospy.logdebug("tf lookup -- {} not found".format(drone.tf_prefix))
             except Exception as e:
-                rospy.logdebug(e)
+                pass
+                # rospy.logdebug(e)
 
 
 if __name__ == '__main__':

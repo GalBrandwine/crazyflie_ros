@@ -231,7 +231,7 @@ class Grid:
 
             occ_grid_msg.header.stamp = rospy.Time.now()
             occ_grid_msg.header.frame_id = "/indoor/occupancy_grid"
-
+            
             # Convert the matrix from 2D fload64 to 1D int8 list
             occ_grid_msg.data = list(np.asarray(self.matrix.flatten(), dtype=np.int8))
 

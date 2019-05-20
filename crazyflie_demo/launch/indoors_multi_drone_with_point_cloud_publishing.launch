@@ -415,9 +415,9 @@ A few notes:
             <!--            <param name="env_lim" value="$(arg env_lim)"/>-->
             <rosparam param="env_lim" subst_value="True">[$(arg env_lim),]</rosparam>
             <param name="resolution" value="$(arg resolution)"/>
-            <!--            <rosparam param="resolution" subst_value="True">[$(arg resolution)]</rosparam>-->
-            <!--            <param name="prefix_list" value="[$(arg frame1), $(arg frame2), $(arg frame3),$(arg frame4)]"/>-->
-            <!--            <param name="prefix_list" value="[$(arg frame1)]"/>-->
+<!--            <rosparam param="resolution" subst_value="True">[$(arg resolution)]</rosparam>-->
+<!--            <param name="prefix_list" value="[$(arg frame1), $(arg frame2), $(arg frame3),$(arg frame4)]"/>-->
+<!--            <param name="prefix_list" value="[$(arg frame1)]"/>-->
             <rosparam param="prefix_list" subst_value="True">[[$(arg frame1)], [$(arg frame2)],]</rosparam>
             <!--            Pass all drones initial takeoff positions-->
             <!--            <param name="init_takeoff_list" value="[[$(arg initX1), $(arg initY1), $(arg initZ1)]] "/>-->
@@ -427,10 +427,14 @@ A few notes:
             <param name="nDrones" value="$(arg nDrones)"/>
         </node>
 
-        <!--<node name="http_server" pkg="crazyflie_demo" type="HTTP_server.py" output="screen">-->
-        <!--<param name="nDrones" value="$(arg nDrones)"/>-->
-        <!--<param name="drone_name_0" value="$(arg frame1)"/>-->
-        <!--</node>-->
+<!--        <node name="http_server" pkg="crazyflie_demo" type="HTTP_server.py" output="screen">-->
+<!--            <param name="nDrones" value="$(arg nDrones)"/>-->
+<!--            <param name="drone_name_0" value="$(arg frame3)"/>-->
+<!--            <param name="env_lim" value="$(arg env_lim)"/>-->
+<!--            <param name="env_space" value="$(arg env_space)"/>-->
+<!--            <param name="resolution" value="$(arg resolution)"/>-->
+<!--            <param name="vehicle_start_pos" value="[0.33, 1.91]" />-->
+<!--        </node>-->
 
     </group>
 
