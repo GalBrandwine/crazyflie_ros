@@ -124,10 +124,10 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         self.update_matrix_additional_data()
 
-
     def vehicle_pos_parser(self, msg):
         self.vehicle_pos = [msg.pose.position.x, msg.pose.position.y]
         self.vehicle_pos = np.multiply(np.add(self.vehicle_pos, self.vehicle_start_pos), m_to_cm)
+        print self.vehicle_pos
 
     # Update additional data: drones location, car path and location, etc.
     def update_matrix_additional_data(self):
@@ -188,8 +188,8 @@ class RequestHandler(BaseHTTPRequestHandler):
 if __name__ == "__main__":
     rospy.init_node("http_server")
     try:
-        server = HTTPServer(('localhost', PORT_NUMBER), RequestHandler)
-        # server = HTTPServer(('192.168.1.103', PORT_NUMBER), RequestHandler)
+        # server = HTTPServer(('localhost', PORT_NUMBER), RequestHandler)
+        server = HTTPServer(('192.168.1.108', PORT_NUMBER), RequestHandler)
         print 'Started HTTP server on port ', PORT_NUMBER
 
         server.serve_forever()
