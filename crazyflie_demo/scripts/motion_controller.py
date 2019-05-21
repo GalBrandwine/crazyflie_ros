@@ -48,7 +48,7 @@ def twist_callback(msg):
     global kb_x, kb_y, kb_z, kb_yaw, keyboard_flag, listen_to_keyboard
 
     if listen_to_keyboard is 1:
-        def_duration = 2.0
+        def_duration = 2.5
         land_duration = 1.5
 
         # rospy.loginfo("Received a /cmd_vel message!")

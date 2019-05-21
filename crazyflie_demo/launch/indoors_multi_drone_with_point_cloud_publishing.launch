@@ -28,21 +28,25 @@ A few notes:
     <arg name="frame1__listening_to_key_board" default="1"/>
     <arg name="frame1_start_delay" default="0"/>
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
-    <arg name="initX1" default="0.381"/>
+<!--    <arg name="initX1" default="0.381"/> &lt;!&ndash;red right point&ndash;&gt;-->
+    <arg name="initX1" default="0.5334"/>
     <!--    <arg name="initY1" default="1.905"/>-->  <!--yello point-->
-    <arg name="initY1" default="0.8382"/>
+<!--    <arg name="initY1" default="0.8382"/> &lt;!&ndash;red right point&ndash;&gt;-->
+    <arg name="initY1" default="1.9050"/>
     <arg name="initZ1" default="0"/>
 
 
     <!-- for second CF    -->
-    <arg name="uri2" default="radio://0/120/2M/E7E7E7E703"/>
-    <arg name="frame2" default="cf3"/>
-    <arg name="frame2_active" default="1"/>
+    <arg name="uri2" default="radio://0/120/2M/E7E7E7E702"/>
+    <arg name="frame2" default="cf2"/>
+    <arg name="frame2_active" default="0"/>
     <arg name="frame2__listening_to_key_board" default="1"/>
-    <arg name="frame2_start_delay" default="3"/>
+    <arg name="frame2_start_delay" default="10"/>
     <arg name="traj_list2" default="[$(arg traj1),$(arg traj2)]"/>
-    <arg name="initX2" default="0.381"/>
-    <arg name="initY2" default="4.191"/>
+<!--    <arg name="initX2" default="0.381"/>  &lt;!&ndash;red left point&ndash;&gt;-->
+    <arg name="initX2" default="0.1524"/>
+<!--    <arg name="initY2" default="4.191"/>  &lt;!&ndash;red left point&ndash;&gt;-->
+    <arg name="initY2" default="1.9050"/>
     <arg name="initZ2" default="0"/>
 
 
@@ -76,13 +80,16 @@ A few notes:
     <arg name="env_lim" default="[$(arg x_min), $(arg x_max), $(arg y_min), $(arg y_max)]"/>
     <arg name="resolution" default="8"/>
     <arg name="env_space" default="0"/>
-    <arg name="nDrones" default="2"/>
+    <arg name="nDrones" default="1"/>
     <arg name="useRefEnv" default="0"/>
 
 
     <!-- run rviz -->
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find crazyflie_demo)/launch/indoors.rviz"
           required="true"/>
+
+    <!-- run bag record -->
+    <node pkg="rosbag" type="record" name="rosbag_record_standard_data" respawn="true" output="screen" args="-o /home/galbra/bags/ -a" />
 
     <!--    teleop_twist_keyboard  -->
     <node name="teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen"
@@ -227,7 +234,7 @@ A few notes:
         <node name="motion_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">
             <param name="tf_prefix" value="$(arg frame2)"/>
             <param name="listen_to_keyboard" value="$(arg frame2__listening_to_key_board)"/>
-            <param name="start_delay" value="$(arg frame1_start_delay)"/>
+            <param name="start_delay" value="$(arg frame2_start_delay)"/>
         </node>
 
         <!--        Tf_broadcast a specific drone with world-->
@@ -396,16 +403,17 @@ A few notes:
 
         </node>
 
-<!--        <node name="display_manager" pkg="crazyflie_demo" type="Display.py" output="screen">-->
-<!--            <param name="env_lim" value="$(arg env_lim)"/>-->
-<!--            <param name="env_space" value="$(arg env_space)"/>-->
-<!--            <param name="resolution" value="$(arg resolution)"/>-->
-<!--            <param name="nDrones" value="$(arg nDrones)"/>-->
-<!--            <param name="drone_name_0" value="$(arg frame1)"/>-->
-<!--            <param name="drone_takeoff_position_0" value="[$(arg initX1), $(arg initY1), $(arg initZ1)]"/>-->
-<!--            <param name="drone_name_1" value="$(arg frame2)"/>-->
-<!--            <param name="drone_takeoff_position_1" value="[$(arg initX2), $(arg initY2), $(arg initZ2)]"/>-->
-<!--        </node>-->
+        <node name="display_manager" pkg="crazyflie_demo" type="Display.py" output="screen">
+            <param name="env_lim" value="$(arg env_lim)"/>
+            <param name="env_space" value="$(arg env_space)"/>
+            <param name="resolution" value="$(arg resolution)"/>
+            <param name="nDrones" value="$(arg nDrones)"/>
+            <param name="drone_name_0" value="$(arg frame1)"/>
+            <param name="drone_takeoff_position_0" value="[$(arg initX1), $(arg initY1), $(arg initZ1)]"/>
+            <param name="drone_name_1" value="$(arg frame2)"/>
+            <param name="drone_takeoff_position_1" value="[$(arg initX2), $(arg initY2), $(arg initZ2)]"/>
+
+        </node>
         <!--    Cf's arary. for Cj_injector   input is an array of drones!
                 Future develop: add drone as a message!
                 INPUT: ,$(arg frame2),$(arg frame3),$(arg frame4)    -->
@@ -426,16 +434,16 @@ A few notes:
             <param name="nDrones" value="$(arg nDrones)"/>
         </node>
 
-        <node name="http_server" pkg="crazyflie_demo" type="HTTP_server.py" output="screen">
-            <param name="nDrones" value="$(arg nDrones)"/>
-            <param name="drone_name_0" value="$(arg frame1)"/>
-            <param name="drone_name_1" value="$(arg frame2)"/>
-            <param name="env_lim" value="$(arg env_lim)"/>
-            <param name="env_space" value="$(arg env_space)"/>
-            <param name="resolution" value="$(arg resolution)"/>
-            <param name="vehicle_start_pos" value="[0.33, 1.91]" />
-            <param name="vehicle_recorded_path" value="$(find crazyflie_demo)/resources/vehicle_recorded_path.txt"/>
-        </node>
+<!--        <node name="http_server" pkg="crazyflie_demo" type="HTTP_server.py" output="screen">-->
+<!--            <param name="nDrones" value="$(arg nDrones)"/>-->
+<!--            <param name="drone_name_0" value="$(arg frame1)"/>-->
+<!--            <param name="drone_name_1" value="$(arg frame2)"/>-->
+<!--            <param name="env_lim" value="$(arg env_lim)"/>-->
+<!--            <param name="env_space" value="$(arg env_space)"/>-->
+<!--            <param name="resolution" value="$(arg resolution)"/>-->
+<!--            <param name="vehicle_start_pos" value="[0.33, 1.91]" />-->
+<!--            <param name="vehicle_recorded_path" value="$(find crazyflie_demo)/resources/vehicle_recorded_path.txt"/>-->
+<!--        </node>-->
 
     </group>
 

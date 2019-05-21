@@ -54,8 +54,8 @@ def xy_to_ij(x, y, x_lim, y_lim, res):
 
 
 def get_goal_point(pos, interesting_points_list_xy, matrix, x_lim, y_lim, res):
-    # g_idx = 0
-    g_idx = g_idx = np.random.randint(len(interesting_points_list_xy))
+    g_idx = 0
+    # g_idx = g_idx = np.random.randint(len(interesting_points_list_xy))
     dist_arr = []
     for idx, elem in enumerate(interesting_points_list_xy):
         dist_arr.append(np.linalg.norm(np.subtract(elem, pos[0])))
@@ -99,7 +99,7 @@ class DroneCjInjector:
         self.matrix = matrix
         self.drone_yaw = math.radians(0)
         self.rot_enabled = False
-        self.rot_time_thresh = 10  # sec
+        self.rot_time_thresh = 7  # sec
         self.last_time_rot_called = rospy.Time.now().to_sec()
         # Init publisher
         self.Cj_injector_pub = rospy.Publisher('/' + self.tf_prefix + "/Cj_injcetor", PoseStamped,
@@ -205,7 +205,7 @@ class DroneInjector:
         self.res = resolution
         self.num_of_drones = len(prefix_takeoff_dict_input.keys())  # get number of drones
         self.env_limits = env_limits_input
-        self.POI_time_thresh = 5  # sec
+        self.POI_time_thresh = 4  # sec
         self.last_time_POI_called = rospy.Time.now().to_sec()
         self.interesting_points_list_xy = []
         self.corner_points_list_xy = []

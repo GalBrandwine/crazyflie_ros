@@ -184,7 +184,7 @@ class Astar:
     def is_path_free(self, si, sj, gi, gj, obmap):
         bpath = list(bresenham(si, sj, gi, gj))
         ok_way = True
-        for ii, elem in enumerate(bpath):
+        for ii, elem in enumerate(bpath[1:]):
             if obmap[elem[0]][elem[1]]:
                 ok_way = False
                 break
