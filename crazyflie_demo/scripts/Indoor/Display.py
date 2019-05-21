@@ -8,9 +8,13 @@ import rospy
 from crazyflie_driver.msg import GenericLogData
 from Grid import drone_pos, m_to_cm
 from nav_msgs.msg import OccupancyGrid
+import cv2
+from geometry_msgs.msg import Pose
+import tf2_ros
+from tf.transformations import euler_from_quaternion
 
 class Display_manager:
-    def __init__(self, border_polygon, obs_array, x_lim, y_lim, res, matrix, initial_pos_dict, nDrones):
+    def __init__(self, border_polygon, x_lim, y_lim, res, matrix, initial_pos_dict, nDrones):
 
         self.nDrones = nDrones
 
@@ -20,16 +24,17 @@ class Display_manager:
         self.matrix = matrix
         self.last_matrix = matrix
         self.border_polygon = border_polygon
-        self.obs_array = obs_array
+        # self.obs_array = obs_array
 
         self.fig = plt.figure()
         mgr = plt.get_current_fig_manager()
         # mgr.full_screen_toggle()
 
-        ax_env, ax_grid = self.fig.subplots(1, 2)
+        # ax_env, ax_grid = self.fig.subplots(1, 2)
+        ax_grid = self.fig.subplots(1, 1)
         plt.axis([self.x_lim[0], self.x_lim[1], self.y_lim[0], self.y_lim[1]])
 
-        self.ax_env = ax_env
+        # self.ax_env = ax_env
         self.ax_grid = ax_grid
 
         self.tail_handles = list()
@@ -37,7 +42,11 @@ class Display_manager:
         self.interest_plot_handle = list()
 
         self.plot_grid()
-        self.plot_obs_array()
+        # self.plot_obs_array()
+        self.topics_arr = []
+        for iDrone in range(self.nDrones):
+            drone_name = rospy.get_param("~drone_name_{}".format(iDrone))
+            self.topics_arr.append("/{}/point_cloud".format(drone_name))
 
         self.takeofpos = initial_pos_dict
         init_pos = []
@@ -62,8 +71,8 @@ class Display_manager:
         # self.prev_corner_points = []
 
         for pos in init_pos:
-            plot_handle_env, = ax_env.plot(pos[0], pos[1], 'ob')
-            self.plot_handle_envs.append(plot_handle_env, )
+            # plot_handle_env, = ax_env.plot(pos[0], pos[1], 'ob')
+            # self.plot_handle_envs.append(plot_handle_env, )
             plot_handle_grid, = ax_grid.plot(pos[0], pos[1], 'ob')
             self.plot_handle_grids.append(plot_handle_grid, )
             # plot_handle_env_vt, = ax_env.plot(pos[0], pos[1], 'or')
@@ -77,14 +86,17 @@ class Display_manager:
 
             # self.edg_to_neighbors_plot_handles.append([])
 
-        for iDrone in range(self.nDrones):
-            # Init listeners
-            drone_name = rospy.get_param("~drone_name_{}".format(iDrone))
-            self.pos_sub = rospy.Subscriber("/{}/log_pos".format(drone_name), GenericLogData,
-                                            self.pos_parser)
+        # for iDrone in range(self.nDrones):
+        #     # Init listeners
+        #     drone_name = rospy.get_param("~drone_name_{}".format(iDrone))
+        #     self.pos_sub = rospy.Subscriber("/{}/log_pos".format(drone_name), GenericLogData,
+        #                                     callback = self.pos_parser)
 
-        self.pos_sub = rospy.Subscriber("/indoor/occupancy_grid_topic", OccupancyGrid,
-                                        self.grid_parser)
+        self.grid_sub = rospy.Subscriber("/indoor/occupancy_grid_topic", OccupancyGrid,
+                                        callback = self.grid_parser, callback_args = "/indoor/occupancy_grid_topic")
+
+        self.tfBuffer = tf2_ros.Buffer()
+        self.listener = tf2_ros.TransformListener(self.tfBuffer)
 
         # self.fig.show()
         self.fig.canvas.draw()
@@ -95,20 +107,55 @@ class Display_manager:
 
         drone_id = pos_header.frame_id.split("/")[0] # Extract drone name from topic name
         # Store drone position and convert it from [m] to [cm]
+        plt_index = self.drones_pos_list[drone_id].index
         self.drones_pos_list[drone_id] = drone_pos(pos_header.stamp.secs,
                                                    self.takeofpos[drone_id][0]+(pos_val[0]*m_to_cm),
                                                    self.takeofpos[drone_id][1]+(pos_val[1]*m_to_cm),
-                                                   self.takeofpos[drone_id][2]+(pos_val[2]*m_to_cm), None, 0)
+                                                   self.takeofpos[drone_id][2]+(pos_val[2]*m_to_cm), None, plt_index)
         # There is no need to change matrix' values acoording to drones position,
         # because it is already done in Grid module.
         # Drones plotting is done via the grid parser (in order to avoid calling the plot function too many times).
 
-    def grid_parser(self, msg):
+    def grid_parser(self, msg, topic):
+
+        for d_idx, cur_topic in enumerate(self.topics_arr):
+            cur_topic_list = cur_topic.split("/")
+            drone_id = [s for s in cur_topic_list if "cf" in s][0]
+            plt_index = self.drones_pos_list[drone_id].index
+            try:
+                trans = self.tfBuffer.lookup_transform('world', drone_id, rospy.Time(0))
+
+                q = (trans.transform.rotation.x,
+                     trans.transform.rotation.y,
+                     trans.transform.rotation.z,
+                     trans.transform.rotation.w)
+
+                euler = euler_from_quaternion(q, axes='sxyz')
+
+                x = trans.transform.translation.x
+                y = trans.transform.translation.y
+                z = trans.transform.translation.z
+                roll = euler[0]
+                pitch = euler[1]
+                yaw = euler[2]
+
+                self.pos = [x, y, z, roll, pitch, yaw]
+                # rospy.loginfo("pos in Display: {}\n".format(self.pos))
+
+                # Store drone position and convert it from [m] to [cm]
+                self.drones_pos_list[drone_id] = drone_pos(0, x*m_to_cm, y*m_to_cm, z*m_to_cm, yaw, plt_index)
+
+            except:
+                rospy.logdebug("tf lookup -- {} not found".format(drone_id))
+            # except Exception as e:
+            #     rospy.loginfo(e)
+
         grid_height = int(msg.info.height / msg.info.resolution)
         grid_width = int(msg.info.width / msg.info.resolution)
         self.last_matrix = self.matrix
-        self.matrix = np.array(msg.data).reshape((grid_height, grid_width))
+        self.matrix = np.array(msg.data).reshape((grid_width, grid_height))
         keys = list(self.drones_pos_list.keys())
+
         for iDrone in range(self.nDrones):
             curr_drone_key = keys[iDrone]
             pos = self.drones_pos_list[curr_drone_key]
@@ -131,8 +178,17 @@ class Display_manager:
             j = nonzero_cols[i_nz]
             if self.matrix[i][j] == 1:
                 self.change_tail_to_empty(i, j)
-            elif self.matrix[i][j] == 2:
+
+            # If there is a wall in the grid, check how many times the wall was "seen",
+            # and set the color according to that counter.
+            elif self.matrix[i][j] > 1:
                 self.change_tail_to_wall(i, j)
+                # color_r = self.matrix[i][j] * 0.01
+                # if color_r > 1:
+                #     color_r = 1
+                # color_g = 0
+                # color_b = 0
+                # self.change_tail_color_ij(i, j, [color_r, color_g, color_b])
 
 
     def plot_interesting_points(self, interesting_points_list_ij):
@@ -159,10 +215,10 @@ class Display_manager:
         border_polygon_patch = PolygonPatch(self.border_polygon, facecolor='white')
         self.ax_env.add_patch(border_polygon_patch)
 
-    def plot_obs_array(self):
-        for obs in self.obs_array:
-            border_polygon_patch = PolygonPatch(obs, facecolor='orange')
-            self.ax_env.add_patch(border_polygon_patch)
+    # def plot_obs_array(self):
+    #     for obs in self.obs_array:
+    #         border_polygon_patch = PolygonPatch(obs, facecolor='orange')
+    #         self.ax_env.add_patch(border_polygon_patch)
 
     def plot_ij(self, i, j):
         pol_center = self.ij_to_xy(i, j)
@@ -171,7 +227,7 @@ class Display_manager:
                            , (pol_center[0] + self.res / 2, pol_center[1] + self.res / 2),
                         (pol_center[0] + self.res / 2, pol_center[1] - self.res / 2)
                            , (pol_center[0] - self.res / 2, pol_center[1] - self.res / 2)])
-        return self.ax_grid.add_patch(PolygonPatch(tail, facecolor='gray'))
+        return self.ax_grid.add_patch(PolygonPatch(tail, facecolor='gray')) # edgecolor='none'
 
     def plot_grid(self):
         for i in range(0, self.matrix.__len__()):
@@ -212,7 +268,7 @@ class Display_manager:
         return x, y
 
     def update_drone_plot(self, real_target, virtual_target, list_idx):
-        self.plot_handle_envs[list_idx].set_data(real_target[0], real_target[1])
+        # self.plot_handle_envs[list_idx].set_data(real_target[0], real_target[1])
         self.plot_handle_grids[list_idx].set_data(real_target[0], real_target[1])
         # self.plot_handle_envs_vt[drone_idx].set_data(virtual_target[0][0], virtual_target[0][1])
         # self.plot_handle_grids_vt[drone_idx].set_data(virtual_target[0][0], virtual_target[0][1])
@@ -249,13 +305,13 @@ if __name__ == "__main__":
     polygon_border = [(x_lim[0], y_lim[0]), (x_lim[1], y_lim[0]), (x_lim[1], y_lim[1]),
                       (x_lim[0], y_lim[1]), (x_lim[0], y_lim[0])]
 
-    obs_array = []
-
-    nObstacles = rospy.get_param("~nObstacles")
-    for iObstacle in range(nObstacles):
-        curr_polygon = rospy.get_param("~obs_{}".format(iObstacle))
-        exec("curr_polygon = {}".format(curr_polygon))
-        obs_array.append(Polygon(curr_polygon))
+    # obs_array = []
+    #
+    # nObstacles = rospy.get_param("~nObstacles")
+    # for iObstacle in range(nObstacles):
+    #     curr_polygon = rospy.get_param("~obs_{}".format(iObstacle))
+    #     exec("curr_polygon = {}".format(curr_polygon))
+    #     obs_array.append(Polygon(curr_polygon))
 
     nDrones = rospy.get_param("~nDrones")
     initial_pos_dict = dict()
@@ -266,8 +322,8 @@ if __name__ == "__main__":
         initial_pos_dict[curr_drone_name] = curr_drone_takeoff_pos
 
     matrix = np.zeros([np.int64(np.ceil((x_lim[1] - x_lim[0]) / resolution)),
-                            np.int64(np.ceil((y_lim[1] - y_lim[0]) / resolution))])
+              np.int64(np.ceil((y_lim[1] - y_lim[0]) / resolution))])
 
-    display_manager = Display_manager(polygon_border, obs_array, x_lim, y_lim, resolution, matrix, initial_pos_dict, 1)
+    display_manager = Display_manager(polygon_border, x_lim, y_lim, resolution, matrix, initial_pos_dict, nDrones)
 
     plt.show(block=True)

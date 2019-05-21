@@ -128,31 +128,30 @@ class DroneInjector:
 
         #                       [----t----, ----x---, ---y---, --z--, yaw]
         path_maze_frame1 = [
-            [step_time * 1, 1 * step, 6.5 * step, 0.3, 0],
-            [step_time * 1.3125, 2.25 * step, 6.5 * step, 0.3, 0],
-            [step_time * 1.3125, 3.5 * step, 6.5 * step, 0.3, 0],
-            [step_time * 1.3125, 3.5 * step, 7.75 * step, 0.3, 0],
-            [step_time * 1.3125, 3.5 * step, 9 * step, 0.3, 0],
-            [step_time * 1.8375, 1.75 * step, 9 * step, 0.3, 0],
-            [step_time * 0.525, 1.75 * step, 9.5 * step, 0.3, 0],
-            [step_time * 1.05, 2.75 * step, 9.5 * step, 0.3, 0],
-            [step_time * 1.3125, 2.75 * step, 10.75 * step, 0.3, 0],
-            [step_time * 1.575, 2.75 * step, 12.25 * step, 0.3, 0],
-            [step_time * 0.7875, 2 * step, 12.25 * step, 0.3, 0],
-            [step_time * 2.1, 2 * step, 14.25 * step, 0.3, 0],
-            [step_time * 1.8375, 3.75 * step, 14.25 * step, 0.3, 0],
-            [step_time * 2.1, 3.75 * step, 12.25 * step, 0.3, 0],
-            [step_time * 1.575, 5.25 * step, 12.25 * step, 0.3, 0],
-            [step_time * 8, 6.75 * step, 12.25 * step, 0.3, 0],
-            [step_time * 2.1, 8.75 * step, 12.25 * step, 0.3, 0],
-            [step_time * 2.1, 10.75 * step, 12.25 * step, 0.3, 0],
-            [step_time * 2.1, 12.75 * step, 12.25 * step, 0.3, 0],
-            [step_time * 2.1, 14.75 * step, 12.25 * step, 0.3, 0],
-            [step_time * 2.1, 16.75 * step, 12.25 * step, 0.3, 0],
-            [step_time * 2.1, 18.75 * step, 12.25 * step, 0.3, 0],
-            [step_time * 14, 18.75 * step, 12.25 * step, 0.3, 0],
-            [step_time * 4, 18.75 * step, 12.25 * step, 1.0, 0],
-            [step_time * 5, 18.75 * step, 12.25 * step, 0, 0]
+            [step_time * 1, 1 * step, 6.5 * step, 0.35, 0],
+            [step_time * 1.3125, 2.25 * step, 6.5 * step, 0.35, 0],
+            [step_time * 1.3125, 3.5 * step, 6.5 * step, 0.35, 0],
+            [step_time * 1.3125, 3.5 * step, 7.75 * step, 0.35, 0],
+            [step_time * 1.3125, 3.5 * step, 9 * step, 0.35, 0],
+            [step_time * 1.8375, 1.75 * step, 9 * step, 0.35, 0],
+            [step_time * 0.525, 1.75 * step, 9.5 * step, 0.35, 0],
+            [step_time * 1.05, 2.75 * step, 9.5 * step, 0.35, 0],
+            [step_time * 1.3125, 2.75 * step, 10.75 * step, 0.35, 0],
+            [step_time * 1.575, 2.75 * step, 12.25 * step, 0.35, 0],
+            [step_time * 0.7875, 2 * step, 12.25 * step, 0.35, 0],
+            [step_time * 2.1, 2 * step, 14.25 * step, 0.35, 0],
+            [step_time * 1.8375, 3.75 * step, 14.25 * step, 0.35, 0],
+            [step_time * 2.1, 3.75 * step, 12.25 * step, 0.35, 0],
+            [step_time * 1.575, 5.25 * step, 12.25 * step, 0.35, 0],
+            [step_time * 8, 6.75 * step, 12.25 * step, 0.35, 0],
+            [step_time * 2.1, 8.75 * step, 12.25 * step, 0.35, 0],
+            [step_time * 2.1, 10.75 * step, 12.25 * step, 0.35, 0],
+            [step_time * 2.1, 12.75 * step, 12.25 * step, 0.35, 0],
+            [step_time * 2.1, 14.75 * step, 12.25 * step, 0.35, 0],
+            [step_time * 2.1, 16.75 * step, 12.25 * step, 0.35, 0],
+            [step_time * 2.1, 18.75 * step, 12.25 * step, 0.35, 0],
+            [step_time * 14, 19.00 * step, 12.25 * step, 0.35, 0],
+            [step_time * 2, 18.75 * step, 12.25 * step, 0, 0]
 
         ]
 
@@ -186,8 +185,7 @@ class DroneInjector:
             [step_time * 1.575, 15.5 * step, 11.75 * step, 0.35, 0],
             [step_time * 1.575, 17 * step, 11.75 * step, 0.35, 0],
             [step_time * 1, 17 * step, 11.75 * step, 0.35, 0],
-            [step_time * 4, 17 * step, 11.75 * step, 1.0, 0],
-            [step_time * 5, 17 * step, 11.75 * step, 0, 0]
+            [step_time * 2, 17 * step, 11.75 * step, 0, 0]
 
         ]
 
@@ -225,8 +223,7 @@ class DroneInjector:
             [step_time * 2.1, 15.75 * step, 12.5 * step, 0.35, 0],
             [step_time * 1.6601957715884, 17.25 * step, 12 * step, 0.35, 0],
             [step_time * 3, 17.25 * step, 12 * step, 0.35, 0],
-            [step_time * 4, 17.25 * step, 12 * step, 1.0, 0],
-            [step_time * 5, 17.25 * step, 12 * step, 0, 0]
+            [step_time * 2, 17.25 * step, 12 * step, 0, 0]
 
         ]
 
@@ -250,8 +247,7 @@ class DroneInjector:
             [step_time * 2.625, 18.75 * step, 11.25 * step, 0.35, 0],
             [step_time * 1.8375, 20.5 * step, 11.25 * step, 0.35, 0],
             [step_time * 12, 20.5 * step, 11.25 * step, 0.35, 0],
-            [step_time * 4, 20.5 * step, 11.25 * step, 1.0, 0],
-            [step_time * 5, 20.5 * step, 11.25 * step, 0, 0]
+            [step_time * 2, 20.5 * step, 11.25 * step, 0, 0]
 
         ]
 

@@ -67,14 +67,17 @@ A few notes:
     <arg name="initZ4" default="0"/>
 
     <!-- arguments for indoor mapping  -->
-    <arg name="x_min" default="0"/>
-    <arg name="x_max" default="250"/>
+    <arg name="x_min" value="0"/>
+<!--        <arg name="x_max" default="510"/> &lt;!&ndash; 16.5ft = 5.0292m&ndash;&gt;-->
+    <arg name="x_max" default="504"/> <!-- 16.5ft - for resolution 8 -->
     <arg name="y_min" default="0"/>
-    <arg name="y_max" default="250"/>
+<!--        <arg name="y_max" default="510"/> &lt;!&ndash; 16.5ft = 5.0292m &ndash;&gt;-->
+    <arg name="y_max" default="504"/> <!-- 16.5ft - for resolution 8 -->
     <arg name="env_lim" default="[$(arg x_min), $(arg x_max), $(arg y_min), $(arg y_max)]"/>
-    <arg name="resolution" default="10"/>
-    <arg name="env_space" default="50"/>
-    <arg name="nDrones" default="2"/>
+    <arg name="resolution" default="8"/>
+    <arg name="env_space" default="0"/>
+    <arg name="nDrones" default="4"/>
+    <arg name="useRefEnv" default="0"/>
 
     <!--    Cf's arary. for Cj_injector   input is an array of drones!
             Future develop: add drone as a message!
@@ -89,8 +92,8 @@ A few notes:
     </node>
 
     <!-- run rviz -->
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find crazyflie_demo)/launch/indoors.rviz"
-          required="true"/>
+    <!--<node name="rviz" pkg="rviz" type="rviz" args="-d $(find crazyflie_demo)/launch/indoors.rviz"-->
+          <!--required="true"/>-->
 
     <!--    teleop_twist_keyboard  -->
     <node name="teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen"
@@ -391,35 +394,72 @@ A few notes:
         </node>
     </group>
 
-    <!--    &lt;!&ndash;    ***************************************************** MAPPING modules *******************************************************&ndash;&gt;-->
-    <!--     <group ns="Mapping">-->
-    <!--        <node name="grid_publisher" pkg="crazyflie_demo" type="Grid.py" output="screen">-->
-    <!--            <param name="env_lim" value="$(arg env_lim)"/>-->
-    <!--            <param name="env_space" value="$(arg env_space)"/>-->
-    <!--            <param name="resolution" value="$(arg resolution)"/>-->
+    <!--    ***************************************************** MAPPING modules *******************************************************-->
+    <group ns="Mapping">
+        <node name="grid_publisher" pkg="crazyflie_demo" type="Grid.py" output="screen">
+            <param name="env_lim" value="$(arg env_lim)"/>
+            <param name="env_space" value="$(arg env_space)"/>
+            <param name="resolution" value="$(arg resolution)"/>
+            <param name="useRefEnv" value="$(arg useRefEnv)"/>
+            <param name="excelPath" value="$(find crazyflie_demo)/resources/MazeMap.csv"/>
+            <param name="nDrones" value="$(arg nDrones)"/>
+            <param name="drone_name_0" value="$(arg frame1)"/>
+            <param name="drone_takeoff_position_0" value="[$(arg initX1), $(arg initY1), $(arg initZ1)]"/>
+            <param name="drone_name_1" value="$(arg frame2)"/>
+            <param name="drone_takeoff_position_1" value="[$(arg initX2), $(arg initY2), $(arg initZ2)]"/>
+            <param name="drone_name_2" value="$(arg frame3)"/>
+            <param name="drone_takeoff_position_2" value="[$(arg initX3), $(arg initY3), $(arg initZ3)]"/>
+            <param name="drone_name_3" value="$(arg frame4)"/>
+            <param name="drone_takeoff_position_3" value="[$(arg initX4), $(arg initY4), $(arg initZ4)]"/>
+        </node>
 
-    <!--            <param name="nDrones" value="$(arg nDrones)"/>-->
-    <!--            <param name="drone_name_0" value="$(arg frame2)"/>-->
-    <!--            <param name="drone_name_1" value="$(arg frame3)"/>-->
-    <!--        </node>-->
+        <!--<node name="display_manager" pkg="crazyflie_demo" type="Display.py" output="screen">-->
+            <!--<param name="env_lim" value="$(arg env_lim)"/>-->
+            <!--<param name="env_space" value="$(arg env_space)"/>-->
+            <!--<param name="resolution" value="$(arg resolution)"/>-->
+            <!--<param name="nDrones" value="$(arg nDrones)"/>-->
+            <!--<param name="drone_name_0" value="$(arg frame1)"/>-->
+            <!--<param name="drone_takeoff_position_0" value="[$(arg initX1), $(arg initY1), $(arg initZ1)]"/>-->
+            <!--<param name="drone_name_1" value="$(arg frame2)"/>-->
+            <!--<param name="drone_takeoff_position_1" value="[$(arg initX2), $(arg initY2), $(arg initZ2)]"/>-->
+            <!--<param name="drone_name_2" value="$(arg frame3)"/>-->
+            <!--<param name="drone_takeoff_position_2" value="[$(arg initX3), $(arg initY3), $(arg initZ3)]"/>-->
+            <!--<param name="drone_name_3" value="$(arg frame4)"/>-->
+            <!--<param name="drone_takeoff_position_3" value="[$(arg initX4), $(arg initY4), $(arg initZ4)]"/>-->
 
-    <!--        <node name="display_manager" pkg="crazyflie_demo" type="Display.py" output="screen">-->
-    <!--            <param name="env_lim" value="$(arg env_lim)"/>-->
-    <!--            <param name="env_space" value="$(arg env_space)"/>-->
-    <!--            <param name="resolution" value="$(arg resolution)"/>-->
+        <!--</node>-->
+        <!--    Cf's arary. for Cj_injector   input is an array of drones!
+                Future develop: add drone as a message!
+                INPUT: ,$(arg frame2),$(arg frame3),$(arg frame4)    -->
 
-    <!--            <param name="nObstacles" value="4"/>-->
-    <!--            <param name="obs_0" value="[(0, 0), (10, 0), (10, 250), (0, 250), (0, 0)]"/>-->
-    <!--            <param name="obs_1" value="[(10, 0), (10, 10), (250, 10), (250, 0), (10, 0)]"/>-->
-    <!--            <param name="obs_2" value="[(250, 10), (240, 10), (240, 250), (250, 250), (250, 10)]"/>-->
-    <!--            <param name="obs_3" value="[(10, 250), (10, 240), (240, 240), (240, 250), (10, 250)]"/>-->
+        <!--<node name="Cj_injector" pkg="crazyflie_demo" type="Cj_injector.py" output="screen">-->
+                        <!--<param name="env_lim" value="$(arg env_lim)"/>-->
+            <!--<rosparam param="env_lim" subst_value="True">[$(arg env_lim),]</rosparam>-->
+            <!--<param name="resolution" value="$(arg resolution)"/>-->
+            <!--<rosparam param="resolution" subst_value="True">[$(arg resolution)]</rosparam>-->
+            <!--<param name="prefix_list" value="[$(arg frame1), $(arg frame2), $(arg frame3),$(arg frame4)]"/>-->
+            <!--<param name="prefix_list" value="[$(arg frame1)]"/>-->
+            <!--<rosparam param="prefix_list" subst_value="True">[[$(arg frame1)], [$(arg frame2)],]</rosparam>-->
+                        <!--Pass all drones initial takeoff positions-->
+                        <!--<param name="init_takeoff_list" value="[[$(arg initX1), $(arg initY1), $(arg initZ1)]] "/>-->
+            <!--<rosparam param="init_takeoff_list" subst_value="True">[[$(arg initX1), $(arg initY1), $(arg initZ1)],[$(arg initX2), $(arg initY2), $(arg initZ2)],]</rosparam>-->
+            <!--<param name="env_space" value="$(arg env_space)"/>-->
+                        <!--<rosparam param="env_space" subst_value="True">[$(arg env_space)]</rosparam>-->
+            <!--<param name="nDrones" value="$(arg nDrones)"/>-->
+        <!--</node>-->
 
-    <!--            <param name="nDrones" value="$(arg nDrones)"/>-->
-    <!--            <param name="drone_name_0" value="$(arg frame2)"/>-->
-    <!--            <param name="drone_takeoff_position_0" value="[180, 180, 0]"/>-->
-    <!--            <param name="drone_name_1" value="$(arg frame3)"/>-->
-    <!--            <param name="drone_takeoff_position_1" value="[60, 60, 0]"/>-->
-    <!--        </node>-->
-    <!--    </group>-->
+        <node name="http_server" pkg="crazyflie_demo" type="HTTP_server.py" output="screen">
+            <param name="nDrones" value="$(arg nDrones)"/>
+            <param name="drone_name_0" value="$(arg frame1)"/>
+            <param name="drone_name_1" value="$(arg frame2)"/>
+            <param name="drone_name_2" value="$(arg frame3)"/>
+            <param name="drone_name_3" value="$(arg frame4)"/>
+            <param name="env_lim" value="$(arg env_lim)"/>
+            <param name="env_space" value="$(arg env_space)"/>
+            <param name="resolution" value="$(arg resolution)"/>
+            <param name="vehicle_start_pos" value="[-0.325, 1.905]" />
+            <param name="vehicle_recorded_path" value="$(find crazyflie_demo)/resources/vehicle_recorded_path.txt"/>
+        </node>
+        </group>
 
 </launch>
