@@ -383,7 +383,7 @@ if __name__ == '__main__':
 
     start_delay = rospy.get_param("~start_delay")
     if start_delay > 0:
-        time.sleep(start_delay)
+        time.sleep(start_delay*2) #delay to avoid dropout when updating parameters
 
     rospy.wait_for_service("/" + prefix + '/update_params')
     rospy.loginfo("found update_params service")

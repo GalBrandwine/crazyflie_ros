@@ -26,7 +26,7 @@ A few notes:
     <arg name="frame1" default="cf1"/>
     <arg name="frame1_active" default="1"/>
     <arg name="frame1_listening_to_key_board" default="1"/>
-    <arg name="frame1_start_delay" default="1" />
+    <arg name="frame1_start_delay" default="0.1" />
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX1" default="0.3048"/>
     <arg name="initY1" default="1.981"/>
@@ -38,7 +38,7 @@ A few notes:
     <arg name="frame2_active" default="1"/>
     <arg name="frame2_start_delay" default="2" />
     <arg name="frame2_listening_to_key_board" default="1"/>
-    <arg name="frame2_launch_delay" default="1"/>
+    <arg name="frame2_launch_delay" default="1.5"/>
     <arg name="traj_list2" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX2" default="0.3048"/>
     <arg name="initY2" default="1.6"/>
