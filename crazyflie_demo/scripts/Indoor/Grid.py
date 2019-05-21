@@ -65,6 +65,7 @@ class Grid:
         self.validity_matrix = copy.deepcopy(self.matrix)
         self.grid_maze = copy.deepcopy(self.matrix)
         self.maze_res = 7.62
+        self.upd_wall = True
         if self.useRefEnv:
             self.csv_to_maze()
 
@@ -183,6 +184,10 @@ class Grid:
                     self.validity_matrix[ip - 1][jp + 1] = 5
                     self.validity_matrix[ip - 1][jp] = 5
 
+                # self.upd_wall = True
+                # if np.linalg.norm(np.subtract([i_s, j_s], [i_g, j_g])) < self.res:
+                #     self.upd_wall = False
+
                 # # Change tail to be empty if the drone is in that tail.
                 # i, j = self.xy_to_ij(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
                 # if self.matrix[i][j] == 0:
@@ -202,7 +207,7 @@ class Grid:
                     self.drones_pc_list[drone_id] = drone_pc(point_cloud_last_timestamp.stamp.secs, sens)
                     # Update grid using the new data
                     self.update_from_tof_sensing_list(drone_id)
-                    self.complete_wall_in_corners(self.matrix)
+                    # self.complete_wall_in_corners(self.matrix)
 
     # def pos_parser(self, msg):
     #     pos_header = msg.header
@@ -303,7 +308,7 @@ class Grid:
                 self.change_tail_to_empty(i, j)
         if 0 < i1 < self.matrix.shape[0] and 0 < j1 < self.matrix.shape[1] and \
                 (np.linalg.norm(np.subtract([i1, j1], [i0, j0])) <= (self.sens_limit / self.res)) and \
-                self.validity_matrix[i1][j1] != 5:
+                self.validity_matrix[i1][j1] != 5 and self.upd_wall:
             self.change_tail_to_wall(i1, j1)
 
         # d = np.subtract(tof_sensing_pos, sensor_pos)
