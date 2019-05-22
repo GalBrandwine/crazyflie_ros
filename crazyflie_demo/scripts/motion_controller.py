@@ -328,7 +328,7 @@ def handler(cf_handler):
                 [direction, duration] = check_direction()
 
                 # rospy.logdebug("Cj direction is {}".format(direction))
-                rospy.logdebug("Cj duration is {}".format(duration))
+                # rospy.logdebug("Cj duration is {}".format(duration))
 
                 # obstacle_free=avoid_collision()
                 # if obstacle_free == True:

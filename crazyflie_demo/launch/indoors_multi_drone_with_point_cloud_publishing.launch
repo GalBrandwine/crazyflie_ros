@@ -21,21 +21,6 @@ A few notes:
     <arg name="traj2" default="/home/galbra/catkin_ws/src/crazyflie_ros/crazyflie_demo/scripts/figure8.csv"/>
 
 
-<!--    &lt;!&ndash; for first CF &ndash;&gt;-->
-<!--    <arg name="uri1" default="radio://0/120/2M/E7E7E7E704"/>-->
-<!--    <arg name="frame1" default="cf4"/>-->
-<!--    <arg name="frame1_active" default="1"/>-->
-<!--    <arg name="frame1__listening_to_key_board" default="1"/>-->
-<!--    <arg name="frame1_start_delay" default="0"/>-->
-<!--    <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>-->
-<!--    <arg name="initX1" default="0.381"/> &lt;!&ndash;red right point&ndash;&gt;-->
-<!--&lt;!&ndash;    <arg name="initX1" default="0.5334"/>&ndash;&gt;-->
-<!--&lt;!&ndash;        <arg name="initY1" default="1.905"/>  yello point&ndash;&gt;-->
-<!--    <arg name="initY1" default="0.8382"/> &lt;!&ndash;red right point&ndash;&gt;-->
-<!--&lt;!&ndash;    <arg name="initY1" default="1.9050"/>&ndash;&gt;-->
-<!--    <arg name="initZ1" default="0"/>-->
-
-
     <!-- for first CF -->
     <arg name="uri1" default="radio://0/120/2M/E7E7E7E704"/>
     <arg name="frame1" default="cf4"/>

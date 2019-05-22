@@ -10,7 +10,7 @@ class GridPOI:
         self.x_lim = env_limits[0:2]
         self.y_lim = env_limits[2:4]
         self.convstrct = np.ones([3, 3])
-        self.wall_fac = 2
+        self.wall_dist = 1
 
     def find_POI(self, matrix):
         # temp_mat = copy.deepcopy(matrix)
@@ -67,6 +67,7 @@ class GridPOI:
     #                 tail_list.append([i, j])
     #     return tail_list
 
+
     def find_interesting_tail(self, matrix):
         tail_list = list()
         sequence_cnt = np.zeros(np.shape(matrix))
@@ -79,52 +80,45 @@ class GridPOI:
                     # tail_list.append([i, j])
         return tail_list
 
-    # def is_tail_interesting(self, i, j, matrix):
-    #     # # Tail is explored
-    #     if i < 1 or i >= matrix.shape[0] or j < 1 or j >= matrix.shape[1]:
-    #         return False
-    #     # Tail on the edge of explored area
-    #     ind_list = [[-1, -1], [0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0]]
-    #     cnt_wall = 0
-    #     cnt_unexplored = 0
-    #     for k in range(len(ind_list)):
-    #         # if (matrix[i][j] == 1) and (matrix[ind_list[k][0] + i][ind_list[k][1] + j] == 2):
-    #         #     cnt_wall = cnt_wall + 1
-    #         # try:
-    #         if (matrix[i][j] == 1) and (matrix[self.wall_fac * ind_list[k][0] + i][self.wall_fac * ind_list[k][1] + j] == 2):
-    #             cnt_wall = cnt_wall + 1
-    #         # except:
-    #         #     if (matrix[i][j] == 1) and (matrix[(self.wall_fac- 1) * ind_list[k][0] + i][(self.wall_fac - 1) * ind_list[k][1] + j] == 2):
-    #         #         cnt_wall = cnt_wall + 1
-    #         if (matrix[i][j] == 1) and (matrix[ind_list[k][0] + i][ind_list[k][1] + j] == 0):
-    #             cnt_unexplored = cnt_unexplored + 1
-    #     # if ((cnt_wall == 4) and (cnt_unexplored == 1)):
-    #     #     return False
-    #     if ((cnt_unexplored >= 1) and (cnt_wall >= 1)):
-    #         return True
-    #     else:
-    #         return False
 
     def is_tail_interesting(self, i, j, matrix):
         # # Tail is explored
         if i < 1 or i >= matrix.shape[0] or j < 1 or j >= matrix.shape[1]:
             return False
         # Tail on the edge of explored area
-        unexp_val = 1
-        wall_val = 3
-        unexp_idxs = [[-unexp_val, -unexp_val], [0, -unexp_val], [unexp_val, -unexp_val], [unexp_val, 0], [unexp_val, unexp_val], [0, unexp_val], [-unexp_val, unexp_val], [-unexp_val, 0]]
-        wall_idxs = [[-wall_val, -wall_val], [0, -wall_val], [wall_val, -wall_val], [wall_val, 0], [wall_val, wall_val], [0, wall_val], [-wall_val, wall_val], [-wall_val, 0]]
-        for k in range(len(unexp_idxs)):
-            if (matrix[i][j] == 1) and (matrix[unexp_idxs[k][0] + i][unexp_idxs[k][1] + j] == 0):
-                for t in range(len(wall_idxs)):
-                    try:
-                        if (matrix[unexp_idxs[k][0] + i + wall_idxs[t][0]][unexp_idxs[k][1] + j + wall_idxs[t][1]] == 2) and \
-                                (matrix[unexp_idxs[k][0] + i + unexp_idxs[t][0]][unexp_idxs[k][1] + j + unexp_idxs[t][1]] != 2):
+        ind_list = [[-1, -1], [0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0]]
+        if (matrix[i][j] == 1):
+            for k in range(len(ind_list)):
+                if (matrix[ind_list[k][0] + i][ind_list[k][1] + j] == 0):
+                    for ti in range(ind_list[k][0] + i - self.wall_dist, ind_list[k][0] + i + self.wall_dist + 1):
+                        for tj in range(ind_list[k][1] + j - self.wall_dist, ind_list[k][1] + j + self.wall_dist + 1):
+                            if matrix[ti][tj] == 2:
+                                return False
+                    return True
+        else:
+            return False
 
-                            return True
-                    except:
-                        continue
-        return False
+
+    # def is_tail_interesting(self, i, j, matrix):
+    #     # # Tail is explored
+    #     if i < 1 or i >= matrix.shape[0] or j < 1 or j >= matrix.shape[1]:
+    #         return False
+    #     # Tail on the edge of explored area
+    #     unexp_val = 1
+    #     wall_val = 3
+    #     unexp_idxs = [[-unexp_val, -unexp_val], [0, -unexp_val], [unexp_val, -unexp_val], [unexp_val, 0], [unexp_val, unexp_val], [0, unexp_val], [-unexp_val, unexp_val], [-unexp_val, 0]]
+    #     wall_idxs = [[-wall_val, -wall_val], [0, -wall_val], [wall_val, -wall_val], [wall_val, 0], [wall_val, wall_val], [0, wall_val], [-wall_val, wall_val], [-wall_val, 0]]
+    #     for k in range(len(unexp_idxs)):
+    #         if (matrix[i][j] == 1) and (matrix[unexp_idxs[k][0] + i][unexp_idxs[k][1] + j] == 0):
+    #             for t in range(len(wall_idxs)):
+    #                 try:
+    #                     if (matrix[unexp_idxs[k][0] + i + wall_idxs[t][0]][unexp_idxs[k][1] + j + wall_idxs[t][1]] == 2) and \
+    #                             (matrix[unexp_idxs[k][0] + i + unexp_idxs[t][0]][unexp_idxs[k][1] + j + unexp_idxs[t][1]] != 2):
+    #
+    #                         return True
+    #                 except:
+    #                     continue
+    #     return False
 
     # def is_tail_in_corner(self, i, j, matrix):
     #     if matrix[i][j] == 1:
