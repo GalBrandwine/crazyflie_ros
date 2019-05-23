@@ -70,6 +70,9 @@ class Grid:
 
         self.start_time = None
         self.historic_sens_ij = []
+        self.show_real_pc = False
+        self.time_thr = 25 #sec\
+        self.time_to_correct_grid = rospy.Time.now().to_sec()
 
         for i, id in enumerate(initial_pos_dict):
             self.drones_pos_list[id] = drone_pos(time=0, x=initial_pos_dict[id][0],
@@ -160,6 +163,12 @@ class Grid:
                 # Store previous position of drone
                 self.drones_prev_pos_list[drone_id] = self.drones_pos_list[drone_id]
 
+                # Change tail of previous drone pos to be empty.
+                rospy.logdebug("Change tail of previous drone pos to be empty")
+                i, j = self.xy_to_ij(self.drones_prev_pos_list[drone_id].x, self.drones_prev_pos_list[drone_id].y)
+                if self.matrix[i][j] == 0:
+                    self.change_tail_to_empty(i, j)
+
                 # Store drone position and convert it from [m] to [cm]
                 self.drones_pos_list[drone_id] = drone_pos(point_cloud_last_timestamp.stamp.secs, x * m_to_cm, y * m_to_cm,
                                                            z * m_to_cm, yaw, plt_index)
@@ -170,7 +179,7 @@ class Grid:
                 path_from_prev_to_cur = list(bresenham(i_s, j_s, i_g, j_g))
 
                 # change the tails of the path to non wall
-                for indx, valp in enumerate(path_from_prev_to_cur[1:-1]):
+                for indx, valp in enumerate(path_from_prev_to_cur):
                     ip, jp = valp[0], valp[1]
                     self.validity_matrix[ip][jp] = 5
                     # The surrounding of drones position
@@ -182,12 +191,29 @@ class Grid:
                     self.validity_matrix[ip][jp + 1] = 5
                     self.validity_matrix[ip - 1][jp + 1] = 5
                     self.validity_matrix[ip - 1][jp] = 5
+                    # # Update the empty tail in grid
+                    self.change_tail_to_empty(ip, jp)
+                    self.change_tail_to_empty(ip - 1, jp - 1)
+                    # self.change_tail_to_empty(ip, jp - 1)
+                    self.change_tail_to_empty(ip + 1, jp - 1)
+                    # self.change_tail_to_empty(ip + 1, jp)
+                    self.change_tail_to_empty(ip + 1, jp + 1)
+                    # self.change_tail_to_empty(ip, jp + 1)
+                    self.change_tail_to_empty(ip - 1, jp + 1)
+                    # self.change_tail_to_empty(ip - 1, jp)
 
-                # # Change tail to be empty if the drone is in that tail.
-                # i, j = self.xy_to_ij(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
-                # if self.matrix[i][j] == 0:
-                #     self.change_tail_to_empty(i, j)
-                #     # self.empty_idxs.append([i, j])
+
+                # Change tail to be a wall if the drone is in that tail.
+                i, j = self.xy_to_ij(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
+                if self.matrix[i][j] == 0:
+                    self.change_tail_to_wall(i, j)
+
+                if (rospy.Time.now().to_sec() - self.time_to_correct_grid) >= self.time_thr:
+                    self.time_to_correct_grid = rospy.Time.now().to_sec()
+                    if np.linalg.norm(np.subtract([self.drones_prev_pos_list[drone_id].x, self.drones_prev_pos_list[drone_id].y],\
+                    [self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y])) < 2 * self.res:
+                        self.show_real_pc = True
+
 
             except:
                 rospy.logdebug("tf lookup -- {} not found".format(drone_id))
@@ -202,7 +228,7 @@ class Grid:
                     self.drones_pc_list[drone_id] = drone_pc(point_cloud_last_timestamp.stamp.secs, sens)
                     # Update grid using the new data
                     self.update_from_tof_sensing_list(drone_id)
-                    self.complete_wall_in_corners(self.matrix)
+                    # self.complete_wall_in_corners(self.matrix)
 
     # def pos_parser(self, msg):
     #     pos_header = msg.header
@@ -297,10 +323,14 @@ class Grid:
             i, j = bres_list[ind]
             if 0 > i or i >= self.matrix.shape[0] or 0 > j or j >= self.matrix.shape[1]:
                 break
-            # if np.linalg.norm(np.subtract([i, j], [i0, j0])) < (self.sens_limit / self.res):
-            if self.matrix[i][j] == 0 and np.linalg.norm(np.subtract([i, j], [i0, j0])) < (self.sens_limit / self.res):
-                # if self.matrix[i][j] == 0 and np.linalg.norm(np.subtract([xs[ind], ys[ind]], sensor_pos)) < (self.sens_limit):
-                self.change_tail_to_empty(i, j)
+            if self.show_real_pc:
+                if np.linalg.norm(np.subtract([i, j], [i0, j0])) < (self.sens_limit / self.res):
+                    self.change_tail_to_empty(i, j)
+            else:
+                if self.matrix[i][j] == 0 and np.linalg.norm(np.subtract([i, j], [i0, j0])) < (self.sens_limit / self.res):
+                    # if self.matrix[i][j] == 0 and np.linalg.norm(np.subtract([xs[ind], ys[ind]], sensor_pos)) < (self.sens_limit):
+                    self.change_tail_to_empty(i, j)
+        self.show_real_pc = False
         if 0 < i1 < self.matrix.shape[0] and 0 < j1 < self.matrix.shape[1] and \
                 (np.linalg.norm(np.subtract([i1, j1], [i0, j0])) <= (self.sens_limit / self.res)) and \
                 self.validity_matrix[i1][j1] != 5:

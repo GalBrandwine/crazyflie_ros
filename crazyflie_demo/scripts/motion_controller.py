@@ -74,7 +74,7 @@ def Cj_injector(msg):
 def check_direction():
     global listener, tfBuffer, cj_injection_message
 
-    speed = 0.20  # default speed m/s
+    speed = 0.1  # default speed m/s
     rot_speed = 0.5  # default rot speed sec/radian
     min_duration = 2.0  # minimum time [sec] for single trajectory
     duration = default_duration = 2  # sec
@@ -328,7 +328,7 @@ def handler(cf_handler):
                 [direction, duration] = check_direction()
 
                 # rospy.logdebug("Cj direction is {}".format(direction))
-                rospy.logdebug("Cj duration is {}".format(duration))
+                # rospy.logdebug("Cj duration is {}".format(duration))
 
                 # obstacle_free=avoid_collision()
                 # if obstacle_free == True:

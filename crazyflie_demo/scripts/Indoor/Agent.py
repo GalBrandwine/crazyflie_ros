@@ -52,8 +52,10 @@ class Agent:
         break_counter = 0
         vec = np.zeros(2)
         flag = False
+        tails_from_wall = 1
         as_flag = False
-        noise_fac = 2
+        noise_fac = 1
+        close_wall = False
 
         # if self.astar_path == []:
         #     vec = np.subtract(self.next_pos[0], self.current_pos[0])
@@ -70,16 +72,42 @@ class Agent:
         elif self.astar_path != [] and np.linalg.norm(np.subtract(self.current_pos[0], self.next_pos[0])) > self.dist_factor * self.step_noise_size\
                 and self.is_step_legal(self.current_pos,  np.subtract(self.next_pos[0], self.current_pos[0]), matrix):
             vec = np.subtract(self.next_pos[0], self.current_pos[0])
-        else:
+        elif self.is_step_legal(self.current_pos,  np.subtract(self.next_pos[0], self.current_pos[0]), matrix):
             vec = np.subtract(self.next_pos[0], self.current_pos[0])
 
 
-        # while break_counter < 10 and as_flag == False and sum(vec) != 0:
-        #     break_counter = break_counter + 1
-        #     step = self.step_noise_size * noise_fac * ([0.5, 0.5] - np.random.rand(2)) + vec
-        #     if self.is_step_legal(self.current_pos, step, matrix):
-        #         vec = step
-        #         break
+
+        if sum(vec) != 0:
+            ivec, jvec = self.xy_to_ij(vec[0], vec[1])
+            for ti in range(ivec - tails_from_wall, ivec + tails_from_wall + 1):
+                for tj in range(jvec - tails_from_wall, jvec - tails_from_wall + 1):
+                    if matrix[ti][tj] == 2:
+                        close_wall = True
+                        break
+        else:
+            close_wall = True
+
+
+        if close_wall:
+            rospy.logdebug("inside close wall")
+            if np.linalg.norm(np.subtract(self.current_pos[0], self.next_pos[0])) > self.res:
+                step = np.multiply(np.divide(vec, np.linalg.norm(vec)), np.linalg.norm(vec) - (tails_from_wall * self.res))
+                if (np.linalg.norm(vec) - (tails_from_wall * self.res)) > 0:
+                    vec = step
+
+            # while break_counter < max_count_val and as_flag == False and sum(vec) != 0:
+            #     break_counter = break_counter + 1
+            #     step = self.step_noise_size * noise_fac * ([0.5, 0.5] - np.random.rand(2)) + self.current_pos[0]
+            #     istep, jstep = self.xy_to_ij(step[0], step[1])
+            #     if self.is_step_legal(self.current_pos, step, matrix) and matrix[istep + tails_from_wall][jstep] != 2 and\
+            #             matrix[istep - tails_from_wall][jstep] != 2 and matrix[istep][jstep + tails_from_wall] != 2 and\
+            #             matrix[istep][jstep - tails_from_wall] != 2:
+            #         vec = step
+            #         break
+
+        if np.linalg.norm(vec) > self.stepSizeLimit:
+            temp = np.divide(vec, np.linalg.norm(vec))
+            vec = np.multiply(temp, self.stepSizeLimit)
 
         if break_counter < max_count_val:
             self.next_pos = self.current_pos + vec

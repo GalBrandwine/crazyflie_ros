@@ -30,7 +30,6 @@ A few notes:
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
 <!--    <arg name="initX1" default="0.381"/> &lt;!&ndash;red right point&ndash;&gt;-->
     <arg name="initX1" default="0.5334"/>
-    <!--    <arg name="initY1" default="1.905"/>-->  <!--yello point-->
 <!--    <arg name="initY1" default="0.8382"/> &lt;!&ndash;red right point&ndash;&gt;-->
     <arg name="initY1" default="1.9050"/>
     <arg name="initZ1" default="0"/>
@@ -41,12 +40,12 @@ A few notes:
     <arg name="frame2" default="cf3"/>
     <arg name="frame2_active" default="0"/>
     <arg name="frame2__listening_to_key_board" default="1"/>
-    <arg name="frame2_start_delay" default="10"/>
+    <arg name="frame2_start_delay" default="5"/>
     <arg name="traj_list2" default="[$(arg traj1),$(arg traj2)]"/>
-<!--    <arg name="initX2" default="0.381"/>  &lt;!&ndash;red left point&ndash;&gt;-->
-    <arg name="initX2" default="0.1524"/>
-<!--    <arg name="initY2" default="4.191"/>  &lt;!&ndash;red left point&ndash;&gt;-->
-    <arg name="initY2" default="1.9050"/>
+    <arg name="initX2" default="0.381"/>  <!--red left point-->
+<!--    <arg name="initX2" default="0.1524"/>-->
+    <arg name="initY2" default="4.115"/>  <!--red left point-->
+<!--    <arg name="initY2" default="1.9050"/>-->
     <arg name="initZ2" default="0"/>
 
 
