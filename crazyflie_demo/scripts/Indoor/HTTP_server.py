@@ -56,7 +56,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.drone_pos_dict[curr_drone_name] = None
 
         # Load recorded vehicle path
-        self.vehicle_path = np.loadtxt(rospy.get_param('~vehicle_recorded_path'))
+        # self.vehicle_path = np.loadtxt(rospy.get_param('~vehicle_recorded_path'))
 
         # Set a subscriber for the occupancy grid. The occupancy grid is a part of the data in the matrix
         # (the occupancy grid contains the information about the free, ubknown and wall areas).
@@ -131,8 +131,8 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     # Update additional data: drones location, car path and location, etc.
     def update_matrix_additional_data(self):
-        for i in range(np.shape(self.vehicle_path)[0]):
-            self.matrix[self.vehicle_path[i][0], self.vehicle_path[i][1]] = 5
+        # for i in range(np.shape(self.vehicle_path)[0]):
+        #     self.matrix[self.vehicle_path[i][0], self.vehicle_path[i][1]] = 5
 
         self.update_drone_positions()
         for iDrone in range(self.nDrones):
@@ -189,7 +189,7 @@ if __name__ == "__main__":
     rospy.init_node("http_server")
     try:
         # server = HTTPServer(('localhost', PORT_NUMBER), RequestHandler)
-        server = HTTPServer(('192.168.1.108', PORT_NUMBER), RequestHandler)
+        server = HTTPServer(('192.168.1.113', PORT_NUMBER), RequestHandler)
         print 'Started HTTP server on port ', PORT_NUMBER
 
         server.serve_forever()

@@ -71,7 +71,7 @@ class Grid:
         self.start_time = None
         self.historic_sens_ij = []
         self.show_real_pc = False
-        self.time_thr = 25 #sec\
+        self.time_thr = 20 #sec\
         self.time_to_correct_grid = rospy.Time.now().to_sec()
 
         for i, id in enumerate(initial_pos_dict):
@@ -164,7 +164,6 @@ class Grid:
                 self.drones_prev_pos_list[drone_id] = self.drones_pos_list[drone_id]
 
                 # Change tail of previous drone pos to be empty.
-                rospy.logdebug("Change tail of previous drone pos to be empty")
                 i, j = self.xy_to_ij(self.drones_prev_pos_list[drone_id].x, self.drones_prev_pos_list[drone_id].y)
                 if self.matrix[i][j] == 0:
                     self.change_tail_to_empty(i, j)

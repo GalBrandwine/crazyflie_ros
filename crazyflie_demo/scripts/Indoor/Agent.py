@@ -89,7 +89,6 @@ class Agent:
 
 
         if close_wall:
-            rospy.logdebug("inside close wall")
             if np.linalg.norm(np.subtract(self.current_pos[0], self.next_pos[0])) > self.res:
                 step = np.multiply(np.divide(vec, np.linalg.norm(vec)), np.linalg.norm(vec) - (tails_from_wall * self.res))
                 if (np.linalg.norm(vec) - (tails_from_wall * self.res)) > 0:
