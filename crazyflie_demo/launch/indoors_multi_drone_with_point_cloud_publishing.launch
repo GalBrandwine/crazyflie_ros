@@ -37,8 +37,8 @@ A few notes:
 
 
     <!-- for second CF    -->
-    <arg name="uri2" default="radio://0/120/2M/E7E7E7E702"/>
-    <arg name="frame2" default="cf2"/>
+    <arg name="uri2" default="radio://0/120/2M/E7E7E7E703"/>
+    <arg name="frame2" default="cf3"/>
     <arg name="frame2_active" default="0"/>
     <arg name="frame2__listening_to_key_board" default="1"/>
     <arg name="frame2_start_delay" default="10"/>
@@ -80,7 +80,7 @@ A few notes:
     <arg name="env_lim" default="[$(arg x_min), $(arg x_max), $(arg y_min), $(arg y_max)]"/>
     <arg name="resolution" default="8"/>
     <arg name="env_space" default="0"/>
-    <arg name="nDrones" default="1"/>
+    <arg name="nDrones" default="2"/>
     <arg name="useRefEnv" default="0"/>
 
 
@@ -434,16 +434,16 @@ A few notes:
             <param name="nDrones" value="$(arg nDrones)"/>
         </node>
 
-<!--        <node name="http_server" pkg="crazyflie_demo" type="HTTP_server.py" output="screen">-->
-<!--            <param name="nDrones" value="$(arg nDrones)"/>-->
-<!--            <param name="drone_name_0" value="$(arg frame1)"/>-->
-<!--            <param name="drone_name_1" value="$(arg frame2)"/>-->
-<!--            <param name="env_lim" value="$(arg env_lim)"/>-->
-<!--            <param name="env_space" value="$(arg env_space)"/>-->
-<!--            <param name="resolution" value="$(arg resolution)"/>-->
-<!--            <param name="vehicle_start_pos" value="[0.33, 1.91]" />-->
-<!--            <param name="vehicle_recorded_path" value="$(find crazyflie_demo)/resources/vehicle_recorded_path.txt"/>-->
-<!--        </node>-->
+        <node name="http_server" pkg="crazyflie_demo" type="HTTP_server.py" output="screen">
+            <param name="nDrones" value="$(arg nDrones)"/>
+            <param name="drone_name_0" value="$(arg frame1)"/>
+            <param name="drone_name_1" value="$(arg frame2)"/>
+            <param name="env_lim" value="$(arg env_lim)"/>
+            <param name="env_space" value="$(arg env_space)"/>
+            <param name="resolution" value="$(arg resolution)"/>
+            <param name="vehicle_start_pos" value="[0.33, 1.91]" />
+            <param name="vehicle_recorded_path" value="$(find crazyflie_demo)/resources/vehicle_recorded_path.txt"/>
+        </node>
 
     </group>
 

@@ -141,11 +141,11 @@ class RequestHandler(BaseHTTPRequestHandler):
                 continue
             drone_pos_xy = self.drone_pos_dict[drone_name][:2]
             drone_pos_ij = list(np.floor(np.divide(np.subtract(drone_pos_xy, [self.x_lim[0], self.y_lim[0]]), self.grid_resolution)))
-            self.matrix[drone_pos_ij[0], drone_pos_ij[1]] = 3
+            self.matrix[int(drone_pos_ij[0]), int(drone_pos_ij[1])] = 3
 
         vehicle_pos_ij = list(np.floor(np.divide(np.subtract(self.vehicle_pos, [self.x_lim[0], self.y_lim[0]]), self.grid_resolution)))
         if vehicle_pos_ij[0] >= 0 and vehicle_pos_ij[0] < np.shape(self.matrix[0]) and vehicle_pos_ij[1] >= 0 and vehicle_pos_ij[1] < np.shape(self.matrix[1]):
-            self.matrix[vehicle_pos_ij[0], vehicle_pos_ij[1]] = 4
+            self.matrix[int(vehicle_pos_ij[0]), int(vehicle_pos_ij[1])] = 4
             # self.vehicle_pos_log.append(vehicle_pos_ij)
             # np.savetxt('/home/bgilad/path.txt', self.vehicle_pos_log, fmt='%s')
             # print "file saved"
