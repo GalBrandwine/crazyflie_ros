@@ -360,7 +360,8 @@ def handler(cf_handler):
 
 
 if __name__ == '__main__':
-    rospy.init_node('motion', log_level=rospy.DEBUG)  # log_level=rospy.DEBUG
+    # rospy.init_node('motion', log_level=rospy.DEBUG)  # log_level=rospy.DEBUG
+    rospy.init_node('motion')
 
     # last minute addition, listen to keyboard per drone!!
     listen_to_keyboard = rospy.get_param("~listen_to_keyboard")

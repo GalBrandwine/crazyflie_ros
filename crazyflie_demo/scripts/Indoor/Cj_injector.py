@@ -13,6 +13,7 @@ from GridPOI import GridPOI
 from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import OccupancyGrid
 from tf.transformations import euler_from_quaternion
+from bresenham import bresenham
 
 m_to_cm = 100
 
@@ -53,18 +54,41 @@ def xy_to_ij(x, y, x_lim, y_lim, res):
     return i, j
 
 
-def get_goal_point(pos, interesting_points_list_xy, matrix, x_lim, y_lim, res):
-    # g_idx = 0
-    g_idx = g_idx = np.random.randint(len(interesting_points_list_xy))
+def get_goal_point(pos, interesting_points_list_xy, matrix, x_lim, y_lim, res, paths_to_wps, min_dist_between_goals):
+    g_idx = []
     dist_arr = []
-    for idx, elem in enumerate(interesting_points_list_xy):
+
+    for ielem, elem in enumerate(interesting_points_list_xy):
         dist_arr.append(np.linalg.norm(np.subtract(elem, pos[0])))
     sorted_dist_idxs = sorted(range(len(dist_arr)), key=lambda k: dist_arr[k])
-    for idx in sorted_dist_idxs:
-        if is_los(pos, [[interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1]]], matrix, x_lim, y_lim,
-                  res):
-            g_idx = idx
-            break
+    if paths_to_wps != []:
+        for idx in sorted_dist_idxs:
+            i_s, j_s = xy_to_ij(pos[0][0], pos[0][1], x_lim, y_lim, res)
+            i_g, j_g = xy_to_ij(interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1], x_lim, y_lim, res)
+            path_curr_sg = list(bresenham(i_s, j_s, i_g, j_g))
+            valid_wp = True
+            overlapping_tails = []
+
+            for path_sg in paths_to_wps:
+                # overlapping_tails = set(path_curr_sg).intersection(path_sg)
+                overlapping_tails = list(set(path_curr_sg).intersection(set(path_sg)))
+                dist_between_goals = np.linalg.norm(np.subtract(list(path_sg[-1]), list(path_curr_sg[-1])))
+                if overlapping_tails != [] and dist_between_goals < min_dist_between_goals:
+                    valid_wp = False
+                    break
+
+            if valid_wp == True:
+                g_idx = idx
+                break
+    else:
+        # g_idx = 0
+        g_idx = g_idx = np.random.randint(len(interesting_points_list_xy))
+        for idx in sorted_dist_idxs:
+            if is_los(pos, [[interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1]]], matrix, x_lim, y_lim,
+                      res):
+                g_idx = idx
+                break
+
     return g_idx
 
 
@@ -139,16 +163,16 @@ class DroneCjInjector:
         # self.next_pose[1] = self.pos[1]/m_to_cm # Only for debug - inject input to output
         # self.next_pose[5] = 0 # Only for debug
 
-        self.next_pose[0] = self.agent.next_pos[0][0] / m_to_cm
-        self.next_pose[1] = self.agent.next_pos[0][1] / m_to_cm
+        self.next_pose[0] = self.agent.next_pos[0][0]
+        self.next_pose[1] = self.agent.next_pos[0][1]
         self.next_pose[5] = self.drone_yaw
         self.next_pose[2] = 0.35  # hard coded Z height
         # # return to original angle after rotation
         # if self.rot_enabled:
         #     self.drone_yaw = drone_yaw
 
-        x = self.next_pose[0]
-        y = self.next_pose[1]
+        x = self.next_pose[0] / m_to_cm
+        y = self.next_pose[1] / m_to_cm
         z = self.next_pose[2]
         roll = 0
         pitch = 0
@@ -247,61 +271,73 @@ class DroneInjector:
 
         x_lim = self.env_limits[0:2]
         y_lim = self.env_limits[2:4]
+        self.min_dist_between_goals = 10
+        paths_to_wps = []
 
         for drone in self.cj_injector_container:
 
-            try:
-                trans = self.tfBuffer.lookup_transform('world', drone.tf_prefix, rospy.Time(0))
+        # try:
+            trans = self.tfBuffer.lookup_transform('world', drone.tf_prefix, rospy.Time(0))
 
-                q = (trans.transform.rotation.x,
-                     trans.transform.rotation.y,
-                     trans.transform.rotation.z,
-                     trans.transform.rotation.w)
+            q = (trans.transform.rotation.x,
+                 trans.transform.rotation.y,
+                 trans.transform.rotation.z,
+                 trans.transform.rotation.w)
 
-                euler = euler_from_quaternion(q, axes='sxyz')
+            euler = euler_from_quaternion(q, axes='sxyz')
 
-                x = trans.transform.translation.x
-                y = trans.transform.translation.y
-                z = trans.transform.translation.z
-                roll = euler[0]
-                pitch = euler[1]
-                yaw = euler[2]
+            x = trans.transform.translation.x
+            y = trans.transform.translation.y
+            z = trans.transform.translation.z
+            roll = euler[0]
+            pitch = euler[1]
+            yaw = euler[2]
 
-                pos = [x * m_to_cm, y * m_to_cm, z * m_to_cm, roll, pitch, yaw]
-                # rospy.loginfo("pos in Display: {}\n".format(self.pos))
-                cur_pos = [[pos[0], pos[1]]]
+            pos = [x * m_to_cm, y * m_to_cm, z * m_to_cm, roll, pitch, yaw]
+            # rospy.loginfo("pos in Display: {}\n".format(self.pos))
+            cur_pos = [[pos[0], pos[1]]]
 
-                if self.POI_enabled and self.interesting_points_list_xy != []:
+            if self.POI_enabled and self.interesting_points_list_xy != []:
 
-                    g_idx = get_goal_point(cur_pos, self.interesting_points_list_xy, self.matrix, x_lim, y_lim,
-                                           self.res)
+                g_idx = get_goal_point(cur_pos, self.interesting_points_list_xy, self.matrix, x_lim, y_lim,
+                                       self.res, paths_to_wps, self.min_dist_between_goals)
 
-                    # if np.random.rand < 0.1:
-                    #     g_idx = np.random.randint(len(self.interesting_points_list_xy))
-                    # else:
-                    #     g_idx = 0
+                # if np.random.rand < 0.1:
+                #     g_idx = np.random.randint(len(self.interesting_points_list_xy))
+                # else:
+                #     g_idx = 0
 
+                try:
                     gx = self.interesting_points_list_xy[g_idx][0]
                     gy = self.interesting_points_list_xy[g_idx][1]
                     goal = [gx, gy]
+
+                    rospy.logdebug("taking goal from get_goal_point {} for drone {}".format(goal, drone.tf_prefix))
+
+                    i_s, j_s = xy_to_ij(cur_pos[0][0], cur_pos[0][1], x_lim, y_lim, self.res)
+                    i_g, j_g = xy_to_ij(goal[0], goal[1], x_lim, y_lim, self.res)
+
+                    path_sg = list(bresenham(i_s, j_s, i_g, j_g))
+                    paths_to_wps.append(path_sg)
+
                     del self.interesting_points_list_xy[g_idx]
-                else:
-                    goal = drone.next_pose[0:2]
+                except:
+                    goal = [drone.next_pose[0], drone.next_pose[1]]
+                    rospy.logdebug("taking position as goal {} for drone {}".format(goal, drone.tf_prefix))
 
-                # rospy.logdebug("Cj_injector pos: {}".format(cur_pos))
-                # drone.update_pos(pos, self.matrix, pos[0:2], corner_points_list_xy)
-                drone.update_pos(cur_pos, self.matrix, goal, yaw, self.corner_points_list_xy, self.POI_enabled)
+            else:
+                goal = [drone.next_pose[0], drone.next_pose[1]]
+                rospy.logdebug("taking position as goal {} for drone {}".format(goal, drone.tf_prefix))
 
-                # rospy.logdebug("in grid_parser - drone.update:\n"
-                #                "pos: {}\n"
-                #                "next_pos: {}\n"
-                #                "".format(pos,pos[0:2]))
+            drone.update_pos(cur_pos, self.matrix, goal, yaw, self.corner_points_list_xy, self.POI_enabled)
 
-            # except:
-            # rospy.logdebug("tf lookup -- {} not found".format(drone.tf_prefix))
-            except Exception as e:
-                pass
-                # rospy.logdebug(e)
+            # rospy.logdebug("in grid_parser - drone.update:\n"
+            #                "pos: {}\n"
+            #                "next_pos: {}\n"
+            #                "".format(pos,pos[0:2]))
+
+        # except Exception as e:
+        #     rospy.logdebug(e)
 
 
 if __name__ == '__main__':
