@@ -14,6 +14,7 @@ import tf2_ros
 from tf.transformations import euler_from_quaternion
 import csv
 import copy
+from geometry_msgs.msg import Twist
 
 m_to_cm = 100
 
@@ -97,6 +98,12 @@ class Grid:
         # Start occupancy grid publisher
         grid_pub_thread = threading.Thread(name='grid_pub_thread', target=self.init_grid_publisher)
         grid_pub_thread.start()
+
+    def grid_discovered(self):
+        grid_size = self.matrix.shape[0]*self.matrix.shape[1]
+        grid_disc = np.count_nonzero(self.matrix)
+        ratio = float(grid_disc)/float(grid_size)
+        return ratio
 
     def csv_to_maze(self):
         maze_path = rospy.get_param('~excelPath')
@@ -227,6 +234,20 @@ class Grid:
                     # Update grid using the new data
                     self.update_from_tof_sensing_list(drone_id)
                     # self.complete_wall_in_corners(self.matrix)
+
+        if self.grid_discovered() > 0.8:
+            """Every grid update check grid coverage, if exceeds X%, land all drones! """
+
+            rospy.loginfo("Coverage reached, landing all drones!")
+            pub = rospy.Publisher('cmd_vel', Twist, queue_size=1)
+            twist = Twist()
+            twist.linear.x = 0
+            twist.linear.y = 0
+            twist.linear.z = 0
+            twist.angular.x = 0
+            twist.angular.y = 0
+            twist.angular.z = 0
+            pub.publish(twist)
 
     # def pos_parser(self, msg):
     #     pos_header = msg.header
