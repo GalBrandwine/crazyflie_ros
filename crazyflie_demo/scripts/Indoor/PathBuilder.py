@@ -225,15 +225,15 @@ def build_trj(pos, env_limits, res, matrix, temp_corner_points_list_xy, goal):
 
     astar_movement, corner_idxs = astar.PlanningAlg(pos[0][0], pos[0][1], gx, gy, temp_corner_points_list_xy)
 
-    # if len(corner_idxs) >= 3:
-    #     for ci in corner_idxs:
-    #         if ci != -1:
-    #             temp_corner_points_list_xy[ci] = []
-    #
-    #     temp_corner_points_list_xy = filter(None, temp_corner_points_list_xy)
+    if len(corner_idxs) >= 3:
+        for ci in corner_idxs:
+            if ci != -1:
+                temp_corner_points_list_xy[ci] = []
+
+        temp_corner_points_list_xy = filter(None, temp_corner_points_list_xy)
 
 
     Astar_Movement = astar_movement[1:]
 
-    # return Astar_Movement, temp_corner_points_list_xy
-    return Astar_Movement
+    return Astar_Movement, temp_corner_points_list_xy
+    # return Astar_Movement

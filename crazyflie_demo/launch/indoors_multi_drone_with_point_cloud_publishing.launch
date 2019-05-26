@@ -24,7 +24,7 @@ A few notes:
     <!-- for first CF -->
     <arg name="uri1" default="radio://0/120/2M/E7E7E7E704"/>
     <arg name="frame1" default="cf4"/>
-    <arg name="frame1_active" default="0"/>
+    <arg name="frame1_active" default="1"/>
     <arg name="frame1__listening_to_key_board" default="1"/>
     <arg name="frame1_start_delay" default="0"/>
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
@@ -40,7 +40,7 @@ A few notes:
     <!-- for second CF    -->
     <arg name="uri2" default="radio://0/120/2M/E7E7E7E703"/>
     <arg name="frame2" default="cf3"/>
-    <arg name="frame2_active" default="0"/>
+    <arg name="frame2_active" default="1"/>
     <arg name="frame2__listening_to_key_board" default="1"/>
     <arg name="frame2_start_delay" default="10"/>
     <arg name="traj_list2" default="[$(arg traj1),$(arg traj2)]"/>
