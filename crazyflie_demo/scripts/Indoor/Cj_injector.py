@@ -1,20 +1,21 @@
 #!/usr/bin/env python
 """This is a simple Cj_injector for emulating. """
 import math
-import numpy as np
 from math import radians
 
 import PathBuilder
+import numpy as np
 import rospy
 import tf
 import tf2_ros
 from Agent import Agent
+from Grid import m_to_cm
 from GridPOI import GridPOI
+from bresenham import bresenham
 from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import OccupancyGrid
 from tf.transformations import euler_from_quaternion
-from bresenham import bresenham
-from Grid import m_to_cm
+
 
 # Drone position
 class drone_pos_goal:
@@ -61,80 +62,120 @@ def xy_to_ij(x, y, x_lim, y_lim, res):
     return i, j
 
 
-# def get_goal_point(pos, interesting_points_list_xy, matrix, x_lim, y_lim, res, paths_to_wps, min_dist_between_goals):
-#     g_idx = []
-#     dist_arr = []
-#
-#     for ielem, elem in enumerate(interesting_points_list_xy):
-#         dist_arr.append(np.linalg.norm(np.subtract(elem, pos[0])))
-#     sorted_dist_idxs = sorted(range(len(dist_arr)), key=lambda k: dist_arr[k])
-#     if paths_to_wps != []:
-#         for idx in sorted_dist_idxs:
-#             i_s, j_s = xy_to_ij(pos[0][0], pos[0][1], x_lim, y_lim, res)
-#             i_g, j_g = xy_to_ij(interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1], x_lim, y_lim, res)
-#             path_curr_sg = list(bresenham(i_s, j_s, i_g, j_g))
-#             valid_wp = True
-#             overlapping_tails = []
-#
-#             for path_sg in paths_to_wps:
-#                 # overlapping_tails = set(path_curr_sg).intersection(path_sg)
-#                 overlapping_tails = list(set(path_curr_sg).intersection(set(path_sg)))
-#                 dist_between_goals = np.linalg.norm(np.subtract(list(path_sg[-1]), list(path_curr_sg[-1])))
-#                 if overlapping_tails != [] and dist_between_goals < min_dist_between_goals:
-#                     valid_wp = False
-#                     break
-#
-#             if valid_wp == True:
-#                 g_idx = idx
-#                 break
-#     else:
-#         # g_idx = 0
-#         g_idx = g_idx = np.random.randint(len(interesting_points_list_xy))
-#         for idx in sorted_dist_idxs:
-#             if is_los(pos, [[interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1]]], matrix, x_lim, y_lim,
-#                       res):
-#                 g_idx = idx
-#                 break
-#
-#     return g_idx
+def get_goal_point(interesting_points_list_xy, matrix, x_lim, y_lim, res, n_tails_between_drones, drones_pos_list, tf_prefix):
 
+    dist_arr = []
+    for ielem, elem in enumerate(interesting_points_list_xy):
+        dist_arr.append(np.linalg.norm(np.subtract(elem, drones_pos_list[tf_prefix].pos)))
+    sorted_dist_idxs = sorted(range(len(dist_arr)), key=lambda k: dist_arr[k])
 
-def get_goal_point(interesting_points_list_xy, x_lim, y_lim, res, drones_pos_list, n_tails_between_drones, tf_prefix):
-    valid_wp_flag = True
-    goal = drones_pos_list[tf_prefix].goal
+    valid_wp_flag = False
     g_idx = []
+
     i_s, j_s = xy_to_ij(drones_pos_list[tf_prefix].pos[0], drones_pos_list[tf_prefix].pos[1], x_lim, y_lim, res)
-    for i_elem, elem in enumerate(interesting_points_list_xy):
-        i_g, j_g = xy_to_ij(elem[0], elem[1], x_lim, y_lim, res)
-        path_curr_sg = list(bresenham(i_s, j_s, i_g, j_g))
+    for idx in sorted_dist_idxs:
+        i_g, j_g = xy_to_ij(interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1], x_lim, y_lim, res)
         for i_prefix, prefix in enumerate(drones_pos_list):
             if prefix != tf_prefix:
                 add_drone_pos = drones_pos_list[prefix].pos
                 i_p_s, j_p_s = xy_to_ij(add_drone_pos[0], add_drone_pos[1], x_lim, y_lim, res)
-                if drones_pos_list[prefix].next_pos != []:
+                if np.linalg.norm(np.subtract([i_g, j_g], [i_p_s, j_p_s])) > n_tails_between_drones:
+                    if is_los([[drones_pos_list[tf_prefix].pos[0], drones_pos_list[tf_prefix].pos[1]]],
+                              [[interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1]]], matrix, x_lim,
+                              y_lim, res):
+                        g_idx = idx
+                        valid_wp_flag = True
+                        break
+        if valid_wp_flag == True:
+            break
+
+    if g_idx == []:
+
+        for idx in sorted_dist_idxs:
+            i_g, j_g = xy_to_ij(interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1], x_lim, y_lim,
+                                res)
+            for i_prefix, prefix in enumerate(drones_pos_list):
+                if prefix != tf_prefix:
+                    add_drone_pos = drones_pos_list[prefix].pos
+                    i_p_s, j_p_s = xy_to_ij(add_drone_pos[0], add_drone_pos[1], x_lim, y_lim, res)
                     add_drone_next_pos = drones_pos_list[prefix].next_pos
                     i_p_g, j_p_g = xy_to_ij(add_drone_next_pos[0], add_drone_next_pos[1], x_lim, y_lim, res)
                     if np.linalg.norm(np.subtract([i_g, j_g], [i_p_s, j_p_s])) > n_tails_between_drones and \
-                            np.linalg.norm(np.subtract([i_g, j_g], [i_p_g, j_p_g])) > n_tails_between_drones:
-                        path_p_sg = list(bresenham(i_p_s, j_p_s, i_p_g, j_p_g))
-                        overlapping_tails = list(set(path_curr_sg).intersection(set(path_p_sg)))
-                        if overlapping_tails != []:
-                            valid_wp_flag = False
-                            break
-                        pass
-                    else:
-                        valid_wp_flag = False
+                                np.linalg.norm(np.subtract([i_g, j_g], [i_p_g, j_p_g])) > n_tails_between_drones:
+                        g_idx = idx
+                        valid_wp_flag = True
                         break
-                else:
-                    if np.linalg.norm(np.subtract([i_g, j_g], [i_p_s, j_p_s])) < n_tails_between_drones:
-                        valid_wp_flag = False
-                        break
+            if valid_wp_flag == True:
+                break
 
-        if valid_wp_flag == True:
-            g_idx = i_elem
-            goal = list(elem)
+    if g_idx == [] and interesting_points_list_xy != []:
+        g_idx = np.random.randint(len(interesting_points_list_xy))
 
-    return g_idx, goal
+
+        # valid_wp_flag = True
+        # for i_elem, elem in enumerate(interesting_points_list_xy):
+        #     i_g, j_g = xy_to_ij(elem[0], elem[1], x_lim, y_lim, res)
+        #     path_curr_sg = list(bresenham(i_s, j_s, i_g, j_g))
+        #     for i_prefix, prefix in enumerate(drones_pos_list):
+        #         if prefix != tf_prefix:
+        #             add_drone_pos = drones_pos_list[prefix].pos
+        #             i_p_s, j_p_s = xy_to_ij(add_drone_pos[0], add_drone_pos[1], x_lim, y_lim, res)
+        #             if drones_pos_list[prefix].next_pos != []:
+        #                 add_drone_next_pos = drones_pos_list[prefix].next_pos
+        #                 i_p_g, j_p_g = xy_to_ij(add_drone_next_pos[0], add_drone_next_pos[1], x_lim, y_lim, res)
+        #                 if np.linalg.norm(np.subtract([i_g, j_g], [i_p_s, j_p_s])) > n_tails_between_drones and \
+        #                         np.linalg.norm(np.subtract([i_g, j_g], [i_p_g, j_p_g])) > n_tails_between_drones:
+        #                     path_p_sg = list(bresenham(i_p_s, j_p_s, i_p_g, j_p_g))
+        #                     overlapping_tails = list(set(path_curr_sg).intersection(set(path_p_sg)))
+        #                     if overlapping_tails != []:
+        #                         valid_wp_flag = False
+        #                         break
+        #                     pass
+        #                 else:
+        #                     valid_wp_flag = False
+        #                     break
+        #     if valid_wp_flag == True:
+        #         g_idx = i_elem
+
+    return g_idx
+
+
+# def get_goal_point(interesting_points_list_xy, x_lim, y_lim, res, drones_pos_list, n_tails_between_drones, tf_prefix):
+#     valid_wp_flag = True
+#     goal = drones_pos_list[tf_prefix].goal
+#     g_idx = []
+#     i_s, j_s = xy_to_ij(drones_pos_list[tf_prefix].pos[0], drones_pos_list[tf_prefix].pos[1], x_lim, y_lim, res)
+#     for i_elem, elem in enumerate(interesting_points_list_xy):
+#         i_g, j_g = xy_to_ij(elem[0], elem[1], x_lim, y_lim, res)
+#         path_curr_sg = list(bresenham(i_s, j_s, i_g, j_g))
+#         for i_prefix, prefix in enumerate(drones_pos_list):
+#             if prefix != tf_prefix:
+#                 add_drone_pos = drones_pos_list[prefix].pos
+#                 i_p_s, j_p_s = xy_to_ij(add_drone_pos[0], add_drone_pos[1], x_lim, y_lim, res)
+#                 if drones_pos_list[prefix].next_pos != []:
+#                     add_drone_next_pos = drones_pos_list[prefix].next_pos
+#                     i_p_g, j_p_g = xy_to_ij(add_drone_next_pos[0], add_drone_next_pos[1], x_lim, y_lim, res)
+#                     if np.linalg.norm(np.subtract([i_g, j_g], [i_p_s, j_p_s])) > n_tails_between_drones and \
+#                             np.linalg.norm(np.subtract([i_g, j_g], [i_p_g, j_p_g])) > n_tails_between_drones:
+#                         path_p_sg = list(bresenham(i_p_s, j_p_s, i_p_g, j_p_g))
+#                         overlapping_tails = list(set(path_curr_sg).intersection(set(path_p_sg)))
+#                         if overlapping_tails != []:
+#                             valid_wp_flag = False
+#                             break
+#                         pass
+#                     else:
+#                         valid_wp_flag = False
+#                         break
+#                 else:
+#                     if np.linalg.norm(np.subtract([i_g, j_g], [i_p_s, j_p_s])) < n_tails_between_drones:
+#                         valid_wp_flag = False
+#                         break
+#
+#         if valid_wp_flag == True:
+#             g_idx = i_elem
+#             goal = list(elem)
+#
+#     return g_idx, goal
 
 
 class DroneCjInjector:
@@ -174,7 +215,8 @@ class DroneCjInjector:
         self.Cj_injector_pub = rospy.Publisher('/' + self.tf_prefix + "/Cj_injcetor", PoseStamped,
                                                queue_size=1)  # hover message publisher
 
-    def update_pos(self, drone_pos, new_matrix, next_point, drone_yaw, corrners_array, act_as_flag, dict_of_drones_pos, tf_prefix):
+    def update_pos(self, drone_pos, new_matrix, next_point, drone_yaw, corrners_array, act_as_flag, dict_of_drones_pos,
+                   tf_prefix):
         """This function is being called in DroneInjector, every time a pose is recieved for this drone.
             :param
                 new_drone_pos - received from Father's subscriber.
@@ -199,8 +241,9 @@ class DroneCjInjector:
 
         # Assume that new_pos = [x,y,z,r,p,y]
         if act_as_flag:
-            Astar_Movement, updated_corners = PathBuilder.build_trj(drone_pos, self.env_limits, self.res, self.matrix, updated_corners,
-                                                   next_point)
+            Astar_Movement, updated_corners = PathBuilder.build_trj(drone_pos, self.env_limits, self.res, self.matrix,
+                                                                    updated_corners,
+                                                                    next_point)
             self.agent.astar_path = Astar_Movement
 
         self.agent.preform_step_sys_sim(drone_pos, self.drone_yaw, self.matrix, dict_of_drones_pos, tf_prefix)
@@ -299,8 +342,9 @@ class DroneInjector:
             drone_init_takeoff = prefix_takeoff_dict_input[drone_pref]
             drone = DroneCjInjector(drone_pref, drone_init_takeoff, self.env_limits, self.matrix, resolution)
             self.cj_injector_container.append(drone)
-            self.drones_pos_list[drone_pref] = drone_pos_goal(pos=[drone_init_takeoff[0] * m_to_cm, drone_init_takeoff[1] * m_to_cm],
-                                                              next_pos=[], goal=[drone_init_takeoff[0] * m_to_cm, drone_init_takeoff[1] * m_to_cm], yaw=[])
+            self.drones_pos_list[drone_pref] = drone_pos_goal(
+                pos=[drone_init_takeoff[0] * m_to_cm, drone_init_takeoff[1] * m_to_cm],
+                next_pos=[], goal=[drone_init_takeoff[0] * m_to_cm, drone_init_takeoff[1] * m_to_cm], yaw=[])
 
         self.rate = rate
 
@@ -330,7 +374,7 @@ class DroneInjector:
 
         for drone in self.cj_injector_container:
 
-        # try:
+            # try:
             trans = self.tfBuffer.lookup_transform('world', drone.tf_prefix, rospy.Time(0))
 
             q = (trans.transform.rotation.x,
@@ -352,8 +396,9 @@ class DroneInjector:
             cur_pos = [[pos[0], pos[1]]]
             if self.POI_enabled and self.interesting_points_list_xy != []:
 
-                g_idx, goal = get_goal_point(self.interesting_points_list_xy, x_lim, y_lim, self.res,
-                                       self.drones_pos_list, self.min_dist_between_drones, drone.tf_prefix)
+                goal = self.drones_pos_list[drone.tf_prefix].goal
+
+                g_idx = get_goal_point(self.interesting_points_list_xy, self.matrix, x_lim, y_lim, self.res, self.min_dist_between_drones, self.drones_pos_list, drone.tf_prefix)
 
                 # if np.random.rand < 0.1:
                 #     g_idx = np.random.randint(len(self.interesting_points_list_xy))
@@ -364,15 +409,18 @@ class DroneInjector:
                 # goal = [gx, gy]
 
                 if g_idx != []:
+                    goal = self.interesting_points_list_xy[g_idx]
                     del self.interesting_points_list_xy[g_idx]
 
-            # else:
-            #     goal = [drone.next_pose[0], drone.next_pose[1]]
+                # else:
+                #     goal = [drone.next_pose[0], drone.next_pose[1]]
 
                 self.drones_pos_list[drone.tf_prefix].pos = cur_pos[0]
                 self.drones_pos_list[drone.tf_prefix].goal = goal
 
-            self.corner_points_list_xy, self.drones_pos_list = drone.update_pos(cur_pos, self.matrix, self.drones_pos_list[drone.tf_prefix].goal, yaw,
+            self.corner_points_list_xy, self.drones_pos_list = drone.update_pos(cur_pos, self.matrix,
+                                                                                self.drones_pos_list[
+                                                                                    drone.tf_prefix].goal, yaw,
                                                                                 self.corner_points_list_xy,
                                                                                 self.POI_enabled, self.drones_pos_list,
                                                                                 drone.tf_prefix)
