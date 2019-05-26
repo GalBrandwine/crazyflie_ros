@@ -11,7 +11,6 @@ import tf2_ros
 from Agent import Agent
 from Grid import m_to_cm
 from GridPOI import GridPOI
-from bresenham import bresenham
 from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import OccupancyGrid
 from tf.transformations import euler_from_quaternion
@@ -62,15 +61,16 @@ def xy_to_ij(x, y, x_lim, y_lim, res):
     return i, j
 
 
-def get_goal_point(interesting_points_list_xy, matrix, x_lim, y_lim, res, n_tails_between_drones, drones_pos_list, tf_prefix):
-
+def get_goal_point(interesting_points_list_xy, matrix, x_lim, y_lim, res, n_tails_between_drones, drones_pos_list,
+                   tf_prefix):
     dist_arr = []
     for ielem, elem in enumerate(interesting_points_list_xy):
         dist_arr.append(np.linalg.norm(np.subtract(elem, drones_pos_list[tf_prefix].pos)))
     sorted_dist_idxs = sorted(range(len(dist_arr)), key=lambda k: dist_arr[k])
 
     valid_wp_flag = False
-    g_idx = []
+    # g_idx = []
+    g_idx = np.random.randint(len(interesting_points_list_xy))
 
     i_s, j_s = xy_to_ij(drones_pos_list[tf_prefix].pos[0], drones_pos_list[tf_prefix].pos[1], x_lim, y_lim, res)
     for idx in sorted_dist_idxs:
@@ -89,7 +89,7 @@ def get_goal_point(interesting_points_list_xy, matrix, x_lim, y_lim, res, n_tail
         if valid_wp_flag == True:
             break
 
-    if g_idx == []:
+    if valid_wp_flag == False:
 
         for idx in sorted_dist_idxs:
             i_g, j_g = xy_to_ij(interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1], x_lim, y_lim,
@@ -101,17 +101,16 @@ def get_goal_point(interesting_points_list_xy, matrix, x_lim, y_lim, res, n_tail
                     add_drone_next_pos = drones_pos_list[prefix].next_pos
                     i_p_g, j_p_g = xy_to_ij(add_drone_next_pos[0], add_drone_next_pos[1], x_lim, y_lim, res)
                     if np.linalg.norm(np.subtract([i_g, j_g], [i_p_s, j_p_s])) > n_tails_between_drones and \
-                                np.linalg.norm(np.subtract([i_g, j_g], [i_p_g, j_p_g])) > n_tails_between_drones:
+                            np.linalg.norm(np.subtract([i_g, j_g], [i_p_g, j_p_g])) > n_tails_between_drones:
                         g_idx = idx
                         valid_wp_flag = True
                         break
             if valid_wp_flag == True:
                 break
 
-    if g_idx == [] and interesting_points_list_xy != []:
-        g_idx = np.random.randint(len(interesting_points_list_xy))
-        # g_idx = 0
-
+    # if g_idx == [] and interesting_points_list_xy != []:
+    #     g_idx = np.random.randint(len(interesting_points_list_xy))
+    #     # g_idx = 0
 
         # valid_wp_flag = True
         # for i_elem, elem in enumerate(interesting_points_list_xy):
@@ -332,7 +331,7 @@ class DroneInjector:
 
         x_lim = self.env_limits[0:2]
         y_lim = self.env_limits[2:4]
-        self.min_dist_between_drones = 10
+        self.min_dist_between_drones = 15
         paths_to_wps = []
 
         for drone in self.cj_injector_container:
@@ -361,7 +360,8 @@ class DroneInjector:
 
                 goal = self.drones_pos_list[drone.tf_prefix].goal
 
-                g_idx = get_goal_point(self.interesting_points_list_xy, self.matrix, x_lim, y_lim, self.res, self.min_dist_between_drones, self.drones_pos_list, drone.tf_prefix)
+                g_idx = get_goal_point(self.interesting_points_list_xy, self.matrix, x_lim, y_lim, self.res,
+                                       self.min_dist_between_drones, self.drones_pos_list, drone.tf_prefix)
 
                 # if np.random.rand < 0.1:
                 #     g_idx = np.random.randint(len(self.interesting_points_list_xy))

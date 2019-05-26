@@ -99,11 +99,12 @@ class Grid:
         grid_pub_thread = threading.Thread(name='grid_pub_thread', target=self.init_grid_publisher)
         grid_pub_thread.start()
 
+        self.land_publisher = rospy.Publisher('cmd_vel', Twist, queue_size=1)
+
     def grid_discovered(self):
         grid_size = self.matrix.shape[0]*self.matrix.shape[1]
         grid_disc = np.count_nonzero(self.matrix)
         ratio = float(grid_disc)/float(grid_size)
-        rospy.logdebug("cover reached: {}".format(ratio))
         return ratio
 
     def csv_to_maze(self):
@@ -236,11 +237,11 @@ class Grid:
                     self.update_from_tof_sensing_list(drone_id)
                     # self.complete_wall_in_corners(self.matrix)
 
-        if self.grid_discovered() > 0.8:
+        if self.grid_discovered() > 0.3:
             """Every grid update check grid coverage, if exceeds X%, land all drones! """
 
             rospy.loginfo("Coverage reached, landing all drones!")
-            pub = rospy.Publisher('cmd_vel', Twist, queue_size=1)
+
             twist = Twist()
             twist.linear.x = 0
             twist.linear.y = 0
@@ -248,7 +249,9 @@ class Grid:
             twist.angular.x = 0
             twist.angular.y = 0
             twist.angular.z = 0
-            pub.publish(twist)
+
+            while not rospy.is_shutdown():
+                self.land_publisher.publish(twist)
 
     # def pos_parser(self, msg):
     #     pos_header = msg.header
@@ -439,7 +442,7 @@ class Grid:
 
 if __name__ == "__main__":
 
-    rospy.init_node("grid_builder", log_level=rospy.DEBUG)
+    rospy.init_node("grid_builder")
 
     env_lim = rospy.get_param("~env_lim")
     env_space = rospy.get_param("~env_space")
