@@ -106,7 +106,7 @@ def get_goal_point(interesting_points_list_xy, x_lim, y_lim, res, drones_pos_lis
     i_s, j_s = xy_to_ij(drones_pos_list[tf_prefix].pos[0], drones_pos_list[tf_prefix].pos[1], x_lim, y_lim, res)
     for i_elem, elem in enumerate(interesting_points_list_xy):
         i_g, j_g = xy_to_ij(elem[0], elem[1], x_lim, y_lim, res)
-        # path_curr_sg = list(bresenham(i_s, j_s, i_g, j_g))
+        path_curr_sg = list(bresenham(i_s, j_s, i_g, j_g))
         for i_prefix, prefix in enumerate(drones_pos_list):
             if prefix != tf_prefix:
                 add_drone_pos = drones_pos_list[prefix].pos
@@ -116,11 +116,11 @@ def get_goal_point(interesting_points_list_xy, x_lim, y_lim, res, drones_pos_lis
                     i_p_g, j_p_g = xy_to_ij(add_drone_next_pos[0], add_drone_next_pos[1], x_lim, y_lim, res)
                     if np.linalg.norm(np.subtract([i_g, j_g], [i_p_s, j_p_s])) > n_tails_between_drones and \
                             np.linalg.norm(np.subtract([i_g, j_g], [i_p_g, j_p_g])) > n_tails_between_drones:
-                        # path_p_sg = list(bresenham(i_p_s, j_p_s, i_p_g, j_p_g))
-                        # overlapping_tails = list(set(path_curr_sg).intersection(set(path_p_sg)))
-                        # if overlapping_tails != []:
-                        #     valid_wp_flag = False
-                        #     break
+                        path_p_sg = list(bresenham(i_p_s, j_p_s, i_p_g, j_p_g))
+                        overlapping_tails = list(set(path_curr_sg).intersection(set(path_p_sg)))
+                        if overlapping_tails != []:
+                            valid_wp_flag = False
+                            break
                         pass
                     else:
                         valid_wp_flag = False
