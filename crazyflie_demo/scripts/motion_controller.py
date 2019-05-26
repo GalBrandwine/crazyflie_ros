@@ -51,9 +51,9 @@ def twist_callback(msg):
         def_duration = 2.5
         land_duration = 1.5
 
-        # rospy.loginfo("Received a /cmd_vel message!")
-        # rospy.loginfo("Linear Components: [%f, %f, %f]" % (msg.linear.x, msg.linear.y, msg.linear.z))
-        # rospy.loginfo("Angular Components: [%f, %f, %f]" % (msg.angular.x, msg.angular.y, msg.angular.z))
+        rospy.logdebug("Received a /cmd_vel message!")
+        rospy.logdebug("Linear Components: [%f, %f, %f]" % (msg.linear.x, msg.linear.y, msg.linear.z))
+        rospy.logdebug("Angular Components: [%f, %f, %f]" % (msg.angular.x, msg.angular.y, msg.angular.z))
 
         kb_x = msg.linear.x
         kb_y = msg.linear.y
@@ -319,6 +319,7 @@ def handler(cf_handler):
                     cf_handler.land(targetHeight=0.0, duration=land_duration)
                     time.sleep(land_duration - 0.5)
                     cf_handler.stop()
+                    break
 
             # If Cj injection received:
             if cj_injection_flag is True:

@@ -189,7 +189,6 @@ class DroneCjInjector:
         self.matrix = new_matrix
         self.pos[0] = drone_pos[0][0]
         self.pos[1] = drone_pos[0][1]
-        updated_corners = corrners_array
 
         self.rot_enabled = False
         if (rospy.Time.now().to_sec() - self.last_time_rot_called) >= self.rot_time_thresh:
@@ -203,8 +202,8 @@ class DroneCjInjector:
 
         # Assume that new_pos = [x,y,z,r,p,y]
         if act_as_flag:
-            Astar_Movement, updated_corners = PathBuilder.build_trj(drone_pos, self.env_limits, self.res, self.matrix,
-                                                                    updated_corners,
+            Astar_Movement = PathBuilder.build_trj(drone_pos, self.env_limits, self.res, self.matrix,
+                                                                    corrners_array,
                                                                     next_point)
             self.agent.astar_path = Astar_Movement
 
@@ -238,7 +237,7 @@ class DroneCjInjector:
         # rospy.logdebug("drone next_point: \n{}".format(next_point))
         self.Cj_injector_pub.publish(pose)
 
-        return updated_corners, dict_of_drones_pos
+        return dict_of_drones_pos
 
 
 def injector(drone_injector, path):
@@ -382,10 +381,8 @@ class DroneInjector:
                 self.drones_pos_list[drone.tf_prefix].pos = cur_pos[0]
                 self.drones_pos_list[drone.tf_prefix].goal = goal
 
-            self.corner_points_list_xy, self.drones_pos_list = drone.update_pos(cur_pos, self.matrix,
-                                                                                self.drones_pos_list[
-                                                                                    drone.tf_prefix].goal, yaw,
-                                                                                self.corner_points_list_xy,
+            self.drones_pos_list = drone.update_pos(cur_pos, self.matrix, self.drones_pos_list[drone.tf_prefix].goal,
+                                                                                yaw, self.corner_points_list_xy,
                                                                                 self.POI_enabled, self.drones_pos_list,
                                                                                 drone.tf_prefix)
 
