@@ -103,6 +103,7 @@ class Grid:
         grid_size = self.matrix.shape[0]*self.matrix.shape[1]
         grid_disc = np.count_nonzero(self.matrix)
         ratio = float(grid_disc)/float(grid_size)
+        rospy.logdebug("cover reached: {}".format(ratio))
         return ratio
 
     def csv_to_maze(self):
@@ -438,7 +439,7 @@ class Grid:
 
 if __name__ == "__main__":
 
-    rospy.init_node("grid_builder")
+    rospy.init_node("grid_builder", log_level=rospy.DEBUG)
 
     env_lim = rospy.get_param("~env_lim")
     env_space = rospy.get_param("~env_space")
