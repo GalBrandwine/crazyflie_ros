@@ -101,7 +101,7 @@ def xy_to_ij(x, y, x_lim, y_lim, res):
 
 def get_goal_point(interesting_points_list_xy, x_lim, y_lim, res, drones_pos_list, n_tails_between_drones, tf_prefix):
     valid_wp_flag = True
-    goal = drones_pos_list[tf_prefix].pos
+    goal = drones_pos_list[tf_prefix].goal
     g_idx = []
     i_s, j_s = xy_to_ij(drones_pos_list[tf_prefix].pos[0], drones_pos_list[tf_prefix].pos[1], x_lim, y_lim, res)
     for i_elem, elem in enumerate(interesting_points_list_xy):
@@ -132,8 +132,7 @@ def get_goal_point(interesting_points_list_xy, x_lim, y_lim, res, drones_pos_lis
 
         if valid_wp_flag == True:
             g_idx = i_elem
-            goal = elem
-            rospy.logdebug("goal from get goal {} prefix: {}".format(goal, prefix))
+            goal = list(elem)
 
     return g_idx, goal
 
@@ -301,7 +300,7 @@ class DroneInjector:
             drone = DroneCjInjector(drone_pref, drone_init_takeoff, self.env_limits, self.matrix, resolution)
             self.cj_injector_container.append(drone)
             self.drones_pos_list[drone_pref] = drone_pos_goal(pos=[drone_init_takeoff[0] * m_to_cm, drone_init_takeoff[1] * m_to_cm],
-                                                              next_pos=[], goal=[], yaw=[])
+                                                              next_pos=[], goal=[drone_init_takeoff[0] * m_to_cm, drone_init_takeoff[1] * m_to_cm], yaw=[])
 
         self.rate = rate
 
@@ -351,7 +350,6 @@ class DroneInjector:
             pos = [x * m_to_cm, y * m_to_cm, z * m_to_cm, roll, pitch, yaw]
             # rospy.loginfo("pos in Display: {}\n".format(self.pos))
             cur_pos = [[pos[0], pos[1]]]
-
             if self.POI_enabled and self.interesting_points_list_xy != []:
 
                 g_idx, goal = get_goal_point(self.interesting_points_list_xy, x_lim, y_lim, self.res,
@@ -368,13 +366,13 @@ class DroneInjector:
                 if g_idx != []:
                     del self.interesting_points_list_xy[g_idx]
 
-            else:
-                goal = [drone.next_pose[0], drone.next_pose[1]]
+            # else:
+            #     goal = [drone.next_pose[0], drone.next_pose[1]]
 
-            self.drones_pos_list[drone.tf_prefix].pos = cur_pos[0]
-            self.drones_pos_list[drone.tf_prefix].goal = goal
+                self.drones_pos_list[drone.tf_prefix].pos = cur_pos[0]
+                self.drones_pos_list[drone.tf_prefix].goal = goal
 
-            self.corner_points_list_xy, self.drones_pos_list = drone.update_pos(cur_pos, self.matrix, goal, yaw,
+            self.corner_points_list_xy, self.drones_pos_list = drone.update_pos(cur_pos, self.matrix, self.drones_pos_list[drone.tf_prefix].goal, yaw,
                                                                                 self.corner_points_list_xy,
                                                                                 self.POI_enabled, self.drones_pos_list,
                                                                                 drone.tf_prefix)
