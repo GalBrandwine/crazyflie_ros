@@ -52,9 +52,12 @@ class GridPOI:
             for j in range(3, matrix[i].__len__() - 3):
                 cflag, add_num = self.is_tail_in_corner(i, j, matrix)
                 if cflag:
-                    cidx = list(np.add([i, j], add_num))
-                    if matrix[cidx[0]][cidx[1]] == 1:
-                        tail_list.append(cidx)
+                    cidx2 = list(np.add([i, j], np.multiply(add_num, [2, 2])))
+                    cidx1 = list(np.add([i, j], add_num))
+                    if matrix[cidx2[0]][cidx2[1]] == 1:
+                        tail_list.append(cidx2)
+                    elif matrix[cidx1[0]][cidx1[1]] == 1:
+                        tail_list.append(cidx1)
                     else:
                         tail_list.append([i, j])
         return tail_list

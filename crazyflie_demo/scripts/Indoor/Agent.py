@@ -12,7 +12,7 @@ class Agent:
         self.velocityFactor = 50
         self.step_noise_size = 20
         self.step_snr = 1
-        self.stepSizeLimit = 30
+        self.stepSizeLimit = 50
         self.step_factor = 1
         self.next_pos = pos
         self.current_pos = self.next_pos
@@ -41,12 +41,12 @@ class Agent:
         return self.next_pos, self.next_heading
 
 
-    def preform_step_sys_sim(self, current_pos, current_heading, matrix):
+    def preform_step_sys_sim(self, current_pos, current_heading, matrix, dict_of_drones_pos, tf_prefix):
         self.update_current_state(current_pos, current_heading)
-        self.Dynam_Search_in_maze(matrix)
+        self.Dynam_Search_in_maze(matrix, dict_of_drones_pos, tf_prefix)
 
 
-    def Dynam_Search_in_maze(self, matrix):
+    def Dynam_Search_in_maze(self, matrix, dict_of_drones_pos, tf_prefix):
 
         max_count_val = 10
         break_counter = 0
@@ -65,6 +65,7 @@ class Agent:
         # if self.astar_path != [] and np.linalg.norm(np.subtract(self.current_pos[0], self.next_pos[0])) > self.dist_factor * self.step_noise_size\
         #         and self.is_step_legal(self.current_pos,  np.subtract(self.next_pos[0], self.current_pos[0]), matrix):
         #     vec = np.subtract(self.next_pos[0], self.current_pos[0])
+
 
         if self.astar_path != [] and self.is_step_legal(self.current_pos,  np.subtract(self.astar_path[0], self.current_pos[0]), matrix):
             vec = np.subtract(self.astar_path[0], self.current_pos[0])
@@ -89,7 +90,6 @@ class Agent:
 
 
         if close_wall:
-            rospy.logdebug("inside close wall")
             if np.linalg.norm(np.subtract(self.current_pos[0], self.next_pos[0])) > self.res:
                 step = np.multiply(np.divide(vec, np.linalg.norm(vec)), np.linalg.norm(vec) - (tails_from_wall * self.res))
                 if (np.linalg.norm(vec) - (tails_from_wall * self.res)) > 0:
@@ -113,7 +113,6 @@ class Agent:
             self.next_pos = self.current_pos + vec
             if as_flag and self.astar_path != []:
                 del self.astar_path[0]
-
 
 # This is the important function, that should be rewriten
     def Dynam_Search_in_maze_old(self, NeighborsPosList, matrix):

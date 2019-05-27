@@ -1,20 +1,28 @@
 #!/usr/bin/env python
 """This is a simple Cj_injector for emulating. """
 import math
-import numpy as np
 from math import radians
 
 import PathBuilder
+import numpy as np
 import rospy
 import tf
 import tf2_ros
 from Agent import Agent
+from Grid import m_to_cm
 from GridPOI import GridPOI
 from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import OccupancyGrid
 from tf.transformations import euler_from_quaternion
 
-m_to_cm = 100
+
+# Drone position
+class drone_pos_goal:
+    def __init__(self, pos=None, next_pos=None, goal=None, yaw=None):
+        self.pos = pos
+        self.next_pos = next_pos
+        self.goal = goal
+        self.yaw = yaw
 
 
 def to_pose_stamped(x, y, z, roll, pitch, yaw):
@@ -53,18 +61,87 @@ def xy_to_ij(x, y, x_lim, y_lim, res):
     return i, j
 
 
-def get_goal_point(pos, interesting_points_list_xy, matrix, x_lim, y_lim, res):
-    # g_idx = 0
-    g_idx = g_idx = np.random.randint(len(interesting_points_list_xy))
+def get_goal_point(interesting_points_list_xy, matrix, x_lim, y_lim, res, n_tails_between_drones, drones_pos_list,
+                   tf_prefix):
     dist_arr = []
-    for idx, elem in enumerate(interesting_points_list_xy):
-        dist_arr.append(np.linalg.norm(np.subtract(elem, pos[0])))
+    for ielem, elem in enumerate(interesting_points_list_xy):
+        dist_arr.append(np.linalg.norm(np.subtract(elem, drones_pos_list[tf_prefix].pos)))
     sorted_dist_idxs = sorted(range(len(dist_arr)), key=lambda k: dist_arr[k])
-    for idx in sorted_dist_idxs:
-        if is_los(pos, [[interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1]]], matrix, x_lim, y_lim,
-                  res):
-            g_idx = idx
-            break
+
+    valid_wp_flag = False
+    g_idx = np.random.randint(len(interesting_points_list_xy))
+    if len(drones_pos_list) > 1:
+        i_s, j_s = xy_to_ij(drones_pos_list[tf_prefix].pos[0], drones_pos_list[tf_prefix].pos[1], x_lim, y_lim, res)
+        for idx in sorted_dist_idxs:
+            i_g, j_g = xy_to_ij(interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1], x_lim, y_lim, res)
+            if np.linalg.norm(np.subtract([i_s, j_s],[i_g, j_g])) > 2:
+                for i_prefix, prefix in enumerate(drones_pos_list):
+                    if prefix != tf_prefix:
+                        add_drone_pos = drones_pos_list[prefix].pos
+                        i_p_s, j_p_s = xy_to_ij(add_drone_pos[0], add_drone_pos[1], x_lim, y_lim, res)
+                        if np.linalg.norm(np.subtract([i_g, j_g], [i_p_s, j_p_s])) > n_tails_between_drones:
+                            if is_los([[drones_pos_list[tf_prefix].pos[0], drones_pos_list[tf_prefix].pos[1]]],
+                                      [[interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1]]], matrix, x_lim,
+                                      y_lim, res):
+                                g_idx = idx
+                                valid_wp_flag = True
+                                break
+                if valid_wp_flag == True:
+                    break
+
+        if valid_wp_flag == False:
+
+            for idx in sorted_dist_idxs:
+                i_g, j_g = xy_to_ij(interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1], x_lim, y_lim,
+                                    res)
+                if np.linalg.norm(np.subtract([i_s, j_s], [i_g, j_g])) > 2:
+                    for i_prefix, prefix in enumerate(drones_pos_list):
+                        if prefix != tf_prefix:
+                            add_drone_pos = drones_pos_list[prefix].pos
+                            i_p_s, j_p_s = xy_to_ij(add_drone_pos[0], add_drone_pos[1], x_lim, y_lim, res)
+                            add_drone_next_pos = drones_pos_list[prefix].next_pos
+                            i_p_g, j_p_g = xy_to_ij(add_drone_next_pos[0], add_drone_next_pos[1], x_lim, y_lim, res)
+                            if np.linalg.norm(np.subtract([i_g, j_g], [i_p_s, j_p_s])) > n_tails_between_drones and \
+                                    np.linalg.norm(np.subtract([i_g, j_g], [i_p_g, j_p_g])) > n_tails_between_drones:
+                                g_idx = idx
+                                valid_wp_flag = True
+                                break
+                    if valid_wp_flag == True:
+                        break
+    else:
+        g_idx = 0
+        for idx in sorted_dist_idxs:
+            if is_los([[drones_pos_list[tf_prefix].pos[0], drones_pos_list[tf_prefix].pos[1]]],
+                      [[interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1]]], matrix, x_lim,
+                      y_lim, res):
+                g_idx = idx
+                break
+
+        # valid_wp_flag = True
+        # for i_elem, elem in enumerate(interesting_points_list_xy):
+        #     i_g, j_g = xy_to_ij(elem[0], elem[1], x_lim, y_lim, res)
+        #     path_curr_sg = list(bresenham(i_s, j_s, i_g, j_g))
+        #     for i_prefix, prefix in enumerate(drones_pos_list):
+        #         if prefix != tf_prefix:
+        #             add_drone_pos = drones_pos_list[prefix].pos
+        #             i_p_s, j_p_s = xy_to_ij(add_drone_pos[0], add_drone_pos[1], x_lim, y_lim, res)
+        #             if drones_pos_list[prefix].next_pos != []:
+        #                 add_drone_next_pos = drones_pos_list[prefix].next_pos
+        #                 i_p_g, j_p_g = xy_to_ij(add_drone_next_pos[0], add_drone_next_pos[1], x_lim, y_lim, res)
+        #                 if np.linalg.norm(np.subtract([i_g, j_g], [i_p_s, j_p_s])) > n_tails_between_drones and \
+        #                         np.linalg.norm(np.subtract([i_g, j_g], [i_p_g, j_p_g])) > n_tails_between_drones:
+        #                     path_p_sg = list(bresenham(i_p_s, j_p_s, i_p_g, j_p_g))
+        #                     overlapping_tails = list(set(path_curr_sg).intersection(set(path_p_sg)))
+        #                     if overlapping_tails != []:
+        #                         valid_wp_flag = False
+        #                         break
+        #                     pass
+        #                 else:
+        #                     valid_wp_flag = False
+        #                     break
+        #     if valid_wp_flag == True:
+        #         g_idx = i_elem
+
     return g_idx
 
 
@@ -105,7 +182,8 @@ class DroneCjInjector:
         self.Cj_injector_pub = rospy.Publisher('/' + self.tf_prefix + "/Cj_injcetor", PoseStamped,
                                                queue_size=1)  # hover message publisher
 
-    def update_pos(self, drone_pos, new_matrix, next_point, drone_yaw, corrners_array, act_as_flag):
+    def update_pos(self, drone_pos, new_matrix, next_point, drone_yaw, corrners_array, act_as_flag, dict_of_drones_pos,
+                   tf_prefix):
         """This function is being called in DroneInjector, every time a pose is recieved for this drone.
             :param
                 new_drone_pos - received from Father's subscriber.
@@ -117,9 +195,21 @@ class DroneCjInjector:
         self.pos[0] = drone_pos[0][0]
         self.pos[1] = drone_pos[0][1]
 
-        self.rot_enabled = False
+        # Assume that new_pos = [x,y,z,r,p,y]
+        if act_as_flag:
+            Astar_Movement = PathBuilder.build_trj(drone_pos, self.env_limits, self.res, self.matrix,
+                                                                    corrners_array,
+                                                                    next_point)
+            self.agent.astar_path = Astar_Movement
+
+        self.agent.preform_step_sys_sim(drone_pos, self.drone_yaw, self.matrix, dict_of_drones_pos, tf_prefix)
+
+        # self.next_pose[0] = self.pos[0]/m_to_cm # Only for debug - inject input to output
+        # self.next_pose[1] = self.pos[1]/m_to_cm # Only for debug - inject input to output
+        # self.next_pose[5] = 0 # Only for debug
+
+
         if (rospy.Time.now().to_sec() - self.last_time_rot_called) >= self.rot_time_thresh:
-            self.rot_enabled = True
             # temp_yaw = np.random.rand() * np.pi / 4
             self.drone_yaw = drone_yaw + (np.pi / 2)
             # rospy.logdebug("angle {}".format(self.drone_yaw))
@@ -127,37 +217,27 @@ class DroneCjInjector:
             # rospy.logdebug("angle after mod {}".format(self.drone_yaw))
             self.last_time_rot_called = rospy.Time.now().to_sec()
 
-        # Assume that new_pos = [x,y,z,r,p,y]
-        if act_as_flag:
-            Astar_Movement = PathBuilder.build_trj(drone_pos, self.env_limits, self.res, self.matrix, corrners_array,
-                                                   next_point)
-            self.agent.astar_path = Astar_Movement
-
-        self.agent.preform_step_sys_sim(drone_pos, self.drone_yaw, self.matrix)
-
-        # self.next_pose[0] = self.pos[0]/m_to_cm # Only for debug - inject input to output
-        # self.next_pose[1] = self.pos[1]/m_to_cm # Only for debug - inject input to output
-        # self.next_pose[5] = 0 # Only for debug
-
-        self.next_pose[0] = self.agent.next_pos[0][0] / m_to_cm
-        self.next_pose[1] = self.agent.next_pos[0][1] / m_to_cm
+        self.next_pose[0] = self.agent.next_pos[0][0]
+        self.next_pose[1] = self.agent.next_pos[0][1]
         self.next_pose[5] = self.drone_yaw
         self.next_pose[2] = 0.35  # hard coded Z height
-        # # return to original angle after rotation
-        # if self.rot_enabled:
-        #     self.drone_yaw = drone_yaw
-
-        x = self.next_pose[0]
-        y = self.next_pose[1]
+        x = self.next_pose[0] / m_to_cm
+        y = self.next_pose[1] / m_to_cm
         z = self.next_pose[2]
         roll = 0
         pitch = 0
         yaw = self.next_pose[5]
         pose = to_pose_stamped(x, y, z, roll, pitch, yaw)
 
+        dict_of_drones_pos[tf_prefix].pos = self.agent.current_pos[0]
+        dict_of_drones_pos[tf_prefix].next_pos = self.agent.next_pos[0]
+        dict_of_drones_pos[tf_prefix].yaw = yaw
+
         # rospy.logdebug("drone pos: \n{}".format(drone_pos))
         # rospy.logdebug("drone next_point: \n{}".format(next_point))
         self.Cj_injector_pub.publish(pose)
+
+        return dict_of_drones_pos
 
 
 def injector(drone_injector, path):
@@ -215,14 +295,17 @@ class DroneInjector:
                                 np.int64(np.ceil((self.env_limits[3] - self.env_limits[2]) / self.res))])
         # self.matrix = np.zeros([np.int64(np.ceil((self.env_limits[3] - self.env_limits[2]) / self.res)),
         #                         np.int64(np.ceil((self.env_limits[1] - self.env_limits[0]) / self.res))])
-
+        self.drones_pos_list = dict()
         # initiate DroneCjInjector per drone and add it to container
-        for drone in prefix_takeoff_dict_input:
-            rospy.logdebug("\n\n******************* Initiating DroneCjInjector for drone: {}".format(drone))
+        for drone_pref in prefix_takeoff_dict_input:
+            rospy.logdebug("\n\n******************* Initiating DroneCjInjector for drone: {}".format(drone_pref))
 
-            drone_init_takeoff = prefix_takeoff_dict_input[drone]
-            drone = DroneCjInjector(drone, drone_init_takeoff, self.env_limits, self.matrix, resolution)
+            drone_init_takeoff = prefix_takeoff_dict_input[drone_pref]
+            drone = DroneCjInjector(drone_pref, drone_init_takeoff, self.env_limits, self.matrix, resolution)
             self.cj_injector_container.append(drone)
+            self.drones_pos_list[drone_pref] = drone_pos_goal(
+                pos=[drone_init_takeoff[0] * m_to_cm, drone_init_takeoff[1] * m_to_cm],
+                next_pos=[], goal=[drone_init_takeoff[0] * m_to_cm, drone_init_takeoff[1] * m_to_cm], yaw=[])
 
         self.rate = rate
 
@@ -247,61 +330,68 @@ class DroneInjector:
 
         x_lim = self.env_limits[0:2]
         y_lim = self.env_limits[2:4]
+        self.min_dist_between_drones = 10
+        paths_to_wps = []
 
         for drone in self.cj_injector_container:
 
-            try:
-                trans = self.tfBuffer.lookup_transform('world', drone.tf_prefix, rospy.Time(0))
+            # try:
+            trans = self.tfBuffer.lookup_transform('world', drone.tf_prefix, rospy.Time(0))
 
-                q = (trans.transform.rotation.x,
-                     trans.transform.rotation.y,
-                     trans.transform.rotation.z,
-                     trans.transform.rotation.w)
+            q = (trans.transform.rotation.x,
+                 trans.transform.rotation.y,
+                 trans.transform.rotation.z,
+                 trans.transform.rotation.w)
 
-                euler = euler_from_quaternion(q, axes='sxyz')
+            euler = euler_from_quaternion(q, axes='sxyz')
 
-                x = trans.transform.translation.x
-                y = trans.transform.translation.y
-                z = trans.transform.translation.z
-                roll = euler[0]
-                pitch = euler[1]
-                yaw = euler[2]
+            x = trans.transform.translation.x
+            y = trans.transform.translation.y
+            z = trans.transform.translation.z
+            roll = euler[0]
+            pitch = euler[1]
+            yaw = euler[2]
 
-                pos = [x * m_to_cm, y * m_to_cm, z * m_to_cm, roll, pitch, yaw]
-                # rospy.loginfo("pos in Display: {}\n".format(self.pos))
-                cur_pos = [[pos[0], pos[1]]]
+            pos = [x * m_to_cm, y * m_to_cm, z * m_to_cm, roll, pitch, yaw]
+            # rospy.loginfo("pos in Display: {}\n".format(self.pos))
+            cur_pos = [[pos[0], pos[1]]]
+            if self.POI_enabled and self.interesting_points_list_xy != []:
 
-                if self.POI_enabled and self.interesting_points_list_xy != []:
+                goal = self.drones_pos_list[drone.tf_prefix].goal
 
-                    g_idx = get_goal_point(cur_pos, self.interesting_points_list_xy, self.matrix, x_lim, y_lim,
-                                           self.res)
+                g_idx = get_goal_point(self.interesting_points_list_xy, self.matrix, x_lim, y_lim, self.res,
+                                       self.min_dist_between_drones, self.drones_pos_list, drone.tf_prefix)
 
-                    # if np.random.rand < 0.1:
-                    #     g_idx = np.random.randint(len(self.interesting_points_list_xy))
-                    # else:
-                    #     g_idx = 0
+                # if np.random.rand < 0.1:
+                #     g_idx = np.random.randint(len(self.interesting_points_list_xy))
+                # else:
+                #     g_idx = 0
+                # gx = self.interesting_points_list_xy[g_idx][0]
+                # gy = self.interesting_points_list_xy[g_idx][1]
+                # goal = [gx, gy]
 
-                    gx = self.interesting_points_list_xy[g_idx][0]
-                    gy = self.interesting_points_list_xy[g_idx][1]
-                    goal = [gx, gy]
+                if g_idx != []:
+                    goal = self.interesting_points_list_xy[g_idx]
                     del self.interesting_points_list_xy[g_idx]
-                else:
-                    goal = drone.next_pose[0:2]
 
-                # rospy.logdebug("Cj_injector pos: {}".format(cur_pos))
-                # drone.update_pos(pos, self.matrix, pos[0:2], corner_points_list_xy)
-                drone.update_pos(cur_pos, self.matrix, goal, yaw, self.corner_points_list_xy, self.POI_enabled)
+                # else:
+                #     goal = [drone.next_pose[0], drone.next_pose[1]]
 
-                # rospy.logdebug("in grid_parser - drone.update:\n"
-                #                "pos: {}\n"
-                #                "next_pos: {}\n"
-                #                "".format(pos,pos[0:2]))
+                self.drones_pos_list[drone.tf_prefix].pos = cur_pos[0]
+                self.drones_pos_list[drone.tf_prefix].goal = goal
 
-            # except:
-            # rospy.logdebug("tf lookup -- {} not found".format(drone.tf_prefix))
-            except Exception as e:
-                pass
-                # rospy.logdebug(e)
+            self.drones_pos_list = drone.update_pos(cur_pos, self.matrix, self.drones_pos_list[drone.tf_prefix].goal,
+                                                                                yaw, self.corner_points_list_xy,
+                                                                                self.POI_enabled, self.drones_pos_list,
+                                                                                drone.tf_prefix)
+
+            # rospy.logdebug("in grid_parser - drone.update:\n"
+            #                "pos: {}\n"
+            #                "next_pos: {}\n"
+            #                "".format(pos,pos[0:2]))
+
+        # except Exception as e:
+        #     rospy.logdebug(e)
 
 
 if __name__ == '__main__':

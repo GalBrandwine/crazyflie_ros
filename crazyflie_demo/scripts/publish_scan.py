@@ -161,7 +161,8 @@ def get_ranges(msg):
 
 
 if __name__ == '__main__':
-    rospy.init_node('publish_point', anonymous=False, log_level=rospy.DEBUG)
+    # rospy.init_node('publish_point', anonymous=False, log_level=rospy.DEBUG)
+    rospy.init_node('publish_point', anonymous=False)
 
     # Crazyflie coordinate
     # pub_front = rospy.Publisher('/' + rospy.get_param("~tf_prefix") + '/points/front', PointStamped, queue_size=1)

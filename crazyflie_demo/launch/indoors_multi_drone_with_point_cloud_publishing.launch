@@ -21,41 +21,59 @@ A few notes:
     <arg name="traj2" default="/home/galbra/catkin_ws/src/crazyflie_ros/crazyflie_demo/scripts/figure8.csv"/>
 
 
-    <!-- for first CF -->
+        <!-- for first CF - One drone -->
     <arg name="uri1" default="radio://0/120/2M/E7E7E7E704"/>
     <arg name="frame1" default="cf4"/>
     <arg name="frame1_active" default="1"/>
     <arg name="frame1__listening_to_key_board" default="1"/>
     <arg name="frame1_start_delay" default="0"/>
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
-<!--    <arg name="initX1" default="0.381"/> &lt;!&ndash;red right point&ndash;&gt;-->
-    <arg name="initX1" default="0.5334"/>
-<!--    <arg name="initY1" default="0.8382"/> &lt;!&ndash;red right point&ndash;&gt;-->
-    <arg name="initY1" default="1.9050"/>
+    <arg name="initX1" default="0.5334"/><!--black farther middle point-->
+    <arg name="initY1" default="1.9050"/><!--black farther middle point-->
     <arg name="initZ1" default="0"/>
+
+
+<!--    &lt;!&ndash; for first CF &ndash;&gt;-->
+<!--    <arg name="uri1" default="radio://0/120/2M/E7E7E7E704"/>-->
+<!--    <arg name="frame1" default="cf4"/>-->
+<!--    <arg name="frame1_active" default="1"/>-->
+<!--    <arg name="frame1__listening_to_key_board" default="1"/>-->
+<!--    <arg name="frame1_start_delay" default="0"/>-->
+<!--    <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>-->
+<!--&lt;!&ndash;    <arg name="initX1" default="0.381"/> &lt;!&ndash;red right point&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;    <arg name="initY1" default="0.8382"/> &lt;!&ndash;red right point&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;    <arg name="initX1" default="0.5334"/>&lt;!&ndash;black farther middle point&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;    <arg name="initY1" default="1.9050"/>&lt;!&ndash;black farther middle point&ndash;&gt;&ndash;&gt;-->
+<!--    <arg name="initX1" default="0.3048"/>&lt;!&ndash;black farther left point&ndash;&gt;-->
+<!--    <arg name="initY1" default="2.0574"/>&lt;!&ndash;black farther left point&ndash;&gt;-->
+<!--    <arg name="initZ1" default="0"/>-->
 
 
     <!-- for second CF    -->
     <arg name="uri2" default="radio://0/120/2M/E7E7E7E703"/>
     <arg name="frame2" default="cf3"/>
-    <arg name="frame2_active" default="0"/>
+    <arg name="frame2_active" default="1"/>
     <arg name="frame2__listening_to_key_board" default="1"/>
-    <arg name="frame2_start_delay" default="5"/>
+    <arg name="frame2_start_delay" default="10"/>
     <arg name="traj_list2" default="[$(arg traj1),$(arg traj2)]"/>
-    <arg name="initX2" default="0.381"/>  <!--red left point-->
-<!--    <arg name="initX2" default="0.1524"/>-->
-    <arg name="initY2" default="4.115"/>  <!--red left point-->
-<!--    <arg name="initY2" default="1.9050"/>-->
+<!--    <arg name="initX2" default="0.381"/>  &lt;!&ndash;red left point&ndash;&gt;-->
+<!--    <arg name="initY2" default="4.115"/>  &lt;!&ndash;red left point&ndash;&gt;-->
+<!--    <arg name="initX2" default="0.1524"/>&lt;!&ndash;black farther middle point&ndash;&gt;-->
+<!--    <arg name="initY2" default="1.9050"/>&lt;!&ndash;black farther middle point&ndash;&gt;-->
+    <arg name="initX2" default="0.0762"/><!--black closer right point-->
+    <arg name="initY2" default="1.6764"/><!--black closer right point-->
     <arg name="initZ2" default="0"/>
 
 
     <!-- for third CF    -->
-    <arg name="uri3" default="radio://0/120/2M/E7E7E7E701"/>
-    <arg name="frame3" default="cf1"/>
+    <arg name="uri3" default="radio://0/120/2M/E7E7E7E702"/>
+    <arg name="frame3" default="cf2"/>
     <arg name="frame3_active" default="0"/>
+    <arg name="frame3__listening_to_key_board" default="1"/>
+    <arg name="frame3_start_delay" default="15"/>
     <arg name="traj_list3" default="[$(arg traj1),$(arg traj2)]"/>
-    <arg name="initX3" default="0.0"/>
-    <arg name="initY3" default="1.8"/>
+    <arg name="initX3" default="0.0762"/><!--black closer right point-->
+    <arg name="initY3" default="2.0574"/><!--black closer right point-->
     <arg name="initZ3" default="0"/>
 
 
@@ -292,14 +310,16 @@ A few notes:
 
         <!--        If trajectory usage is desired: -->
         <!--        <node name="crazyflie_demo_hover" pkg="crazyflie_demo" type="traj_planner.py" output="screen">-->
-        <!--            <param name="tf_prefix" value="$(arg frame2)"/>-->
+        <!--            <param name="tf_prefix" value="$(arg frame3)"/>-->
         <!--            &lt;!&ndash;            Pass a list as ros param&ndash;&gt;-->
-        <!--            <rosparam param="traj_list" subst_value="True">$(arg traj_list2)</rosparam>-->
+        <!--            <rosparam param="traj_list" subst_value="True">$(arg traj_list3)</rosparam>-->
         <!--        </node>-->
 
         <!--        Start keyboard controller. -->
         <node name="motion_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">
             <param name="tf_prefix" value="$(arg frame3)"/>
+            <param name="listen_to_keyboard" value="$(arg frame3__listening_to_key_board)"/>
+            <param name="start_delay" value="$(arg frame3_start_delay)"/>
         </node>
 
         <!--        Tf_broadcast a specific drone with world-->
@@ -399,6 +419,8 @@ A few notes:
             <param name="drone_takeoff_position_0" value="[$(arg initX1), $(arg initY1), $(arg initZ1)]"/>
             <param name="drone_name_1" value="$(arg frame2)"/>
             <param name="drone_takeoff_position_1" value="[$(arg initX2), $(arg initY2), $(arg initZ2)]"/>
+            <param name="drone_name_2" value="$(arg frame3)"/>
+            <param name="drone_takeoff_position_2" value="[$(arg initX3), $(arg initY3), $(arg initZ3)]"/>
 
         </node>
 
@@ -411,6 +433,8 @@ A few notes:
             <param name="drone_takeoff_position_0" value="[$(arg initX1), $(arg initY1), $(arg initZ1)]"/>
             <param name="drone_name_1" value="$(arg frame2)"/>
             <param name="drone_takeoff_position_1" value="[$(arg initX2), $(arg initY2), $(arg initZ2)]"/>
+            <param name="drone_name_2" value="$(arg frame3)"/>
+            <param name="drone_takeoff_position_2" value="[$(arg initX3), $(arg initY3), $(arg initZ3)]"/>
 
         </node>
         <!--    Cf's arary. for Cj_injector   input is an array of drones!
@@ -424,25 +448,27 @@ A few notes:
 <!--            <rosparam param="resolution" subst_value="True">[$(arg resolution)]</rosparam>-->
 <!--            <param name="prefix_list" value="[$(arg frame1), $(arg frame2), $(arg frame3),$(arg frame4)]"/>-->
 <!--            <param name="prefix_list" value="[$(arg frame1)]"/>-->
-            <rosparam param="prefix_list" subst_value="True">[[$(arg frame1)], [$(arg frame2)],]</rosparam>
+            <rosparam param="prefix_list" subst_value="True">[[$(arg frame1)], [$(arg frame2)], [$(arg frame3)],]</rosparam>
             <!--            Pass all drones initial takeoff positions-->
             <!--            <param name="init_takeoff_list" value="[[$(arg initX1), $(arg initY1), $(arg initZ1)]] "/>-->
-            <rosparam param="init_takeoff_list" subst_value="True">[[$(arg initX1), $(arg initY1), $(arg initZ1)],[$(arg initX2), $(arg initY2), $(arg initZ2)],]</rosparam>
+            <rosparam param="init_takeoff_list" subst_value="True">[[$(arg initX1), $(arg initY1), $(arg initZ1)],
+                [$(arg initX2), $(arg initY2), $(arg initZ2)],
+                [$(arg initX3), $(arg initY3), $(arg initZ3)],]</rosparam>
             <param name="env_space" value="$(arg env_space)"/>
             <!--            <rosparam param="env_space" subst_value="True">[$(arg env_space)]</rosparam>-->
             <param name="nDrones" value="$(arg nDrones)"/>
         </node>
 
-        <node name="http_server" pkg="crazyflie_demo" type="HTTP_server.py" output="screen">
-            <param name="nDrones" value="$(arg nDrones)"/>
-            <param name="drone_name_0" value="$(arg frame1)"/>
-            <param name="drone_name_1" value="$(arg frame2)"/>
-            <param name="env_lim" value="$(arg env_lim)"/>
-            <param name="env_space" value="$(arg env_space)"/>
-            <param name="resolution" value="$(arg resolution)"/>
-            <param name="vehicle_start_pos" value="[0.33, 1.91]" />
-            <param name="vehicle_recorded_path" value="$(find crazyflie_demo)/resources/vehicle_recorded_path.txt"/>
-        </node>
+<!--        <node name="http_server" pkg="crazyflie_demo" type="HTTP_server.py" output="screen">-->
+<!--            <param name="nDrones" value="$(arg nDrones)"/>-->
+<!--            <param name="drone_name_0" value="$(arg frame1)"/>-->
+<!--            <param name="drone_name_1" value="$(arg frame2)"/>-->
+<!--            <param name="env_lim" value="$(arg env_lim)"/>-->
+<!--            <param name="env_space" value="$(arg env_space)"/>-->
+<!--            <param name="resolution" value="$(arg resolution)"/>-->
+<!--            <param name="vehicle_start_pos" value="[0.33, 1.91]" />-->
+<!--            <param name="vehicle_recorded_path" value="$(find crazyflie_demo)/resources/vehicle_recorded_path.txt"/>-->
+<!--        </node>-->
 
     </group>
 
