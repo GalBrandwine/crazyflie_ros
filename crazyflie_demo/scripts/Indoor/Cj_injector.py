@@ -195,6 +195,16 @@ class DroneCjInjector:
         self.pos[0] = drone_pos[0][0]
         self.pos[1] = drone_pos[0][1]
 
+        self.rot_enabled = False
+        if (rospy.Time.now().to_sec() - self.last_time_rot_called) >= self.rot_time_thresh:
+            self.rot_enabled = True
+            # temp_yaw = np.random.rand() * np.pi / 4
+            self.drone_yaw = drone_yaw + (np.pi / 2)
+            # rospy.logdebug("angle {}".format(self.drone_yaw))
+            self.drone_yaw = np.mod(self.drone_yaw, np.pi)  # limit the rotation by maximum angle
+            # rospy.logdebug("angle after mod {}".format(self.drone_yaw))
+            self.last_time_rot_called = rospy.Time.now().to_sec()
+
         # Assume that new_pos = [x,y,z,r,p,y]
         if act_as_flag:
             Astar_Movement = PathBuilder.build_trj(drone_pos, self.env_limits, self.res, self.matrix,
@@ -208,19 +218,14 @@ class DroneCjInjector:
         # self.next_pose[1] = self.pos[1]/m_to_cm # Only for debug - inject input to output
         # self.next_pose[5] = 0 # Only for debug
 
-
-        if (rospy.Time.now().to_sec() - self.last_time_rot_called) >= self.rot_time_thresh:
-            # temp_yaw = np.random.rand() * np.pi / 4
-            self.drone_yaw = drone_yaw + (np.pi / 2)
-            # rospy.logdebug("angle {}".format(self.drone_yaw))
-            self.drone_yaw = np.mod(self.drone_yaw, np.pi)  # limit the rotation by maximum angle
-            # rospy.logdebug("angle after mod {}".format(self.drone_yaw))
-            self.last_time_rot_called = rospy.Time.now().to_sec()
-
         self.next_pose[0] = self.agent.next_pos[0][0]
         self.next_pose[1] = self.agent.next_pos[0][1]
         self.next_pose[5] = self.drone_yaw
         self.next_pose[2] = 0.35  # hard coded Z height
+        # # return to original angle after rotation
+        # if self.rot_enabled:
+        #     self.drone_yaw = drone_yaw
+
         x = self.next_pose[0] / m_to_cm
         y = self.next_pose[1] / m_to_cm
         z = self.next_pose[2]
