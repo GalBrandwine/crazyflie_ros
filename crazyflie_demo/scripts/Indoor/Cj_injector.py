@@ -330,7 +330,7 @@ class DroneInjector:
 
         x_lim = self.env_limits[0:2]
         y_lim = self.env_limits[2:4]
-        self.min_dist_between_drones = 10
+        self.min_dist_between_drones = 15
         paths_to_wps = []
 
         for drone in self.cj_injector_container:

@@ -21,37 +21,37 @@ A few notes:
     <arg name="traj2" default="/home/galbra/catkin_ws/src/crazyflie_ros/crazyflie_demo/scripts/figure8.csv"/>
 
 
-        <!-- for first CF - One drone -->
-    <arg name="uri1" default="radio://0/120/2M/E7E7E7E704"/>
-    <arg name="frame1" default="cf4"/>
-    <arg name="frame1_active" default="1"/>
-    <arg name="frame1__listening_to_key_board" default="1"/>
-    <arg name="frame1_start_delay" default="0"/>
-    <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
-    <arg name="initX1" default="0.5334"/><!--black farther middle point-->
-    <arg name="initY1" default="1.9050"/><!--black farther middle point-->
-    <arg name="initZ1" default="0"/>
-
-
-<!--    &lt;!&ndash; for first CF &ndash;&gt;-->
+<!--        &lt;!&ndash; for first CF - One drone &ndash;&gt;-->
 <!--    <arg name="uri1" default="radio://0/120/2M/E7E7E7E704"/>-->
 <!--    <arg name="frame1" default="cf4"/>-->
 <!--    <arg name="frame1_active" default="1"/>-->
 <!--    <arg name="frame1__listening_to_key_board" default="1"/>-->
 <!--    <arg name="frame1_start_delay" default="0"/>-->
 <!--    <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>-->
-<!--&lt;!&ndash;    <arg name="initX1" default="0.381"/> &lt;!&ndash;red right point&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;    <arg name="initY1" default="0.8382"/> &lt;!&ndash;red right point&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;    <arg name="initX1" default="0.5334"/>&lt;!&ndash;black farther middle point&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;    <arg name="initY1" default="1.9050"/>&lt;!&ndash;black farther middle point&ndash;&gt;&ndash;&gt;-->
-<!--    <arg name="initX1" default="0.3048"/>&lt;!&ndash;black farther left point&ndash;&gt;-->
-<!--    <arg name="initY1" default="2.0574"/>&lt;!&ndash;black farther left point&ndash;&gt;-->
+<!--    <arg name="initX1" default="0.5334"/>&lt;!&ndash;black farther middle point&ndash;&gt;-->
+<!--    <arg name="initY1" default="1.9050"/>&lt;!&ndash;black farther middle point&ndash;&gt;-->
 <!--    <arg name="initZ1" default="0"/>-->
 
 
+    <!-- for first CF -->
+    <arg name="uri1" default="radio://0/120/2M/E7E7E7E704"/>
+    <arg name="frame1" default="cf4"/>
+    <arg name="frame1_active" default="1"/>
+    <arg name="frame1__listening_to_key_board" default="1"/>
+    <arg name="frame1_start_delay" default="0"/>
+    <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
+<!--    <arg name="initX1" default="0.381"/> &lt;!&ndash;red right point&ndash;&gt;-->
+<!--    <arg name="initY1" default="0.8382"/> &lt;!&ndash;red right point&ndash;&gt;-->
+<!--    <arg name="initX1" default="0.5334"/>&lt;!&ndash;black farther middle point&ndash;&gt;-->
+<!--    <arg name="initY1" default="1.9050"/>&lt;!&ndash;black farther middle point&ndash;&gt;-->
+    <arg name="initX1" default="0.3048"/><!--black farther left point-->
+    <arg name="initY1" default="2.0574"/><!--black farther left point-->
+    <arg name="initZ1" default="0"/>
+
+
     <!-- for second CF    -->
-    <arg name="uri2" default="radio://0/120/2M/E7E7E7E703"/>
-    <arg name="frame2" default="cf3"/>
+    <arg name="uri2" default="radio://0/120/2M/E7E7E7E708"/>
+    <arg name="frame2" default="cf8"/>
     <arg name="frame2_active" default="1"/>
     <arg name="frame2__listening_to_key_board" default="1"/>
     <arg name="frame2_start_delay" default="10"/>

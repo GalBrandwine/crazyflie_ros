@@ -29,7 +29,7 @@ class Agent:
         self.x_lim = env_limits[0:2]
         self.y_lim = env_limits[2:4]
         self.res = res
-        self.dist_factor = 2
+        self.dist_factor = 1
 
 
     def update_current_state(self, current_pos, current_heading):

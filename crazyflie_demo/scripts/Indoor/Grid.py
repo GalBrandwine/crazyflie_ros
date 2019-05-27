@@ -238,7 +238,7 @@ class Grid:
                     self.update_from_tof_sensing_list(drone_id)
                     # self.complete_wall_in_corners(self.matrix)
 
-        if self.grid_discovered() > 0.7:
+        if self.grid_discovered() > 0.75:
             """Every grid update check grid coverage, if exceeds X%, land all drones! """
 
             rospy.loginfo("Coverage reached, landing all drones!")
