@@ -129,10 +129,10 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     # Update additional data: drones location, car path and location, etc.
     def update_matrix_additional_data(self):
-        for i in range(len(self.vehicle_pos_history)):
-            if self.vehicle_pos_history[i][0] >= 0 and self.vehicle_pos_history[i][0] < np.shape(self.matrix[0]) and \
-                    self.vehicle_pos_history[i][1] >= 0 and self.vehicle_pos_history[i][1] < np.shape(self.matrix[1]):
-                self.matrix[self.vehicle_pos_history[i][0], self.vehicle_pos_history[i][1]] = 5
+        # for i in range(len(self.vehicle_pos_history)):
+        #     if self.vehicle_pos_history[i][0] >= 0 and self.vehicle_pos_history[i][0] < np.shape(self.matrix[0]) and \
+        #             self.vehicle_pos_history[i][1] >= 0 and self.vehicle_pos_history[i][1] < np.shape(self.matrix[1]):
+        #         self.matrix[self.vehicle_pos_history[i][0], self.vehicle_pos_history[i][1]] = 5
 
         self.update_drone_positions()
         for iDrone in range(self.nDrones):
@@ -143,9 +143,9 @@ class RequestHandler(BaseHTTPRequestHandler):
             drone_pos_ij = list(np.floor(np.divide(np.subtract(drone_pos_xy, [self.x_lim[0], self.y_lim[0]]), self.grid_resolution)))
             self.matrix[int(drone_pos_ij[0]), int(drone_pos_ij[1])] = 3
 
-        vehicle_pos_ij = list(np.floor(np.divide(np.subtract(self.vehicle_pos, [self.x_lim[0], self.y_lim[0]]), self.grid_resolution)))
-        if vehicle_pos_ij[0] >= 0 and vehicle_pos_ij[0] < np.shape(self.matrix[0]) and vehicle_pos_ij[1] >= 0 and vehicle_pos_ij[1] < np.shape(self.matrix[1]):
-            self.matrix[int(vehicle_pos_ij[0]), int(vehicle_pos_ij[1])] = 4
+        # vehicle_pos_ij = list(np.floor(np.divide(np.subtract(self.vehicle_pos, [self.x_lim[0], self.y_lim[0]]), self.grid_resolution)))
+        # if vehicle_pos_ij[0] >= 0 and vehicle_pos_ij[0] < np.shape(self.matrix[0]) and vehicle_pos_ij[1] >= 0 and vehicle_pos_ij[1] < np.shape(self.matrix[1]):
+        #     self.matrix[int(vehicle_pos_ij[0]), int(vehicle_pos_ij[1])] = 4
 
     def update_drone_positions(self):
         for iDrone in range(len(self.drone_pos_dict)):
@@ -181,8 +181,8 @@ class RequestHandler(BaseHTTPRequestHandler):
 if __name__ == "__main__":
     rospy.init_node("http_server")
     try:
-        # server = HTTPServer(('localhost', PORT_NUMBER), RequestHandler)
-        server = HTTPServer(('192.168.1.113', PORT_NUMBER), RequestHandler)
+        server = HTTPServer(('localhost', PORT_NUMBER), RequestHandler)
+        # server = HTTPServer(('192.168.1.113', PORT_NUMBER), RequestHandler)
         print 'Started HTTP server on port ', PORT_NUMBER
 
         server.serve_forever()
