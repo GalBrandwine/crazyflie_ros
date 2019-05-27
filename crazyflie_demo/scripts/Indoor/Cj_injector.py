@@ -69,7 +69,6 @@ def get_goal_point(interesting_points_list_xy, matrix, x_lim, y_lim, res, n_tail
     sorted_dist_idxs = sorted(range(len(dist_arr)), key=lambda k: dist_arr[k])
 
     valid_wp_flag = False
-    # g_idx = []
     g_idx = np.random.randint(len(interesting_points_list_xy))
 
     if len(drones_pos_list) > 1:
@@ -109,6 +108,7 @@ def get_goal_point(interesting_points_list_xy, matrix, x_lim, y_lim, res, n_tail
                 if valid_wp_flag == True:
                     break
     else:
+        g_idx = 0
         for idx in sorted_dist_idxs:
             if is_los([[drones_pos_list[tf_prefix].pos[0], drones_pos_list[tf_prefix].pos[1]]],
                       [[interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1]]], matrix, x_lim,

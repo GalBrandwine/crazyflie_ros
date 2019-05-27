@@ -211,14 +211,16 @@ class Grid:
                 # # Change tail to be a wall if the drone is in that tail.
                 # i, j = self.xy_to_ij(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
                 # self.change_tail_to_wall(i, j)
+
                 if (rospy.Time.now().to_sec() - self.time_to_correct_grid) >= self.time_thr:
-                    if np.linalg.norm(
-                            np.subtract([self.drones_prev_pos_list[drone_id].x, self.drones_prev_pos_list[drone_id].y], \
-                                        [self.drones_pos_list[drone_id].x,
-                                         self.drones_pos_list[drone_id].y])) < 2 * self.res:
+                    if np.linalg.norm(np.subtract([self.drones_prev_pos_list[drone_id].x,
+                                                   self.drones_prev_pos_list[drone_id].y],
+                                                  [self.drones_pos_list[drone_id].x,
+                                                   self.drones_pos_list[drone_id].y])) < 2 * self.res:
                         self.show_real_pc = True
                         self.time_to_correct_grid = rospy.Time.now().to_sec()
-
+                    else:
+                        self.show_real_pc = False
 
 
             except:
@@ -236,7 +238,7 @@ class Grid:
                     self.update_from_tof_sensing_list(drone_id)
                     # self.complete_wall_in_corners(self.matrix)
 
-        if self.grid_discovered() > 0.75:
+        if self.grid_discovered() > 0.7:
             """Every grid update check grid coverage, if exceeds X%, land all drones! """
 
             rospy.loginfo("Coverage reached, landing all drones!")
@@ -352,7 +354,8 @@ class Grid:
                         self.sens_limit / self.res):
                     # if self.matrix[i][j] == 0 and np.linalg.norm(np.subtract([xs[ind], ys[ind]], sensor_pos)) < (self.sens_limit):
                     self.change_tail_to_empty(i, j)
-        self.show_real_pc = False
+        if (rospy.Time.now().to_sec() - self.time_to_correct_grid) >= (self.time_thr/10):
+            self.show_real_pc = False
         if 0 < i1 < self.matrix.shape[0] and 0 < j1 < self.matrix.shape[1] and \
                 (np.linalg.norm(np.subtract([i1, j1], [i0, j0])) <= (self.sens_limit / self.res)) and \
                 self.validity_matrix[i1][j1] != 5:
