@@ -70,43 +70,44 @@ def get_goal_point(interesting_points_list_xy, matrix, x_lim, y_lim, res, n_tail
 
     valid_wp_flag = False
     g_idx = np.random.randint(len(interesting_points_list_xy))
-
     if len(drones_pos_list) > 1:
         i_s, j_s = xy_to_ij(drones_pos_list[tf_prefix].pos[0], drones_pos_list[tf_prefix].pos[1], x_lim, y_lim, res)
         for idx in sorted_dist_idxs:
             i_g, j_g = xy_to_ij(interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1], x_lim, y_lim, res)
-            for i_prefix, prefix in enumerate(drones_pos_list):
-                if prefix != tf_prefix:
-                    add_drone_pos = drones_pos_list[prefix].pos
-                    i_p_s, j_p_s = xy_to_ij(add_drone_pos[0], add_drone_pos[1], x_lim, y_lim, res)
-                    if np.linalg.norm(np.subtract([i_g, j_g], [i_p_s, j_p_s])) > n_tails_between_drones:
-                        if is_los([[drones_pos_list[tf_prefix].pos[0], drones_pos_list[tf_prefix].pos[1]]],
-                                  [[interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1]]], matrix, x_lim,
-                                  y_lim, res):
-                            g_idx = idx
-                            valid_wp_flag = True
-                            break
-            if valid_wp_flag == True:
-                break
+            if np.linalg.norm(np.subtract([i_s, j_s],[i_g, j_g])) > 2:
+                for i_prefix, prefix in enumerate(drones_pos_list):
+                    if prefix != tf_prefix:
+                        add_drone_pos = drones_pos_list[prefix].pos
+                        i_p_s, j_p_s = xy_to_ij(add_drone_pos[0], add_drone_pos[1], x_lim, y_lim, res)
+                        if np.linalg.norm(np.subtract([i_g, j_g], [i_p_s, j_p_s])) > n_tails_between_drones:
+                            if is_los([[drones_pos_list[tf_prefix].pos[0], drones_pos_list[tf_prefix].pos[1]]],
+                                      [[interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1]]], matrix, x_lim,
+                                      y_lim, res):
+                                g_idx = idx
+                                valid_wp_flag = True
+                                break
+                if valid_wp_flag == True:
+                    break
 
         if valid_wp_flag == False:
 
             for idx in sorted_dist_idxs:
                 i_g, j_g = xy_to_ij(interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1], x_lim, y_lim,
                                     res)
-                for i_prefix, prefix in enumerate(drones_pos_list):
-                    if prefix != tf_prefix:
-                        add_drone_pos = drones_pos_list[prefix].pos
-                        i_p_s, j_p_s = xy_to_ij(add_drone_pos[0], add_drone_pos[1], x_lim, y_lim, res)
-                        add_drone_next_pos = drones_pos_list[prefix].next_pos
-                        i_p_g, j_p_g = xy_to_ij(add_drone_next_pos[0], add_drone_next_pos[1], x_lim, y_lim, res)
-                        if np.linalg.norm(np.subtract([i_g, j_g], [i_p_s, j_p_s])) > n_tails_between_drones and \
-                                np.linalg.norm(np.subtract([i_g, j_g], [i_p_g, j_p_g])) > n_tails_between_drones:
-                            g_idx = idx
-                            valid_wp_flag = True
-                            break
-                if valid_wp_flag == True:
-                    break
+                if np.linalg.norm(np.subtract([i_s, j_s], [i_g, j_g])) > 2:
+                    for i_prefix, prefix in enumerate(drones_pos_list):
+                        if prefix != tf_prefix:
+                            add_drone_pos = drones_pos_list[prefix].pos
+                            i_p_s, j_p_s = xy_to_ij(add_drone_pos[0], add_drone_pos[1], x_lim, y_lim, res)
+                            add_drone_next_pos = drones_pos_list[prefix].next_pos
+                            i_p_g, j_p_g = xy_to_ij(add_drone_next_pos[0], add_drone_next_pos[1], x_lim, y_lim, res)
+                            if np.linalg.norm(np.subtract([i_g, j_g], [i_p_s, j_p_s])) > n_tails_between_drones and \
+                                    np.linalg.norm(np.subtract([i_g, j_g], [i_p_g, j_p_g])) > n_tails_between_drones:
+                                g_idx = idx
+                                valid_wp_flag = True
+                                break
+                    if valid_wp_flag == True:
+                        break
     else:
         g_idx = 0
         for idx in sorted_dist_idxs:
@@ -194,16 +195,6 @@ class DroneCjInjector:
         self.pos[0] = drone_pos[0][0]
         self.pos[1] = drone_pos[0][1]
 
-        self.rot_enabled = False
-        if (rospy.Time.now().to_sec() - self.last_time_rot_called) >= self.rot_time_thresh:
-            self.rot_enabled = True
-            # temp_yaw = np.random.rand() * np.pi / 4
-            self.drone_yaw = drone_yaw + (np.pi / 2)
-            # rospy.logdebug("angle {}".format(self.drone_yaw))
-            self.drone_yaw = np.mod(self.drone_yaw, np.pi)  # limit the rotation by maximum angle
-            # rospy.logdebug("angle after mod {}".format(self.drone_yaw))
-            self.last_time_rot_called = rospy.Time.now().to_sec()
-
         # Assume that new_pos = [x,y,z,r,p,y]
         if act_as_flag:
             Astar_Movement = PathBuilder.build_trj(drone_pos, self.env_limits, self.res, self.matrix,
@@ -217,14 +208,19 @@ class DroneCjInjector:
         # self.next_pose[1] = self.pos[1]/m_to_cm # Only for debug - inject input to output
         # self.next_pose[5] = 0 # Only for debug
 
+
+        if (rospy.Time.now().to_sec() - self.last_time_rot_called) >= self.rot_time_thresh:
+            # temp_yaw = np.random.rand() * np.pi / 4
+            self.drone_yaw = drone_yaw + (np.pi / 2)
+            # rospy.logdebug("angle {}".format(self.drone_yaw))
+            self.drone_yaw = np.mod(self.drone_yaw, np.pi)  # limit the rotation by maximum angle
+            # rospy.logdebug("angle after mod {}".format(self.drone_yaw))
+            self.last_time_rot_called = rospy.Time.now().to_sec()
+
         self.next_pose[0] = self.agent.next_pos[0][0]
         self.next_pose[1] = self.agent.next_pos[0][1]
         self.next_pose[5] = self.drone_yaw
         self.next_pose[2] = 0.35  # hard coded Z height
-        # # return to original angle after rotation
-        # if self.rot_enabled:
-        #     self.drone_yaw = drone_yaw
-
         x = self.next_pose[0] / m_to_cm
         y = self.next_pose[1] / m_to_cm
         z = self.next_pose[2]
@@ -334,7 +330,7 @@ class DroneInjector:
 
         x_lim = self.env_limits[0:2]
         y_lim = self.env_limits[2:4]
-        self.min_dist_between_drones = 15
+        self.min_dist_between_drones = 10
         paths_to_wps = []
 
         for drone in self.cj_injector_container:

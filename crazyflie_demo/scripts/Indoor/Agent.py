@@ -12,7 +12,7 @@ class Agent:
         self.velocityFactor = 50
         self.step_noise_size = 20
         self.step_snr = 1
-        self.stepSizeLimit = 30
+        self.stepSizeLimit = 50
         self.step_factor = 1
         self.next_pos = pos
         self.current_pos = self.next_pos
