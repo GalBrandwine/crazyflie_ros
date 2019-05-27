@@ -70,7 +70,7 @@ class Grid:
         self.start_time = None
         self.historic_sens_ij = []
         self.show_real_pc = False
-        self.time_thr = 25  # sec
+        self.time_thr = 20 # sec
         self.time_to_correct_grid = rospy.Time.now().to_sec()
 
         for i, id in enumerate(initial_pos_dict):
@@ -211,14 +211,14 @@ class Grid:
                 # # Change tail to be a wall if the drone is in that tail.
                 # i, j = self.xy_to_ij(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
                 # self.change_tail_to_wall(i, j)
-
                 if (rospy.Time.now().to_sec() - self.time_to_correct_grid) >= self.time_thr:
-                    self.time_to_correct_grid = rospy.Time.now().to_sec()
                     if np.linalg.norm(
                             np.subtract([self.drones_prev_pos_list[drone_id].x, self.drones_prev_pos_list[drone_id].y], \
                                         [self.drones_pos_list[drone_id].x,
                                          self.drones_pos_list[drone_id].y])) < 2 * self.res:
                         self.show_real_pc = True
+                        self.time_to_correct_grid = rospy.Time.now().to_sec()
+
 
 
             except:

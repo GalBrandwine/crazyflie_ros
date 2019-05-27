@@ -40,7 +40,7 @@ A few notes:
     <!-- for second CF    -->
     <arg name="uri2" default="radio://0/120/2M/E7E7E7E703"/>
     <arg name="frame2" default="cf3"/>
-    <arg name="frame2_active" default="1"/>
+    <arg name="frame2_active" default="0"/>
     <arg name="frame2__listening_to_key_board" default="1"/>
     <arg name="frame2_start_delay" default="8"/>
     <arg name="traj_list2" default="[$(arg traj1),$(arg traj2)]"/>
@@ -56,7 +56,7 @@ A few notes:
     <!-- for third CF    -->
     <arg name="uri3" default="radio://0/120/2M/E7E7E7E702"/>
     <arg name="frame3" default="cf2"/>
-    <arg name="frame3_active" default="1"/>
+    <arg name="frame3_active" default="0"/>
     <arg name="frame3__listening_to_key_board" default="1"/>
     <arg name="frame3_start_delay" default="15"/>
     <arg name="traj_list3" default="[$(arg traj1),$(arg traj2)]"/>
@@ -85,7 +85,7 @@ A few notes:
     <arg name="env_lim" default="[$(arg x_min), $(arg x_max), $(arg y_min), $(arg y_max)]"/>
     <arg name="resolution" default="8"/>
     <arg name="env_space" default="0"/>
-    <arg name="nDrones" default="3"/>
+    <arg name="nDrones" default="1"/>
     <arg name="useRefEnv" default="0"/>
 
 
@@ -298,19 +298,17 @@ A few notes:
 
         <!--        If trajectory usage is desired: -->
         <!--        <node name="crazyflie_demo_hover" pkg="crazyflie_demo" type="traj_planner.py" output="screen">-->
-        <!--            <param name="tf_prefix" value="$(arg frame2)"/>-->
+        <!--            <param name="tf_prefix" value="$(arg frame3)"/>-->
         <!--            &lt;!&ndash;            Pass a list as ros param&ndash;&gt;-->
-        <!--            <rosparam param="traj_list" subst_value="True">$(arg traj_list2)</rosparam>-->
+        <!--            <rosparam param="traj_list" subst_value="True">$(arg traj_list3)</rosparam>-->
         <!--        </node>-->
 
-
-           <!--        Start keyboard controller. -->
+        <!--        Start keyboard controller. -->
         <node name="motion_controller" pkg="crazyflie_demo" type="motion_controller.py" output="screen">
             <param name="tf_prefix" value="$(arg frame3)"/>
             <param name="listen_to_keyboard" value="$(arg frame3__listening_to_key_board)"/>
             <param name="start_delay" value="$(arg frame3_start_delay)"/>
         </node>
-
 
         <!--        Tf_broadcast a specific drone with world-->
         <node name="tf_broadcast" pkg="crazyflie_demo" type="tf_broadcaster.py" output="screen">

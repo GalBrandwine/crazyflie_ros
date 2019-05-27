@@ -72,45 +72,49 @@ def get_goal_point(interesting_points_list_xy, matrix, x_lim, y_lim, res, n_tail
     # g_idx = []
     g_idx = np.random.randint(len(interesting_points_list_xy))
 
-    i_s, j_s = xy_to_ij(drones_pos_list[tf_prefix].pos[0], drones_pos_list[tf_prefix].pos[1], x_lim, y_lim, res)
-    for idx in sorted_dist_idxs:
-        i_g, j_g = xy_to_ij(interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1], x_lim, y_lim, res)
-        for i_prefix, prefix in enumerate(drones_pos_list):
-            if prefix != tf_prefix:
-                add_drone_pos = drones_pos_list[prefix].pos
-                i_p_s, j_p_s = xy_to_ij(add_drone_pos[0], add_drone_pos[1], x_lim, y_lim, res)
-                if np.linalg.norm(np.subtract([i_g, j_g], [i_p_s, j_p_s])) > n_tails_between_drones:
-                    if is_los([[drones_pos_list[tf_prefix].pos[0], drones_pos_list[tf_prefix].pos[1]]],
-                              [[interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1]]], matrix, x_lim,
-                              y_lim, res):
-                        g_idx = idx
-                        valid_wp_flag = True
-                        break
-        if valid_wp_flag == True:
-            break
-
-    if valid_wp_flag == False:
-
+    if len(drones_pos_list) > 1:
+        i_s, j_s = xy_to_ij(drones_pos_list[tf_prefix].pos[0], drones_pos_list[tf_prefix].pos[1], x_lim, y_lim, res)
         for idx in sorted_dist_idxs:
-            i_g, j_g = xy_to_ij(interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1], x_lim, y_lim,
-                                res)
+            i_g, j_g = xy_to_ij(interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1], x_lim, y_lim, res)
             for i_prefix, prefix in enumerate(drones_pos_list):
                 if prefix != tf_prefix:
                     add_drone_pos = drones_pos_list[prefix].pos
                     i_p_s, j_p_s = xy_to_ij(add_drone_pos[0], add_drone_pos[1], x_lim, y_lim, res)
-                    add_drone_next_pos = drones_pos_list[prefix].next_pos
-                    i_p_g, j_p_g = xy_to_ij(add_drone_next_pos[0], add_drone_next_pos[1], x_lim, y_lim, res)
-                    if np.linalg.norm(np.subtract([i_g, j_g], [i_p_s, j_p_s])) > n_tails_between_drones and \
-                            np.linalg.norm(np.subtract([i_g, j_g], [i_p_g, j_p_g])) > n_tails_between_drones:
-                        g_idx = idx
-                        valid_wp_flag = True
-                        break
+                    if np.linalg.norm(np.subtract([i_g, j_g], [i_p_s, j_p_s])) > n_tails_between_drones:
+                        if is_los([[drones_pos_list[tf_prefix].pos[0], drones_pos_list[tf_prefix].pos[1]]],
+                                  [[interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1]]], matrix, x_lim,
+                                  y_lim, res):
+                            g_idx = idx
+                            valid_wp_flag = True
+                            break
             if valid_wp_flag == True:
                 break
 
-    # if g_idx == [] and interesting_points_list_xy != []:
-    #     g_idx = np.random.randint(len(interesting_points_list_xy))
-    #     # g_idx = 0
+        if valid_wp_flag == False:
+
+            for idx in sorted_dist_idxs:
+                i_g, j_g = xy_to_ij(interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1], x_lim, y_lim,
+                                    res)
+                for i_prefix, prefix in enumerate(drones_pos_list):
+                    if prefix != tf_prefix:
+                        add_drone_pos = drones_pos_list[prefix].pos
+                        i_p_s, j_p_s = xy_to_ij(add_drone_pos[0], add_drone_pos[1], x_lim, y_lim, res)
+                        add_drone_next_pos = drones_pos_list[prefix].next_pos
+                        i_p_g, j_p_g = xy_to_ij(add_drone_next_pos[0], add_drone_next_pos[1], x_lim, y_lim, res)
+                        if np.linalg.norm(np.subtract([i_g, j_g], [i_p_s, j_p_s])) > n_tails_between_drones and \
+                                np.linalg.norm(np.subtract([i_g, j_g], [i_p_g, j_p_g])) > n_tails_between_drones:
+                            g_idx = idx
+                            valid_wp_flag = True
+                            break
+                if valid_wp_flag == True:
+                    break
+    else:
+        for idx in sorted_dist_idxs:
+            if is_los([[drones_pos_list[tf_prefix].pos[0], drones_pos_list[tf_prefix].pos[1]]],
+                      [[interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1]]], matrix, x_lim,
+                      y_lim, res):
+                g_idx = idx
+                break
 
         # valid_wp_flag = True
         # for i_elem, elem in enumerate(interesting_points_list_xy):
@@ -374,7 +378,6 @@ class DroneInjector:
                     goal = self.interesting_points_list_xy[g_idx]
                     del self.interesting_points_list_xy[g_idx]
 
-                rospy.logdebug("goal: {} for drone: {}".format(self.interesting_points_list_xy[g_idx], drone.tf_prefix))
                 # else:
                 #     goal = [drone.next_pose[0], drone.next_pose[1]]
 
