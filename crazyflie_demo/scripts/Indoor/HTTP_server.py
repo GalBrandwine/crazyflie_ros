@@ -99,7 +99,8 @@ class RequestHandler(BaseHTTPRequestHandler):
         while True:
             #  Reflect the matrix
             reflected_matrix = np.transpose(self.matrix)
-            json_res = json.dumps(reflected_matrix.tolist())
+            rotated_matrix = np.rot90(reflected_matrix, k=3)
+            json_res = json.dumps(rotated_matrix.tolist())
             res_str = "event: grid\n"
             res_str += "data: {}\n\n".format(json_res)
             self.wfile.write(res_str.encode("utf-8"))
