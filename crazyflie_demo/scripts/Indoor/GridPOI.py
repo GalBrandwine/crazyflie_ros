@@ -4,6 +4,11 @@ import rospy
 
 
 class GridPOI:
+    # This module is a part of Cj_injector. It is responsible for finding interesting point (goals of aech drone)
+    # and the corners (point of movement for each drone)
+    # 0 - unexplored area
+    # 1 - explored empty area
+    # 2 - explored area (wall)
 
     def __init__(self, res, env_limits):
         self.res = res
@@ -11,6 +16,7 @@ class GridPOI:
         self.y_lim = env_limits[2:4]
         self.convstrct = np.ones([3, 3])
         self.wall_dist = 1
+        self.Tails_from_edge_to_ignored = 3
 
     def find_POI(self, matrix):
         # temp_mat = copy.deepcopy(matrix)
@@ -48,8 +54,8 @@ class GridPOI:
 
     def find_corners_tails(self, matrix):
         tail_list = list()
-        for i in range(3, matrix.__len__() - 3):
-            for j in range(3, matrix[i].__len__() - 3):
+        for i in range(self.Tails_from_edge_to_ignored, matrix.__len__() - self.Tails_from_edge_to_ignored):
+            for j in range(self.Tails_from_edge_to_ignored, matrix[i].__len__() - self.Tails_from_edge_to_ignored):
                 cflag, add_num = self.is_tail_in_corner(i, j, matrix)
                 if cflag:
                     cidx2 = list(np.add([i, j], np.multiply(add_num, [2, 2])))
@@ -74,8 +80,8 @@ class GridPOI:
     def find_interesting_tail(self, matrix):
         tail_list = list()
         sequence_cnt = np.zeros(np.shape(matrix))
-        for i in range(3, matrix.__len__() - 3):
-            for j in range(3, matrix[i].__len__() - 3):
+        for i in range(self.Tails_from_edge_to_ignored, matrix.__len__() - self.Tails_from_edge_to_ignored):
+            for j in range(self.Tails_from_edge_to_ignored, matrix[i].__len__() - self.Tails_from_edge_to_ignored):
                 if self.is_tail_interesting(i, j, matrix):
                     if sequence_cnt[i - 1][j - 1] == 0 and sequence_cnt[i][j - 1] == 0 and sequence_cnt[i - 1][j] == 0:
                         tail_list.append([i, j])

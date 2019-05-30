@@ -14,6 +14,8 @@ import tf2_ros
 from tf.transformations import euler_from_quaternion
 
 class Display_manager:
+    # This module displays the occupancy grid + drones positions
+
     def __init__(self, border_polygon, x_lim, y_lim, res, matrix, initial_pos_dict, nDrones):
 
         self.nDrones = nDrones

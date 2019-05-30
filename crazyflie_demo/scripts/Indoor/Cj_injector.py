@@ -45,6 +45,8 @@ def to_pose_stamped(x, y, z, roll, pitch, yaw):
 
 
 def is_los(p1, p2, matrix, x_lim, y_lim, res):
+    # This function checks if there is a line of sight between two point on the grid
+
     n = int(np.maximum(1, np.ceil(np.linalg.norm(np.subtract(p1, p2)) / res) * 3))
     x = np.linspace(p1[0][0], p2[0][0], num=n, endpoint=True)
     y = np.linspace(p1[0][1], p2[0][1], num=n, endpoint=True)
@@ -63,18 +65,22 @@ def xy_to_ij(x, y, x_lim, y_lim, res):
 
 def get_goal_point(interesting_points_list_xy, matrix, x_lim, y_lim, res, n_tails_between_drones, drones_pos_list,
                    tf_prefix):
+    # This function chooses specific interest point for each drone
+
     dist_arr = []
+    dist_from_prev_pos = 2
+
     for ielem, elem in enumerate(interesting_points_list_xy):
         dist_arr.append(np.linalg.norm(np.subtract(elem, drones_pos_list[tf_prefix].pos)))
     sorted_dist_idxs = sorted(range(len(dist_arr)), key=lambda k: dist_arr[k])
 
     valid_wp_flag = False
     g_idx = np.random.randint(len(interesting_points_list_xy))
-    if len(drones_pos_list) > 1:
+    if len(drones_pos_list) > 1: # For multiple drones
         i_s, j_s = xy_to_ij(drones_pos_list[tf_prefix].pos[0], drones_pos_list[tf_prefix].pos[1], x_lim, y_lim, res)
         for idx in sorted_dist_idxs:
             i_g, j_g = xy_to_ij(interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1], x_lim, y_lim, res)
-            if np.linalg.norm(np.subtract([i_s, j_s],[i_g, j_g])) > 2:
+            if np.linalg.norm(np.subtract([i_s, j_s],[i_g, j_g])) > dist_from_prev_pos:
                 for i_prefix, prefix in enumerate(drones_pos_list):
                     if prefix != tf_prefix:
                         add_drone_pos = drones_pos_list[prefix].pos
@@ -94,7 +100,7 @@ def get_goal_point(interesting_points_list_xy, matrix, x_lim, y_lim, res, n_tail
             for idx in sorted_dist_idxs:
                 i_g, j_g = xy_to_ij(interesting_points_list_xy[idx][0], interesting_points_list_xy[idx][1], x_lim, y_lim,
                                     res)
-                if np.linalg.norm(np.subtract([i_s, j_s], [i_g, j_g])) > 2:
+                if np.linalg.norm(np.subtract([i_s, j_s], [i_g, j_g])) > dist_from_prev_pos:
                     for i_prefix, prefix in enumerate(drones_pos_list):
                         if prefix != tf_prefix:
                             add_drone_pos = drones_pos_list[prefix].pos
@@ -108,7 +114,7 @@ def get_goal_point(interesting_points_list_xy, matrix, x_lim, y_lim, res, n_tail
                                 break
                     if valid_wp_flag == True:
                         break
-    else:
+    else: # For one drone
         g_idx = 0
         for idx in sorted_dist_idxs:
             if is_los([[drones_pos_list[tf_prefix].pos[0], drones_pos_list[tf_prefix].pos[1]]],
@@ -178,6 +184,7 @@ class DroneCjInjector:
         self.rot_enabled = False
         self.rot_time_thresh = 10  # sec
         self.last_time_rot_called = rospy.Time.now().to_sec()
+        self.z_hard_coded_height = 0.35  # hard coded Z height
         # Init publisher
         self.Cj_injector_pub = rospy.Publisher('/' + self.tf_prefix + "/Cj_injcetor", PoseStamped,
                                                queue_size=1)  # hover message publisher
@@ -195,6 +202,7 @@ class DroneCjInjector:
         self.pos[0] = drone_pos[0][0]
         self.pos[1] = drone_pos[0][1]
 
+        # perform rotation
         self.rot_enabled = False
         if (rospy.Time.now().to_sec() - self.last_time_rot_called) >= self.rot_time_thresh:
             self.rot_enabled = True
@@ -207,11 +215,15 @@ class DroneCjInjector:
 
         # Assume that new_pos = [x,y,z,r,p,y]
         if act_as_flag:
+            # If POI flag is enabled, then activate Astar algorithm.
+            # This algorithm finds the optimal path to goal (interest point of each drone).
             Astar_Movement = PathBuilder.build_trj(drone_pos, self.env_limits, self.res, self.matrix,
                                                                     corrners_array,
                                                                     next_point)
+            # Update the path to goal in Agent
             self.agent.astar_path = Astar_Movement
 
+        # Choose the relevant point from path according to current position
         self.agent.preform_step_sys_sim(drone_pos, self.drone_yaw, self.matrix, dict_of_drones_pos, tf_prefix)
 
         # self.next_pose[0] = self.pos[0]/m_to_cm # Only for debug - inject input to output
@@ -221,7 +233,7 @@ class DroneCjInjector:
         self.next_pose[0] = self.agent.next_pos[0][0]
         self.next_pose[1] = self.agent.next_pos[0][1]
         self.next_pose[5] = self.drone_yaw
-        self.next_pose[2] = 0.35  # hard coded Z height
+        self.next_pose[2] = self.z_hard_coded_height
         # # return to original angle after rotation
         # if self.rot_enabled:
         #     self.drone_yaw = drone_yaw

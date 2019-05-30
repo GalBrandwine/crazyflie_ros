@@ -37,6 +37,12 @@ class drone_pc:
 
 class Grid:
 
+    # Grid module receives raw data (position and pc) from all drones and composes the occupancy grid.
+    # This grid will be published to display nodule and Cj_injector module.
+    # 0 - unexplored area
+    # 1 - explored empty area
+    # 2 - explored area (wall)
+
     def __init__(self, x_lim, y_lim, res, nDrones, initial_pos_dict, useRefEnv, excelPath):
 
         self.x_lim = x_lim
@@ -332,6 +338,7 @@ class Grid:
                 sensing_pos = [[self.initpos[0] + elem[0], self.initpos[1] + elem[1]]]
                 self.update_with_tof_sensor([[current_pos.x, current_pos.y]], sensing_pos)
 
+    # Update grid according to raw data
     def update_with_tof_sensor(self, sensor_pos, tof_sensing_pos):
         i0, j0 = self.xy_to_ij(sensor_pos[0][0], sensor_pos[0][1])
         i1, j1 = self.xy_to_ij(tof_sensing_pos[0][0], tof_sensing_pos[0][1])
@@ -383,7 +390,7 @@ class Grid:
                 return True
         return False
 
-    def update_with_dummy_tof_sensor(self, sensor_pos, yaw):
+    def update_with_dummy_tof_sensor(self, sensor_pos, yaw): # For known maze
         directions_vec = np.add([0, np.pi / 2, np.pi, 3 * np.pi / 2], yaw)
         for phi in directions_vec:
             dummy_tof = np.add(sensor_pos, np.multiply(self.sens_limit, [[np.cos(phi), np.sin(phi)]]))
@@ -400,7 +407,7 @@ class Grid:
                     self.change_tail_to_wall(i, j)
                     break
 
-    def complete_wall_in_corners(self, matrix):
+    def complete_wall_in_corners(self, matrix): # currently not in use
         for i in range(1, matrix.__len__() - 1):
             for j in range(1, matrix[i].__len__() - 1):
                 if matrix[i][j] == 0:
