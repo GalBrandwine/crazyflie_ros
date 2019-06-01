@@ -218,6 +218,9 @@ class Grid:
                 # i, j = self.xy_to_ij(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
                 # self.change_tail_to_wall(i, j)
 
+                # Check if after a period of time the drone is in the same place.
+                # If it is, rise up the show_real_pc flag,
+                # which will reveal the current sensing of pc without adding it to previous ones.
                 if (rospy.Time.now().to_sec() - self.time_to_correct_grid) >= self.time_thr:
                     if np.linalg.norm(np.subtract([self.drones_prev_pos_list[drone_id].x,
                                                    self.drones_prev_pos_list[drone_id].y],

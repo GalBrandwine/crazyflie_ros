@@ -65,7 +65,10 @@ def xy_to_ij(x, y, x_lim, y_lim, res):
 
 def get_goal_point(interesting_points_list_xy, matrix, x_lim, y_lim, res, n_tails_between_drones, drones_pos_list,
                    tf_prefix):
-    # This function chooses specific interest point for each drone
+    # This function chooses specific interest point for each drone.
+    # It will choose the closest point which is in LOS (not mandatory)
+    # and is far from the current and next position of all drones.
+    # If there is no such point it will be taken randomly
 
     dist_arr = []
     dist_from_prev_pos = 2
