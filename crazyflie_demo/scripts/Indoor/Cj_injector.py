@@ -253,8 +253,6 @@ class DroneCjInjector:
         dict_of_drones_pos[tf_prefix].next_pos = self.agent.next_pos[0]
         dict_of_drones_pos[tf_prefix].yaw = yaw
 
-        # rospy.logdebug("drone pos: \n{}".format(drone_pos))
-        # rospy.logdebug("drone next_point: \n{}".format(next_point))
         self.Cj_injector_pub.publish(pose)
 
         return dict_of_drones_pos
@@ -281,7 +279,7 @@ def injector(drone_injector, path):
         rospy.sleep(time_delay)
 
 
-class DroneInjector:
+class DronesManager:
     """This class will subscribe to Mj topic, and send each drone it's next Cj.
 
     DroneInjector:
@@ -436,7 +434,7 @@ if __name__ == '__main__':
         curr_takeoff = initial_takeoff_list_from_launch_file[iDrone]
         prefix_takeoff_dict[pref[0]] = curr_takeoff
 
-    drone_container = DroneInjector(prefix_takeoff_dict, limits_from_launch_file, res_from_launch_file, 15)
+    drone_container = DronesManager(prefix_takeoff_dict, limits_from_launch_file, res_from_launch_file, 15)
 
     rospy.loginfo("******************* Publish /Cj_injection_rotation_example for starting the example")
 

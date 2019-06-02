@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+""" Grid module is the occopancy_grid filler and publisher. """
 import copy
 import csv
 import threading
@@ -76,7 +77,7 @@ class Grid:
         self.start_time = None
         self.historic_sens_ij = []
         self.show_real_pc = False
-        self.time_thr = 20 # sec
+        self.time_thr = 20  # sec
         self.time_to_correct_grid = rospy.Time.now().to_sec()
 
         for i, id in enumerate(initial_pos_dict):
@@ -364,7 +365,7 @@ class Grid:
                         self.sens_limit / self.res):
                     # if self.matrix[i][j] == 0 and np.linalg.norm(np.subtract([xs[ind], ys[ind]], sensor_pos)) < (self.sens_limit):
                     self.change_tail_to_empty(i, j)
-        if (rospy.Time.now().to_sec() - self.time_to_correct_grid) >= (self.time_thr/10):
+        if (rospy.Time.now().to_sec() - self.time_to_correct_grid) >= (self.time_thr / 10):
             self.show_real_pc = False
         if 0 < i1 < self.matrix.shape[0] and 0 < j1 < self.matrix.shape[1] and \
                 (np.linalg.norm(np.subtract([i1, j1], [i0, j0])) <= (self.sens_limit / self.res)) and \
@@ -393,7 +394,7 @@ class Grid:
                 return True
         return False
 
-    def update_with_dummy_tof_sensor(self, sensor_pos, yaw): # For known maze
+    def update_with_dummy_tof_sensor(self, sensor_pos, yaw):  # For known maze
         directions_vec = np.add([0, np.pi / 2, np.pi, 3 * np.pi / 2], yaw)
         for phi in directions_vec:
             dummy_tof = np.add(sensor_pos, np.multiply(self.sens_limit, [[np.cos(phi), np.sin(phi)]]))
@@ -410,7 +411,7 @@ class Grid:
                     self.change_tail_to_wall(i, j)
                     break
 
-    def complete_wall_in_corners(self, matrix): # currently not in use
+    def complete_wall_in_corners(self, matrix):  # currently not in use
         for i in range(1, matrix.__len__() - 1):
             for j in range(1, matrix[i].__len__() - 1):
                 if matrix[i][j] == 0:
