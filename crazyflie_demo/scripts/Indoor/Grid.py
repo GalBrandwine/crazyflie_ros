@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-""" Grid module is the occopancy_grid filler and publisher. """
+""" Grid module is the occupancy_grid filler and publisher. """
 import copy
 import csv
 import threading

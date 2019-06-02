@@ -1,14 +1,17 @@
 #!/usr/bin/env python
 import numpy as np
-import rospy
 
 
 class GridPOI:
-    # This module is a part of Cj_injector. It is responsible for finding interesting point (goals of aech drone)
-    # and the corners (point of movement for each drone)
-    # 0 - unexplored area
-    # 1 - explored empty area
-    # 2 - explored area (wall)
+    """ This module is a part of Cj_injector. It is responsible for finding interesting point (goals of each drone)
+
+        and the corners (point of movement for each drone).
+
+        Possible variable in matrix:
+            0 - unexplored area
+            1 - explored empty area
+            2 - explored area (wall)
+    """
 
     def __init__(self, res, env_limits):
         self.res = res
@@ -19,17 +22,7 @@ class GridPOI:
         self.Tails_from_edge_to_ignored = 3
 
     def find_POI(self, matrix):
-        # temp_mat = copy.deepcopy(matrix)
-        # bin_matrix = ndimage.binary_dilation(temp_mat, self.convstrct).astype(temp_mat.dtype)
-
-        # import matplotlib.pyplot as plt
-        # fig = plt.figure(45645)
-        # ax_1, ax_2 = fig.subplots(1, 2)
-        # ax_1.imshow(np.transpose(matrix), origin='lower')
-        # ax_2.imshow(np.transpose(bin_matrix), origin='lower')
-
         interesting_points_list_ij, interesting_points_list_xy = self.find_interesting_points(matrix)
-        # rospy.logdebug("POI:{}".format(interesting_points_list_xy))
         corner_points_list_ij, corner_points_list_xy = self.find_corner_points(matrix)
 
         return [interesting_points_list_ij, interesting_points_list_xy, corner_points_list_ij, corner_points_list_xy]
@@ -76,7 +69,6 @@ class GridPOI:
     #                 tail_list.append([i, j])
     #     return tail_list
 
-
     def find_interesting_tail(self, matrix):
         tail_list = list()
         sequence_cnt = np.zeros(np.shape(matrix))
@@ -88,7 +80,6 @@ class GridPOI:
                         sequence_cnt[i][j] = 1
                     # tail_list.append([i, j])
         return tail_list
-
 
     def is_tail_interesting(self, i, j, matrix):
         # # Tail is explored
@@ -106,7 +97,6 @@ class GridPOI:
                     return True
         else:
             return False
-
 
     # def is_tail_interesting(self, i, j, matrix):
     #     # # Tail is explored

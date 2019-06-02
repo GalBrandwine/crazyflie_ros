@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 import math
+
 import numpy as np
 from bresenham import bresenham
+
 
 class Node:
 
@@ -107,7 +109,6 @@ class Astar:
 
         return Astar_path, path_idxs
 
-
     def calc_heuristic(self, n1, n2):
         w = 1.0  # weight of heuristic
         d = w * math.sqrt((n1.x - n2.x) ** 2 + (n1.y - n2.y) ** 2)
@@ -125,7 +126,7 @@ class Astar:
         elif node.y >= maxy:
             return False
 
-        i,j = self.xy_to_ij(node.x, node.y)
+        i, j = self.xy_to_ij(node.x, node.y)
         if obmap[i][j]:
             return False
 
@@ -163,7 +164,7 @@ class Astar:
         pradius = math.sqrt((nstart.x - ngoal.x) ** 2 + (nstart.y - ngoal.y) ** 2)
         for j, jend in enumerate(zip(mx, my)):
             dcost = math.sqrt((nstart.x - jend[0]) ** 2 + (nstart.y - jend[1]) ** 2)
-            if dcost <= pradius: # Not mandatory if... Only to speed up!
+            if dcost <= pradius:  # Not mandatory if... Only to speed up!
                 allx.append(jend[0])
                 ally.append(jend[1])
                 allcost.append(dcost)
@@ -180,7 +181,6 @@ class Astar:
 
         return okways
 
-
     def is_path_free(self, si, sj, gi, gj, obmap):
         bpath = list(bresenham(si, sj, gi, gj))
         ok_way = True
@@ -190,7 +190,6 @@ class Astar:
                 break
 
         return ok_way
-
 
     def calc_fianl_path(self, ngoal, closedset):
         # generate final path
@@ -215,7 +214,6 @@ class Astar:
 
 
 def build_trj(pos, env_limits, res, matrix, temp_corner_points_list_xy, goal):
-
     x_lim = env_limits[0:2]
     y_lim = env_limits[2:4]
     astar = Astar(x_lim, y_lim, matrix, res)
@@ -231,7 +229,6 @@ def build_trj(pos, env_limits, res, matrix, temp_corner_points_list_xy, goal):
     #             temp_corner_points_list_xy[ci] = []
     #
     #     temp_corner_points_list_xy = filter(None, temp_corner_points_list_xy)
-
 
     Astar_Movement = astar_movement[1:]
 

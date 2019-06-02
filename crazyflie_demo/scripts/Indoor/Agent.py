@@ -5,11 +5,15 @@ import numpy as np
 
 
 class Agent:
-    # This module chooses the next position for each dore using the function Dynam_Search_in_maze
-    # 0 - unexplored area
-    # 1 - explored empty area
-    # 2 - explored area (wall)
+    """ Class for controlling the drone.
 
+        Each drone has This module chooses the next position for each drone using the function Dynam_Search_in_maze
+
+    0 - unexplored area
+    1 - explored empty area
+    2 - explored area (wall)
+
+    """
     def __init__(self, AgentID, pos, res, env_limits):
         self.ID = AgentID
         self.agent_alive = True
