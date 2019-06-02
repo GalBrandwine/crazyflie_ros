@@ -36,7 +36,7 @@ A few notes:
     <arg name="uri2" default="radio://0/120/2M/E7E7E7E702"/>
     <arg name="frame2" default="cf2"/>
     <arg name="frame2_active" default="1"/>
-    <arg name="frame2_start_delay" default="2" />
+    <arg name="frame2_start_delay" default="3" />
     <arg name="frame2_listening_to_key_board" default="1"/>
     <arg name="frame2_launch_delay" default="1.5"/>
     <arg name="traj_list2" default="[$(arg traj1),$(arg traj2)]"/>
@@ -48,7 +48,7 @@ A few notes:
     <arg name="uri3" default="radio://0/120/2M/E7E7E7E703"/>
     <arg name="frame3" default="cf3"/>
     <arg name="frame3_active" default="1"/>
-    <arg name="frame3_start_delay" default="3" />
+    <arg name="frame3_start_delay" default="5" />
     <arg name="frame3_listening_to_key_board" default="1"/>
     <arg name="traj_list3" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX3" default="0.0762"/>
@@ -59,7 +59,7 @@ A few notes:
     <arg name="uri4" default="radio://0/120/2M/E7E7E7E708"/>
     <arg name="frame4" default="cf8"/>
     <arg name="frame4_active" default="1"/>
-    <arg name="frame4_start_delay" default="5" />
+    <arg name="frame4_start_delay" default="8" />
     <arg name="frame4_listening_to_key_board" default="1"/>
     <arg name="traj_list4" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX4" default="0.0762"/>
@@ -92,12 +92,15 @@ A few notes:
     </node>
 
     <!-- run rviz -->
-    <!--<node name="rviz" pkg="rviz" type="rviz" args="-d $(find crazyflie_demo)/launch/indoors.rviz"-->
-          <!--required="true"/>-->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find crazyflie_demo)/launch/indoors.rviz"
+          required="true"/>
 
     <!--    teleop_twist_keyboard  -->
     <node name="teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen"
           launch-prefix="xterm -e"/>
+
+    <!--run rosbag-->
+    <node pkg="rosbag" type="record" name="rosbag_record_data" respawn="true" output="screen" args="-o /home/user/bagfiles/ -a" />
 
     <!--run vrpn client -->
     <!--<node pkg="vrpn_client_ros" name="vrpn" output="screen" type="vrpn_client_node" required="true">-->
@@ -136,7 +139,7 @@ A few notes:
 
             <rosparam>
                 genericLogTopics: ["log_pos" , "log_rpy" , "log_ranges", "log_sensors" ]
-                genericLogTopicFrequencies: [20 , 20 , 20 , 20 ]
+                genericLogTopicFrequencies: [20 , 20 , 20 , 2 ]
                 genericLogTopic_log_pos_Variables: ["stateEstimate.x", "stateEstimate.y", "stateEstimate.z"]
                 genericLogTopic_log_rpy_Variables: ["stabilizer.roll" , "stabilizer.pitch" , "stabilizer.yaw"]
                 genericLogTopic_log_ranges_Variables: ["range.front", "range.back", "range.up", "range.left",
@@ -207,7 +210,7 @@ A few notes:
 
             <rosparam>
                 genericLogTopics: ["log_pos" , "log_rpy" , "log_ranges", "log_sensors" ]
-                genericLogTopicFrequencies: [20 , 20 , 20 , 20 ]
+                genericLogTopicFrequencies: [20 , 20 , 20 , 2 ]
                 genericLogTopic_log_pos_Variables: ["stateEstimate.x", "stateEstimate.y", "stateEstimate.z"]
                 genericLogTopic_log_rpy_Variables: ["stabilizer.roll" , "stabilizer.pitch" , "stabilizer.yaw"]
                 genericLogTopic_log_ranges_Variables: ["range.front", "range.back", "range.up", "range.left",
@@ -278,7 +281,7 @@ A few notes:
 
             <rosparam>
                 genericLogTopics: ["log_pos" , "log_rpy" , "log_ranges", "log_sensors" ]
-                genericLogTopicFrequencies: [20 , 20 , 20 , 20 ]
+                genericLogTopicFrequencies: [20 , 20 , 20 , 2 ]
                 genericLogTopic_log_pos_Variables: ["stateEstimate.x", "stateEstimate.y", "stateEstimate.z"]
                 genericLogTopic_log_rpy_Variables: ["stabilizer.roll" , "stabilizer.pitch" , "stabilizer.yaw"]
                 genericLogTopic_log_ranges_Variables: ["range.front", "range.back", "range.up", "range.left",
@@ -344,7 +347,7 @@ A few notes:
 
             <rosparam>
                 genericLogTopics: ["log_pos" , "log_rpy" , "log_ranges", "log_sensors" ]
-                genericLogTopicFrequencies: [20 , 20 , 20 , 20 ]
+                genericLogTopicFrequencies: [20 , 20 , 20 , 2 ]
                 genericLogTopic_log_pos_Variables: ["stateEstimate.x", "stateEstimate.y", "stateEstimate.z"]
                 genericLogTopic_log_rpy_Variables: ["stabilizer.roll" , "stabilizer.pitch" , "stabilizer.yaw"]
                 genericLogTopic_log_ranges_Variables: ["range.front", "range.back", "range.up", "range.left",

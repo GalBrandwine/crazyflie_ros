@@ -381,12 +381,12 @@ if __name__ == '__main__':
     tfBuffer = tf2_ros.Buffer()  # initialize tf buffer for transform lookup
     listener = tf2_ros.TransformListener(tfBuffer)
 
-    start_delay = rospy.get_param("~start_delay")
-    if start_delay > 0:
-        time.sleep(start_delay*2) #delay to avoid dropout when updating parameters
-
     rospy.wait_for_service("/" + prefix + '/update_params')
     rospy.loginfo("found update_params service")
+
+    start_delay = rospy.get_param("~start_delay")
+    if start_delay > 0:
+        time.sleep(start_delay*2.5) #delay to avoid dropout when updating parameters
 
     cf.setParam("commander/enHighLevel", 1)
     cf.setParam("stabilizer/estimator", 2)  # Use EKF

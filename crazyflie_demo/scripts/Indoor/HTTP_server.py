@@ -11,11 +11,9 @@ import tf2_ros
 from tf.transformations import euler_from_quaternion
 import numpy as np
 from Grid import m_to_cm
-import ast
-
-
 
 PORT_NUMBER = 8080
+
 
 # This class will handle any incoming request from the browser
 class RequestHandler(BaseHTTPRequestHandler):
@@ -23,11 +21,11 @@ class RequestHandler(BaseHTTPRequestHandler):
         env_lim = rospy.get_param("~env_lim")
         env_space = rospy.get_param("~env_space")
 
-        exec("env_lim = {}".format(env_lim))
+        exec ("env_lim = {}".format(env_lim))
 
         self.x_lim = (env_lim[0] - env_space, env_lim[1] + env_space)
         self.y_lim = (env_lim[2] - env_space, env_lim[3] + env_space)
-        
+
         # Initialize the matrix to be None
         self.matrix = None
 
@@ -44,7 +42,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.vehicle_start_pos = rospy.get_param("~vehicle_start_pos")
         exec ("self.vehicle_start_pos = {}".format(self.vehicle_start_pos))
         self.vehicle_pos = np.multiply(self.vehicle_start_pos, m_to_cm)
-        self.vehicle_pos_log = []
+        self.vehicle_pos_history = []
 
         # Initialize listener to drone locations
         self.tfBuffer = tf2_ros.Buffer()
@@ -56,7 +54,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.drone_pos_dict[curr_drone_name] = None
 
         # Load recorded vehicle path
-        self.vehicle_path = np.loadtxt(rospy.get_param('~vehicle_recorded_path'))
+        # self.vehicle_path = np.loadtxt(rospy.get_param('~vehicle_recorded_path'))
 
         # Set a subscriber for the occupancy grid. The occupancy grid is a part of the data in the matrix
         # (the occupancy grid contains the information about the free, ubknown and wall areas).
@@ -64,18 +62,18 @@ class RequestHandler(BaseHTTPRequestHandler):
                                          callback=self.grid_parser)
 
         self.vehicle_pos_sub = rospy.Subscriber("/slam_out_pose", PoseStamped,
-                                         callback=self.vehicle_pos_parser)
+                                                callback=self.vehicle_pos_parser)
 
-        self.frame_sub = rospy.Subscriber('/indoor/vehicle_frame_topic', CompressedImage,
-                                          callback=self.frame_parser)
+        # self.frame_sub = rospy.Subscriber('/camera/infra1/image_rect_raw/compressed', CompressedImage,
+        #                                   callback=self.frame_parser)
 
     def do_GET(self):
-        
+
         self.initialize()
-        
+
         while self.matrix_width is None and self.matrix_height is None:
             sleep(1)
-            
+
         self.send_response(200)
 
         print "connection established"
@@ -102,7 +100,8 @@ class RequestHandler(BaseHTTPRequestHandler):
         while True:
             #  Reflect the matrix
             reflected_matrix = np.transpose(self.matrix)
-            json_res = json.dumps(reflected_matrix.tolist())
+            rotated_matrix = np.rot90(reflected_matrix, k=3)
+            json_res = json.dumps(rotated_matrix.tolist())
             res_str = "event: grid\n"
             res_str += "data: {}\n\n".format(json_res)
             self.wfile.write(res_str.encode("utf-8"))
@@ -113,7 +112,7 @@ class RequestHandler(BaseHTTPRequestHandler):
     def grid_parser(self, msg):
         grid_height = int(msg.info.height / msg.info.resolution)
         grid_width = int(msg.info.width / msg.info.resolution)
-        
+
         if self.matrix_height is None:
             self.matrix_height = grid_height
         if self.matrix_width is None:
@@ -125,14 +124,18 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.update_matrix_additional_data()
 
     def vehicle_pos_parser(self, msg):
-        self.vehicle_pos = [msg.pose.position.x, msg.pose.position.y]
+        self.vehicle_pos = (msg.pose.position.x, msg.pose.position.y)
         self.vehicle_pos = np.multiply(np.add(self.vehicle_pos, self.vehicle_start_pos), m_to_cm)
-        print self.vehicle_pos
+        vehicle_pos_ij = list(
+            np.floor(np.divide(np.subtract(self.vehicle_pos, [self.x_lim[0], self.y_lim[0]]), self.grid_resolution)))
+        self.vehicle_pos_history.append(vehicle_pos_ij)
 
     # Update additional data: drones location, car path and location, etc.
     def update_matrix_additional_data(self):
-        # for i in range(np.shape(self.vehicle_path)[0]):
-        #     self.matrix[self.vehicle_path[i][0], self.vehicle_path[i][1]] = 5
+        # for i in range(len(self.vehicle_pos_history)):
+        #     if self.vehicle_pos_history[i][0] >= 0 and self.vehicle_pos_history[i][0] < np.shape(self.matrix[0]) and \
+        #             self.vehicle_pos_history[i][1] >= 0 and self.vehicle_pos_history[i][1] < np.shape(self.matrix[1]):
+        #         self.matrix[self.vehicle_pos_history[i][0], self.vehicle_pos_history[i][1]] = 5
 
         self.update_drone_positions()
         for iDrone in range(self.nDrones):
@@ -140,17 +143,13 @@ class RequestHandler(BaseHTTPRequestHandler):
             if self.drone_pos_dict[drone_name] is None:
                 continue
             drone_pos_xy = self.drone_pos_dict[drone_name][:2]
-            drone_pos_ij = list(np.floor(np.divide(np.subtract(drone_pos_xy, [self.x_lim[0], self.y_lim[0]]), self.grid_resolution)))
-            print drone_pos_ij
+            drone_pos_ij = list(
+                np.floor(np.divide(np.subtract(drone_pos_xy, [self.x_lim[0], self.y_lim[0]]), self.grid_resolution)))
             self.matrix[int(drone_pos_ij[0]), int(drone_pos_ij[1])] = 3
 
         # vehicle_pos_ij = list(np.floor(np.divide(np.subtract(self.vehicle_pos, [self.x_lim[0], self.y_lim[0]]), self.grid_resolution)))
         # if vehicle_pos_ij[0] >= 0 and vehicle_pos_ij[0] < np.shape(self.matrix[0]) and vehicle_pos_ij[1] >= 0 and vehicle_pos_ij[1] < np.shape(self.matrix[1]):
-        #     self.matrix[int(vehicle_pos_ij[0]), int(ehicle_pos_ij[1])] = 4
-            # self.vehicle_pos_log.append(vehicle_pos_ij)
-            # np.savetxt('/home/bgilad/path.txt', self.vehicle_pos_log, fmt='%s')
-            # print "file saved"
-
+        #     self.matrix[int(vehicle_pos_ij[0]), int(vehicle_pos_ij[1])] = 4
 
     def update_drone_positions(self):
         for iDrone in range(len(self.drone_pos_dict)):
@@ -180,22 +179,18 @@ class RequestHandler(BaseHTTPRequestHandler):
             # except Exception as e:
             #     rospy.loginfo(e)
 
-    def frame_parser(self):
+    def frame_parser(self, msg):
         pass
-
-
 
 
 if __name__ == "__main__":
     rospy.init_node("http_server")
     try:
         # server = HTTPServer(('localhost', PORT_NUMBER), RequestHandler)
-        server = HTTPServer(('192.168.1.102', PORT_NUMBER), RequestHandler)
+        server = HTTPServer(('192.168.1.123', PORT_NUMBER), RequestHandler)
         print 'Started HTTP server on port ', PORT_NUMBER
 
         server.serve_forever()
 
     except:
-        rospy.loginfo("exceptiopn http server")
         server.socket.close()
-

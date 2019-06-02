@@ -17,7 +17,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: PointCloud2_CF1
   - Class: rviz/Displays
     Help Height: 78
     Name: Displays
@@ -25,7 +25,7 @@ Panels:
       Expanded:
         - /Grid1
       Splitter Ratio: 0.5
-    Tree Height: 222
+    Tree Height: 359
 Visualization Manager:
   Class: ""
   Displays:
@@ -52,13 +52,43 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
+        cf1:
+          Value: true
+        cf1_takeoff:
+          Value: true
+        cf2:
+          Value: true
+        cf2_takeoff:
+          Value: true
+        cf3:
+          Value: true
+        cf3_takeoff:
+          Value: true
+        cf8:
+          Value: true
+        cf8_takeoff:
+          Value: true
+        world:
+          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: true
       Tree:
-        {}
+        world:
+          cf1_takeoff:
+            cf1:
+              {}
+          cf2_takeoff:
+            cf2:
+              {}
+          cf3_takeoff:
+            cf3:
+              {}
+          cf8_takeoff:
+            cf8:
+              {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -266,16 +296,16 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 11.8195162
+      Distance: 5.5149641
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 2.04938698
-        Y: 1.61177969
-        Z: 0.132559925
+        X: 1.84241295
+        Y: 1.86886418
+        Z: 0.132354781
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false

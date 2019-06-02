@@ -43,7 +43,7 @@ class DroneCjInjector:
 def injector(drone_injector, start_delay, path):
     """Simple threaded function for publishing point of a drone. """
     if start_delay > 0:
-        sleep(start_delay)
+        sleep(start_delay+3.5)
         
     for point in path:
         time_delay = point[0]
@@ -145,14 +145,13 @@ class DroneInjector:
             [step_time * 1.575, 5.25 * step, 12.25 * step, 0.35, 0],
             [step_time * 8, 6.75 * step, 12.25 * step, 0.35, 0],
             [step_time * 2.1, 8.75 * step, 12.25 * step, 0.35, 0],
-            [step_time * 2.1, 10.75 * step, 12.25 * step, 0.35, 0],
-            [step_time * 2.1, 12.75 * step, 12.25 * step, 0.35, 0],
-            [step_time * 2.1, 14.75 * step, 12.25 * step, 0.35, 0],
-            [step_time * 2.1, 16.75 * step, 12.25 * step, 0.35, 0],
-            [step_time * 2.1, 18.75 * step, 12.25 * step, 0.35, 0],
-            [step_time * 14, 19.00 * step, 12.25 * step, 0.35, 0],
-            [step_time * 2, 18.75 * step, 12.25 * step, 0, 0]
-
+            [step_time * 1.05, 8.75 * step, 13.25 * step, 0.35, 0],
+            [step_time * 2.1, 10.75 * step, 13.25 * step, 0.35, 0],
+            [step_time * 2.1, 12.75 * step, 13.25 * step, 0.35, 0],
+            [step_time * 2.1, 14.75 * step, 13.25 * step, 0.35, 0],
+            [step_time * 2.1, 16.75 * step, 13.25 * step, 0.35, 0],
+            [step_time * 2.1, 18.75 * step, 13.25 * step, 0.35, 0],
+            [step_time * 1.5, 18.75 * step, 13.25 * step, 0, 0]
         ]
 
         #                       [----t----, ----x---, ---y---, --z--, yaw]
@@ -217,37 +216,35 @@ class DroneInjector:
             [step_time * 1.575, 10.25 * step, 8.5 * step, 0.35, 0],
             [step_time * 1.48492424049175, 9.25 * step, 9.5 * step, 0.35, 0],
             [step_time * 1.575, 9.25 * step, 11 * step, 0.35, 0],
-            [step_time * 1.6601957715884, 9.75 * step, 12.5 * step, 0.35, 0],
-            [step_time * 2.1, 11.75 * step, 12.5 * step, 0.35, 0],
-            [step_time * 2.1, 13.75 * step, 12.5 * step, 0.35, 0],
-            [step_time * 2.1, 15.75 * step, 12.5 * step, 0.35, 0],
-            [step_time * 1.6601957715884, 17.25 * step, 12 * step, 0.35, 0],
-            [step_time * 3, 17.25 * step, 12 * step, 0.35, 0],
-            [step_time * 2, 17.25 * step, 12 * step, 0, 0]
+            [step_time * 1.91102884593614, 9.75 * step, 12.75 * step, 0.35, 0],
+            [step_time * 2.1, 11.75 * step, 12.75 * step, 0.35, 0],
+            [step_time * 2.1, 13.75 * step, 12.75 * step, 0.35, 0],
+            [step_time * 2.1, 15.75 * step, 12.75 * step, 0.35, 0],
+            [step_time * 2.16463045344927, 17.75 * step, 12.25 * step, 0.35, 0],
+            [step_time * 0, 17.75 * step, 12.25 * step, 0, 0]
 
         ]
 
         #                       [----t----, ----x---, ---y---, --z--, yaw]
         path_maze_frame4 = [
             [step_time * 1, 0.25 * step, 5.25 * step, 0.35, 0],
-            [step_time * 1.575, 1.75 * step, 5.25 * step, 0.35, 0],
-            [step_time * 1.575, 3.25 * step, 5.25 * step, 0.35, 0],
-            [step_time * 1.8375, 5 * step, 5.25 * step, 0.35, 0],
-            [step_time * 1.8375, 6.75 * step, 5.25 * step, 0.35, 0],
-            [step_time * 2.1, 6.75 * step, 7.25 * step, 0.35, 0],
-            [step_time * 2.1, 6.75 * step, 9.25 * step, 0.35, 0],
-            [step_time * 1.575, 6.75 * step, 10.75 * step, 0.35, 0],
-            [step_time * 1.575, 6.75 * step, 12.25 * step, 0.35, 0],
-            [step_time * 0.742462120245875, 7.25 * step, 12.75 * step, 0.35, 0],
-            [step_time * 1.575, 8.75 * step, 12.75 * step, 0.35, 0],
-            [step_time * 10, 10.75 * step, 12.75 * step, 0.35, 0],
-            [step_time * 2.1, 12.75 * step, 12.75 * step, 0.35, 0],
-            [step_time * 2.1, 14.75 * step, 12.75 * step, 0.35, 0],
-            [step_time * 2.1, 16.75 * step, 12.75 * step, 0.35, 0],
+            [step_time * 1.8375, 2 * step, 5.25 * step, 0.35, 0],
+            [step_time * 1.8375, 3.75 * step, 5.25 * step, 0.35, 0],
+            [step_time * 1.8375, 5.5 * step, 5.25 * step, 0.35, 0],
+            [step_time * 1.8375, 7.25 * step, 5.25 * step, 0.35, 0],
+            [step_time * 2.1, 7.25 * step, 7.25 * step, 0.35, 0],
+            [step_time * 2.1, 7.25 * step, 9.25 * step, 0.35, 0],
+            [step_time * 1.575, 7.25 * step, 10.75 * step, 0.35, 0],
+            [step_time * 1.575, 7.25 * step, 12.25 * step, 0.35, 0],
+            [step_time * 0.742462120245875, 7.75 * step, 12.75 * step, 0.35, 0],
+            [step_time * 1.575, 9.25 * step, 12.75 * step, 0.35, 0],
+            [step_time * 9, 11.25 * step, 12.75 * step, 0.35, 0],
+            [step_time * 2.1, 13.25 * step, 12.75 * step, 0.35, 0],
+            [step_time * 1.8375, 15 * step, 12.75 * step, 0.35, 0],
+            [step_time * 1.8375, 16.75 * step, 12.75 * step, 0.35, 0],
             [step_time * 2.625, 18.75 * step, 11.25 * step, 0.35, 0],
             [step_time * 1.8375, 20.5 * step, 11.25 * step, 0.35, 0],
-            [step_time * 12, 20.5 * step, 11.25 * step, 0.35, 0],
-            [step_time * 2, 20.5 * step, 11.25 * step, 0, 0]
+            [step_time * 1.5, 20.5 * step, 11.25 * step, 0, 0]
 
         ]
 
