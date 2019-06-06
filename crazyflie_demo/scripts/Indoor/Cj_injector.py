@@ -125,9 +125,9 @@ class DroneCjInjector:
         if (rospy.Time.now().to_sec() - self.last_time_rot_called) >= self.rot_time_thresh:
             self.rot_enabled = True
             self.drone_yaw = drone_yaw + (np.pi / 2)
-            rospy.logdebug("angle {}".format(self.drone_yaw))
+            rospy.logdebug("in Cj_injector angle {}".format(self.drone_yaw))
             self.drone_yaw = np.mod(self.drone_yaw, np.pi)
-            rospy.logdebug("angle after mod {}".format(self.drone_yaw))
+            rospy.logdebug("in Cj_injector angle after mod {}".format(self.drone_yaw))
             self.last_time_rot_called = rospy.Time.now().to_sec()
 
         # Assume that new_pos = [x,y,z,r,p,y]
@@ -554,7 +554,7 @@ class DronesManager:
 
 
 if __name__ == '__main__':
-    rospy.init_node("incjetor", log_level=rospy.DEBUG)
+    rospy.init_node("incjetor", log_level=rospy.INFO)
 
     # Get params from ROS launch file.
     prefix_list_from_launch_file = rospy.get_param("~prefix_list")
