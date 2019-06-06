@@ -33,8 +33,8 @@ A few notes:
     <arg name="frame1__listening_to_key_board" default="1"/>
     <arg name="frame1_start_delay" default="0"/>
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
-    <arg name="initX1" default="0.3048"/><!--black farther left point-->
-    <arg name="initY1" default="0.3048"/><!--black farther left point-->
+    <arg name="initX1" default="0.5334"/><!--black farther left point-->
+    <arg name="initY1" default="0.4572"/><!--black farther left point-->
     <arg name="initZ1" default="0"/>
 
 
@@ -89,7 +89,7 @@ A few notes:
                 - useRefEnv:                        temp development, should be removed.
     -->
 
-    <!--    DONT DELETE!    Beer_Sheva maze size:
+    <!--    DONT DELETE!    Beer-Sheva maze size:
             <arg name="x_min" value="0"/>
             <arg name="x_max" default="504"/>
             <arg name="y_min" default="0"/>
