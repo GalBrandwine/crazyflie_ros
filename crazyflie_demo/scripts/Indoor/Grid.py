@@ -140,7 +140,7 @@ class Grid:
         # plt.show()
 
     def point_cloud_parser(self, msg, topic):
-        """Each publicitation, theres' an array of 10 points."""
+        """ Each publicitation, there's' an array of 10 points."""
         point_cloud_last_timestamp = msg.header
         point_cloud = pc2.read_points_list(msg, skip_nans=True)
 
@@ -263,23 +263,6 @@ class Grid:
 
             self.land_publisher.publish(twist)
 
-    # def pos_parser(self, msg):
-    #     pos_header = msg.header
-    #     pos_val = msg.values
-    #
-    #     drone_id = pos_header.frame_id.split("/")[0] # Extract drone name from topic name
-    #     plt_index = self.drones_pos_list[drone_id].index
-    #     # Store drone position and convert it from [m] to [cm]
-    #     self.drones_pos_list[drone_id] = drone_pos(pos_header.stamp.secs,
-    #                                                self.takeofpos[drone_id][0]+(pos_val[0]*m_to_cm),
-    #                                                self.takeofpos[drone_id][1]+(pos_val[1]*m_to_cm),
-    #                                                self.takeofpos[drone_id][2]+(pos_val[2]*m_to_cm), None, plt_index)
-    #
-    #     # Change tail to be empty if the drone is in that tail.
-    #     i, j = self.xy_to_ij(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
-    #     if self.matrix[i][j] == 0:
-    #         self.change_tail_to_empty(i, j)
-
     # Initialize a publisher for occupancy grid
     def init_grid_publisher(self):
         self.grid_publisher = rospy.Publisher('/indoor/occupancy_grid_topic', OccupancyGrid, queue_size=10)
@@ -372,15 +355,7 @@ class Grid:
                 self.validity_matrix[i1][j1] != 5:
             self.change_tail_to_wall(i1, j1)
 
-        # d = np.subtract(tof_sensing_pos, sensor_pos)
-        # norm_d = np.linalg.norm(d)
-        # if norm_d > 0 and (np.linalg.norm(np.subtract([i1, j1], [i0, j0])) <= (self.sens_limit / self.res)) and 0 < i1 < self.matrix.shape[0] and 0 < j1 < self.matrix.shape[1]:
-        #     wall_pos = tof_sensing_pos + d / norm_d * self.res / 1000
-        #     i, j = self.xy_to_ij(wall_pos[0][0], wall_pos[0][1])
-        #     # if self.time_filter(i, j, pc_time):
-        #     self.change_tail_to_wall(i, j)
-
-    # Apply time filter TODO: document...
+    # Apply time filter
     def time_filter(self, i, j, pc_time):
         if self.start_time is None or pc_time - self.start_time < 10:
             self.historic_sens_ij.append((i, j, pc_time))

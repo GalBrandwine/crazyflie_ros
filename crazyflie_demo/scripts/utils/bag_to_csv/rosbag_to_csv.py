@@ -122,7 +122,7 @@ def bag_to_csv(options, fname, file_path):
                     stream.write('world coord,')
                     stream.write('world coord,')
 
-                    # todo: note that in the futore the point_cloud will be in WC
+                    # todo: note that in the future the point_cloud will be in WC
                     stream.write('LC,')
                     stream.write('LC,')
                     stream.write('LC,')

@@ -167,7 +167,6 @@ class Display_manager:
 
         self.update_grid_plot()
 
-    # TODO: plot POI
 
     # Update the grid plot using the last receive matrix (i.e. occupancy grid)
     def update_grid_plot(self):
