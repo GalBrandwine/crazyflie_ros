@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package>
+    <name>crazyflie_mapping</name>
+    <version>0.0.1</version>
+    <description>Mapping and swarm managing tools for crazyflie package (vrpn, teleoperation, rviz integration)
+    </description>
+
+    <maintainer email="gal080592@gmail.com">Gal Brandwine</maintainer>
+    <maintainer email="tomsofer@gmail.com">Tom Sofer</maintainer>
+
+    <license>MIT</license>
+
+    <url type="website">http://ros.org/wiki/crazyflie</url>
+    <url type="bugtracker">https://github.com/GalBrandwine/crazyflie_ros/issues</url>
+
+    <author email="gal080592@gmail.com">Gal Brandwine</author>
+    <author email="tomsofer@gmail.com">Tom Sofer</author>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <build_depend>roscpp</build_depend>
+    <build_depend>message_generation</build_depend>
+    <build_depend>sensor_msgs</build_depend>
+    <build_depend>tf2_sensor_msgs</build_depend>
+    <build_depend>nav_msgs</build_depend>
+
+
+    <run_depend>roscpp</run_depend>
+    <run_depend>python-numpy</run_depend>
+    <run_depend>python-Bresenham</run_depend>
+    <run_depend>python-matplotlib == 2.2.4</run_depend>
+
+</package>
