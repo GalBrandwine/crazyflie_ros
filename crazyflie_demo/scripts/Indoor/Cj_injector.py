@@ -263,7 +263,7 @@ class DronesManager:
             z = trans.transform.translation.z
             roll = euler[0]
             pitch = euler[1]
-            yaw = euler[2]
+            yaw = eDronesManageruler[2]
 
             pos = [x * m_to_cm, y * m_to_cm, z * m_to_cm, roll, pitch, yaw]
             cur_pos = [[pos[0], pos[1]]]
