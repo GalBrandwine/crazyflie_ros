@@ -12,6 +12,7 @@ import tf2_ros
 from Agent import Agent
 from Grid import m_to_cm
 from GridPOI import GridPOI
+from crazyflie_mapping.srv import *
 from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import OccupancyGrid
 from std_msgs.msg import Empty
@@ -553,8 +554,18 @@ class DronesManager:
         self.simple_rectangel_example()
 
 
+def handle_swarm_takeoff(req):
+    rospy.logdebug("Returning {}".format(req))
+    # return AddTwoIntsResponse(req.a + req.b)
+    return req
+
+
 if __name__ == '__main__':
     rospy.init_node("incjetor", log_level=rospy.INFO)
+
+    # Initiating service:
+    s = rospy.Service('SwarmTakeoff', SwarmTakeoff, handle_swarm_takeoff)
+    rospy.loginfo("Service SwarmTakeoff Initiated")
 
     # Get params from ROS launch file.
     prefix_list_from_launch_file = rospy.get_param("~prefix_list")
@@ -579,5 +590,6 @@ if __name__ == '__main__':
     drone_container = DronesManager(prefix_takeoff_dict, limits_from_launch_file, res_from_launch_file, 15)
 
     rospy.loginfo("******************* Publish /Cj_injection_predefined_path for starting the example")
+    rospy.loginfo("******************* Publish /SwarmTakeoff for starting Autonomous flight")
 
     rospy.spin()
