@@ -113,7 +113,7 @@ A few notes:
 
     <!--    run bag record -->
     <node pkg="rosbag" type="record" name="rosbag_record_standard_data" respawn="true" output="screen"
-          args="-o /home/galbra/bags/ -a"/>
+          args="-o /home/$USER/ -a"/>
 
     <!--    Teleop_twist_keyboard  -->
     <node name="teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen"

@@ -19,6 +19,7 @@ A swarm management and mappping tools for crazyflie.
     * tf2_sensor_msgs
     * nav_msgs
     * sensor_msgs
+    * teleop_twist_keyboard
 
 ## Usage:
 * Inside 'indoors_mapping.launch', set the correct CF's radio & the correct params for Mapping node.
