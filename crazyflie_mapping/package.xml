@@ -30,5 +30,6 @@
     <run_depend>python-numpy</run_depend>
     <run_depend>python-Bresenham</run_depend>
     <run_depend>python-matplotlib == 2.2.4</run_depend>
+    <run_depend>python-shapely</run_depend>
 
 </package>
