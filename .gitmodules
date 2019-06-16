@@ -3,4 +3,4 @@
 	url = https://github.com/whoenig/crazyflie_cpp.git
 [submodule "crazyflie_tools"]
 	path = crazyflie_tools
-	url = https://github.com/whoenig/crazyflie_tools
+	url = https://github.com/whoenig/crazyflie_tools.git
