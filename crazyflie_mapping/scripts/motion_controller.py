@@ -197,16 +197,16 @@ def get_xyz_yaw(cj_injection_message):
 
 
 def handler(cf_handler):
-    # Waiting for service
-    rospy.wait_for_service('add_two_ints')
-    try:
-        take_off_requested = rospy.ServiceProxy('SwarmTakeoff', SwarmTakeoff)
-        rospy.logdebug("SwarmTakeoof service recieved: {}".format(take_off_requested))
-        initialZ = take_off_requested
-        # resp1 = add_two_ints(x, y)
-        # return resp1.sum
-    except rospy.ServiceException, e:
-        print "Service call failed: %s" % e
+    # # Waiting for service
+    # rospy.wait_for_service('add_two_ints')
+    # try:
+    #     take_off_requested = rospy.ServiceProxy('SwarmTakeoff', SwarmTakeoff)
+    #     rospy.logdebug("SwarmTakeoof service recieved: {}".format(take_off_requested))
+    #     initialZ = take_off_requested
+    #     # resp1 = add_two_ints(x, y)
+    #     # return resp1.sum
+    # except rospy.ServiceException, e:
+    #     print "Service call failed: %s" % e
 
     r = rospy.Rate(5)
     time.sleep(0.5)

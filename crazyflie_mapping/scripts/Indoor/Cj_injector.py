@@ -563,9 +563,9 @@ def handle_swarm_takeoff(req):
 if __name__ == '__main__':
     rospy.init_node("incjetor", log_level=rospy.INFO)
 
-    # Initiating service:
-    s = rospy.Service('SwarmTakeoff', SwarmTakeoff, handle_swarm_takeoff)
-    rospy.loginfo("Service SwarmTakeoff Initiated")
+    # # Initiating service:
+    # s = rospy.Service('SwarmTakeoff', SwarmTakeoff, handle_swarm_takeoff)
+    # rospy.loginfo("Service SwarmTakeoff Initiated")
 
     # Get params from ROS launch file.
     prefix_list_from_launch_file = rospy.get_param("~prefix_list")
