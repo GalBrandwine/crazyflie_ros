@@ -12,7 +12,6 @@ import tf2_ros
 from Agent import Agent
 from Grid import m_to_cm
 from GridPOI import GridPOI
-from crazyflie_mapping.srv import *
 from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import OccupancyGrid
 from std_msgs.msg import Empty
