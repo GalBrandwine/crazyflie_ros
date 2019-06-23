@@ -17,8 +17,8 @@ A few notes:
 
     <!--    ***************************************************** Drones initiation ********************************************************
             Parameters:
-                - uri:                              the drone ID (per technology, in this case, Crazyflie)
-                - frame:                            the ROS-name, for adressing this drone, with publishing and subscribing.
+                - uri:                              the drone hardware ID
+                - frame:                            the ROS name space, for publishing and subscribing.
                 - frame_active:                     flag, use this drone if activated.
                 - frame__listening_to_key_board:    flag, for listening to key_board_teleop_twist node (ROS).
                 - frame1_start_delay:               counter in sec, for delaying this drone's start.
@@ -33,20 +33,20 @@ A few notes:
     <arg name="frame1__listening_to_key_board" default="1"/>
     <arg name="frame1_start_delay" default="0"/>
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
-    <arg name="initX1" default="0.5334"/><!--black farther left point-->
-    <arg name="initY1" default="0.4572"/><!--black farther left point-->
+    <arg name="initX1" default="0.05"/><!--black farther left point-->
+    <arg name="initY1" default="0.5"/><!--black farther left point-->
     <arg name="initZ1" default="0"/>
 
 
     <!-- for second CF    -->
-    <arg name="uri2" default="radio://0/120/2M/E7E7E7E708"/>
-    <arg name="frame2" default="cf8"/>
+    <arg name="uri2" default="radio://0/120/2M/E7E7E7E703"/>
+    <arg name="frame2" default="cf3"/>
     <arg name="frame2_active" default="0"/>
     <arg name="frame2__listening_to_key_board" default="1"/>
-    <arg name="frame2_start_delay" default="10"/>
+    <arg name="frame2_start_delay" default="0"/>
     <arg name="traj_list2" default="[$(arg traj1),$(arg traj2)]"/>
-    <arg name="initX2" default="0.0762"/><!--black closer right point-->
-    <arg name="initY2" default="1.6764"/><!--black closer right point-->
+    <arg name="initX2" default="0.05"/><!--black closer right point-->
+    <arg name="initY2" default="0.8"/><!--black closer right point-->
     <arg name="initZ2" default="0"/>
 
 
@@ -89,17 +89,11 @@ A few notes:
                 - useRefEnv:                        temp development, should be removed.
     -->
 
-    <!--    DONT DELETE!    Beer-Sheva maze size:
-            <arg name="x_min" value="0"/>
-            <arg name="x_max" default="504"/>
-            <arg name="y_min" default="0"/>
-            <arg name="y_max" default="504"/>
-    -->
 
     <arg name="x_min" value="0"/>
-    <arg name="x_max" default="200"/>
+    <arg name="x_max" default="350"/>
     <arg name="y_min" default="0"/>
-    <arg name="y_max" default="200"/>
+    <arg name="y_max" default="350"/>
     <arg name="env_lim" default="[$(arg x_min), $(arg x_max), $(arg y_min), $(arg y_max)]"/>
     <arg name="resolution" default="8"/>
     <arg name="env_space" default="0"/>
@@ -112,8 +106,8 @@ A few notes:
           required="true"/>
 
     <!--    run bag record -->
-    <node pkg="rosbag" type="record" name="rosbag_record_standard_data" respawn="true" output="screen"
-          args="-o /home/$USER/ -a"/>
+<!--    <node pkg="rosbag" type="record" name="rosbag_record_standard_data" respawn="true" output="screen"-->
+<!--          args="-o /home/$USER/ -a"/>-->
 
     <!--    Teleop_twist_keyboard  -->
     <node name="teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen"
@@ -176,9 +170,9 @@ A few notes:
 
 
         <!--            Fix vrpn axes - broadcasts tf frame "cf#_fixed" FOR IT TO WORK THE RIGID BODY NAME MUST BE CF#_VRPN -->
-        <node name="explorer" pkg="crazyflie_mapping" type="tf_fixer.py" output="screen">
-            <param name="tf_prefix" value="$(arg frame1)"/>
-        </node>
+<!--        <node name="explorer" pkg="crazyflie_mapping" type="tf_fixer.py" output="screen">-->
+<!--            <param name="tf_prefix" value="$(arg frame1)"/>-->
+<!--        </node>-->
 
         <!--        Tf_broadcast a static transform with offset between a drone launch point and world-->
         <node pkg="tf" type="static_transform_publisher" name="world_to_$(arg frame1)_takeoff"
@@ -245,9 +239,9 @@ A few notes:
         </node>
 
         <!--        Fix vrpn axes - broadcasts tf frame "cf#_fixed" FOR IT TO WORK THE RIGID BODY NAME MUST BE CF#_VRPN -->
-        <node name="explorer" pkg="crazyflie_mapping" type="tf_fixer.py" output="screen">
-            <param name="tf_prefix" value="$(arg frame2)"/>
-        </node>
+<!--        <node name="explorer" pkg="crazyflie_mapping" type="tf_fixer.py" output="screen">-->
+<!--            <param name="tf_prefix" value="$(arg frame2)"/>-->
+<!--        </node>-->
 
         <!--        Tf_broadcast a static transform with offset between a drone launch point and world-->
         <node pkg="tf" type="static_transform_publisher" name="world_to_$(arg frame2)_takeoff"
@@ -314,9 +308,9 @@ A few notes:
         </node>
 
         <!--        Fix vrpn axes - broadcasts tf frame "cf#_fixed" FOR IT TO WORK THE RIGID BODY NAME MUST BE CF#_VRPN -->
-        <node name="explorer" pkg="crazyflie_mapping" type="tf_fixer.py" output="screen">
-            <param name="tf_prefix" value="$(arg frame3)"/>
-        </node>
+<!--        <node name="explorer" pkg="crazyflie_mapping" type="tf_fixer.py" output="screen">-->
+<!--            <param name="tf_prefix" value="$(arg frame3)"/>-->
+<!--        </node>-->
 
         <!--        Tf_broadcast a static transform with offset between a drone launch point and world-->
         <node pkg="tf" type="static_transform_publisher" name="world_to_$(arg frame3)_takeoff"
@@ -383,9 +377,9 @@ A few notes:
         </node>
 
         <!--        Fix vrpn axes - broadcasts tf frame "cf#_fixed" FOR IT TO WORK THE RIGID BODY NAME MUST BE CF#_VRPN -->
-        <node name="explorer" pkg="crazyflie_mapping" type="tf_fixer.py" output="screen">
-            <param name="tf_prefix" value="$(arg frame4)"/>
-        </node>
+<!--        <node name="explorer" pkg="crazyflie_mapping" type="tf_fixer.py" output="screen">-->
+<!--            <param name="tf_prefix" value="$(arg frame4)"/>-->
+<!--        </node>-->
 
         <!--        Tf_broadcast a static transform with offset between a drone launch point and world-->
         <node pkg="tf" type="static_transform_publisher" name="world_to_$(arg frame4)_takeoff"
