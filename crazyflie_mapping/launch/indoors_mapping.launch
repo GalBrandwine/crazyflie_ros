@@ -33,8 +33,8 @@ A few notes:
     <arg name="frame1__listening_to_key_board" default="1"/>
     <arg name="frame1_start_delay" default="0"/>
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
-    <arg name="initX1" default="0"/><!--black farther left point-->
-    <arg name="initY1" default="0"/><!--black farther left point-->
+    <arg name="initX1" default="0.3048"/><!--black farther left point-->
+    <arg name="initY1" default="2.0574"/><!--black farther left point-->
     <arg name="initZ1" default="0"/>
 
 
@@ -45,8 +45,8 @@ A few notes:
     <arg name="frame2__listening_to_key_board" default="1"/>
     <arg name="frame2_start_delay" default="0"/>
     <arg name="traj_list2" default="[$(arg traj1),$(arg traj2)]"/>
-    <arg name="initX2" default="0.05"/><!--black closer right point-->
-    <arg name="initY2" default="0.8"/><!--black closer right point-->
+    <arg name="initX2" default="0.0762"/><!--black closer right point-->
+    <arg name="initY2" default="2.0574"/><!--black closer right point-->
     <arg name="initZ2" default="0"/>
 
 
@@ -91,9 +91,9 @@ A few notes:
 
 
     <arg name="x_min" value="0"/>
-    <arg name="x_max" default="510"/>
+    <arg name="x_max" default="504"/>
     <arg name="y_min" default="0"/>
-    <arg name="y_max" default="510"/>
+    <arg name="y_max" default="504"/>
     <arg name="env_lim" default="[$(arg x_min), $(arg x_max), $(arg y_min), $(arg y_max)]"/>
     <arg name="resolution" default="8"/>
     <arg name="env_space" default="0"/>
@@ -436,7 +436,7 @@ A few notes:
 
         </node>
 
-        <node name="DronesManager" pkg="crazyflie_mapping" type="Display.py" output="screen">
+        <node name="display_manager" pkg="crazyflie_mapping" type="Display.py" output="screen">
             <param name="env_lim" value="$(arg env_lim)"/>
             <param name="env_space" value="$(arg env_space)"/>
             <param name="resolution" value="$(arg resolution)"/>
@@ -472,7 +472,7 @@ A few notes:
 <!--            <param name="nDrones" value="$(arg nDrones)"/>-->
 <!--        </node>-->
 
-        <node name="Cj_injector" pkg="crazyflie_mapping" type="Local_planner.py" output="screen">
+        <node name="DronesManager" pkg="crazyflie_mapping" type="Local_planner.py" output="screen">
             <rosparam param="env_lim" subst_value="True">[$(arg env_lim),]</rosparam>
             <param name="resolution" value="$(arg resolution)"/>
             <rosparam param="prefix_list" subst_value="True">[[$(arg frame1)], [$(arg frame2)], [$(arg frame3)],]

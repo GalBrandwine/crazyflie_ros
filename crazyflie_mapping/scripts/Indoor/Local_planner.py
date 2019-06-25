@@ -238,7 +238,7 @@ class Local_planner:
 
         # Assume that new_pos = [x,y,z,r,p,y]
         # Find the path to the next wp using A* algorithm
-        Astar_Movement = Astar.build_trj(drone_pos, self.env_limits, self.res, self.matrix, wp_path[0], tf_prefix, dict_of_drones_pos)
+        Astar_Movement = Astar.build_trj(drone_pos, self.env_limits, self.res, self.matrix, wp_path, tf_prefix, dict_of_drones_pos)
         # Update the path to goal in Agent
         self.agent.wp_path = Astar_Movement + self.agent.wp_path
 
