@@ -105,8 +105,8 @@ A few notes:
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find crazyflie_demo)/launch/indoors.rviz"
           required="true"/>
 
-<!--  &lt;!&ndash; run bag record &ndash;&gt;-->
-<!--    <node pkg="rosbag" type="record" name="rosbag_record_standard_data" respawn="true" output="screen" args="-o /home/PycharmProjects/bags/ -a" />-->
+  <!-- run bag record -->
+    <node pkg="rosbag" type="record" name="rosbag_record_standard_data" respawn="true" output="screen" args="-o /home/MARGLUP/bags/ -a" />
 
     <!--    teleop_twist_keyboard  -->
     <node name="teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen"
