@@ -10,10 +10,10 @@ USAGE:
 
 <launch>
     <!-- for first CF -->
-    <arg name="uri1" default="radio://0/120/2M/E7E7E7E705"/>
-    <arg name="frame1" default="cf5"/>
+    <arg name="uri1" default="radio://0/120/2M/E7E7E7E703"/>
+    <arg name="frame1" default="cf3"/>
     <arg name="initX1" default="0"/>
-    <arg name="initY1" default="0"/>
+    <arg name="initY1" default="0.5"/>
     <arg name="initZ1" default="0"/>
 
 
@@ -47,10 +47,6 @@ USAGE:
             </rosparam>
         </node>
 
-        <!--            Fix vrpn axes - broadcasts tf frame "cf#_fixed" FOR IT TO WORK THE RIGID BODY NAME MUST BE CF#_VRPN -->
-        <node name="explorer" pkg="crazyflie_demo" type="tf_fixer.py" output="screen">
-            <param name="tf_prefix" value="$(arg frame1)"/>
-        </node>
         <!--        Tf_broadcast a static transform with offset between a drone launch point and world-->
         <node pkg="tf" type="static_transform_publisher" name="world_to_$(arg frame1)_takeoff"
               args="$(arg initX1) $(arg initY1) 0 0 0 0 1 world $(arg frame1)_takeoff 100"/>

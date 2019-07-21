@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-""" Grid module is the occupancy_grid filler and publisher. """
 import copy
 import csv
 import threading
@@ -38,12 +37,6 @@ class drone_pc:
 
 class Grid:
 
-    # Grid module receives raw data (position and pc) from all drones and composes the occupancy grid.
-    # This grid will be published to display nodule and Cj_injector module.
-    # 0 - unexplored area
-    # 1 - explored empty area
-    # 2 - explored area (wall)
-
     def __init__(self, x_lim, y_lim, res, nDrones, initial_pos_dict, useRefEnv, excelPath):
 
         self.x_lim = x_lim
@@ -63,21 +56,21 @@ class Grid:
             drone_name = rospy.get_param("~drone_name_{}".format(iDrone))
             self.topics_arr.append("/{}/point_cloud".format(drone_name))
         self.drone_name_arr = []
-        self.floor_thr = 32
+        self.floor_thr = 20 #minimum Z value of point in point_cloud
         self.sens_limit = 250
         self.rate = 2  # Hz
         self.useRefEnv = useRefEnv
         self.excelPath = excelPath
         self.validity_matrix = copy.deepcopy(self.matrix)
         self.grid_maze = copy.deepcopy(self.matrix)
-        self.maze_res = 7.62
+        self.maze_res = 10
         if self.useRefEnv:
             self.csv_to_maze()
 
         self.start_time = None
         self.historic_sens_ij = []
         self.show_real_pc = False
-        self.time_thr = 20  # sec
+        self.time_thr = 10 # sec
         self.time_to_correct_grid = rospy.Time.now().to_sec()
 
         for i, id in enumerate(initial_pos_dict):
@@ -140,7 +133,7 @@ class Grid:
         # plt.show()
 
     def point_cloud_parser(self, msg, topic):
-        """ Each publicitation, there's' an array of 10 points."""
+        """Each publicitation, theres' an array of 10 points."""
         point_cloud_last_timestamp = msg.header
         point_cloud = pc2.read_points_list(msg, skip_nans=True)
 
@@ -219,9 +212,6 @@ class Grid:
                 # i, j = self.xy_to_ij(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
                 # self.change_tail_to_wall(i, j)
 
-                # Check if after a period of time the drone is in the same place.
-                # If it is, rise up the show_real_pc flag,
-                # which will reveal the current sensing of pc without adding it to previous ones.
                 if (rospy.Time.now().to_sec() - self.time_to_correct_grid) >= self.time_thr:
                     if np.linalg.norm(np.subtract([self.drones_prev_pos_list[drone_id].x,
                                                    self.drones_prev_pos_list[drone_id].y],
@@ -248,7 +238,7 @@ class Grid:
                     self.update_from_tof_sensing_list(drone_id)
                     # self.complete_wall_in_corners(self.matrix)
 
-        if self.grid_discovered() > 0.75:
+        if self.grid_discovered() > 0.99:
             """Every grid update check grid coverage, if exceeds X%, land all drones! """
 
             rospy.loginfo("Coverage reached, landing all drones!")
@@ -256,12 +246,29 @@ class Grid:
             twist = Twist()
             twist.linear.x = 0
             twist.linear.y = 0
-            twist.linear.z = -1  # in motion_controller - if 'z' smaller than 0, land.
+            twist.linear.z = 0
             twist.angular.x = 0
             twist.angular.y = 0
             twist.angular.z = 0
 
             self.land_publisher.publish(twist)
+
+    # def pos_parser(self, msg):
+    #     pos_header = msg.header
+    #     pos_val = msg.values
+    #
+    #     drone_id = pos_header.frame_id.split("/")[0] # Extract drone name from topic name
+    #     plt_index = self.drones_pos_list[drone_id].index
+    #     # Store drone position and convert it from [m] to [cm]
+    #     self.drones_pos_list[drone_id] = drone_pos(pos_header.stamp.secs,
+    #                                                self.takeofpos[drone_id][0]+(pos_val[0]*m_to_cm),
+    #                                                self.takeofpos[drone_id][1]+(pos_val[1]*m_to_cm),
+    #                                                self.takeofpos[drone_id][2]+(pos_val[2]*m_to_cm), None, plt_index)
+    #
+    #     # Change tail to be empty if the drone is in that tail.
+    #     i, j = self.xy_to_ij(self.drones_pos_list[drone_id].x, self.drones_pos_list[drone_id].y)
+    #     if self.matrix[i][j] == 0:
+    #         self.change_tail_to_empty(i, j)
 
     # Initialize a publisher for occupancy grid
     def init_grid_publisher(self):
@@ -273,17 +280,19 @@ class Grid:
         rate = rospy.Rate(self.rate)
         while not rospy.is_shutdown():
             m = MapMetaData()  # Grid metadata
-            m.resolution = self.res  # Grid resolution
-            m.width = self.x_lim[1] - self.x_lim[0]  # Grid width in world CS
-            m.height = self.y_lim[1] - self.y_lim[0]  # Grid height in worlds CS
+
+            m.width = (self.x_lim[1] - self.x_lim[0])/self.res  # Grid width in world CS
+            m.resolution = 0.1 ##self.res/100  # Grid resolution in meter/cell instead of cm/cell
+            m.height = (self.y_lim[1] - self.y_lim[0])/self.res  # Grid height in worlds CS
             m.origin = Pose()  # The grid origin in world CS (there is no need for indoor navigation)
             occ_grid_msg.info = m
 
             occ_grid_msg.header.stamp = rospy.Time.now()
-            occ_grid_msg.header.frame_id = "/indoor/occupancy_grid"
+            occ_grid_msg.header.frame_id = "world"
 
-            # Convert the matrix from 2D fload64 to 1D int8 list
-            occ_grid_msg.data = list(np.asarray(self.matrix.flatten(), dtype=np.int8))
+            # Convert the matrix from 2D float64 to 1D int8 list
+            pub_matrix=np.transpose((self.matrix *63 ) -1)
+            occ_grid_msg.data = list(np.asarray(pub_matrix.flatten(), dtype=np.int8))
 
             # Publish the message
             self.grid_publisher.publish(occ_grid_msg)
@@ -325,7 +334,6 @@ class Grid:
                 sensing_pos = [[self.initpos[0] + elem[0], self.initpos[1] + elem[1]]]
                 self.update_with_tof_sensor([[current_pos.x, current_pos.y]], sensing_pos)
 
-    # Update grid according to raw data
     def update_with_tof_sensor(self, sensor_pos, tof_sensing_pos):
         i0, j0 = self.xy_to_ij(sensor_pos[0][0], sensor_pos[0][1])
         i1, j1 = self.xy_to_ij(tof_sensing_pos[0][0], tof_sensing_pos[0][1])
@@ -348,14 +356,22 @@ class Grid:
                         self.sens_limit / self.res):
                     # if self.matrix[i][j] == 0 and np.linalg.norm(np.subtract([xs[ind], ys[ind]], sensor_pos)) < (self.sens_limit):
                     self.change_tail_to_empty(i, j)
-        if (rospy.Time.now().to_sec() - self.time_to_correct_grid) >= (self.time_thr / 10):
+        if (rospy.Time.now().to_sec() - self.time_to_correct_grid) >= (self.time_thr/10):
             self.show_real_pc = False
         if 0 < i1 < self.matrix.shape[0] and 0 < j1 < self.matrix.shape[1] and \
                 (np.linalg.norm(np.subtract([i1, j1], [i0, j0])) <= (self.sens_limit / self.res)) and \
                 self.validity_matrix[i1][j1] != 5:
             self.change_tail_to_wall(i1, j1)
 
-    # Apply time filter
+        # d = np.subtract(tof_sensing_pos, sensor_pos)
+        # norm_d = np.linalg.norm(d)
+        # if norm_d > 0 and (np.linalg.norm(np.subtract([i1, j1], [i0, j0])) <= (self.sens_limit / self.res)) and 0 < i1 < self.matrix.shape[0] and 0 < j1 < self.matrix.shape[1]:
+        #     wall_pos = tof_sensing_pos + d / norm_d * self.res / 1000
+        #     i, j = self.xy_to_ij(wall_pos[0][0], wall_pos[0][1])
+        #     # if self.time_filter(i, j, pc_time):
+        #     self.change_tail_to_wall(i, j)
+
+    # Apply time filter TODO: document...
     def time_filter(self, i, j, pc_time):
         if self.start_time is None or pc_time - self.start_time < 10:
             self.historic_sens_ij.append((i, j, pc_time))
@@ -369,7 +385,7 @@ class Grid:
                 return True
         return False
 
-    def update_with_dummy_tof_sensor(self, sensor_pos, yaw):  # For known maze
+    def update_with_dummy_tof_sensor(self, sensor_pos, yaw):
         directions_vec = np.add([0, np.pi / 2, np.pi, 3 * np.pi / 2], yaw)
         for phi in directions_vec:
             dummy_tof = np.add(sensor_pos, np.multiply(self.sens_limit, [[np.cos(phi), np.sin(phi)]]))
@@ -386,7 +402,7 @@ class Grid:
                     self.change_tail_to_wall(i, j)
                     break
 
-    def complete_wall_in_corners(self, matrix):  # currently not in use
+    def complete_wall_in_corners(self, matrix):
         for i in range(1, matrix.__len__() - 1):
             for j in range(1, matrix[i].__len__() - 1):
                 if matrix[i][j] == 0:

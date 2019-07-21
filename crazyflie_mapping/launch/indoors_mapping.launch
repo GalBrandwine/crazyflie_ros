@@ -34,19 +34,19 @@ A few notes:
     <arg name="frame1_start_delay" default="0"/>
     <arg name="traj_list" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX1" default="0.05"/><!--black farther left point-->
-    <arg name="initY1" default="0.5"/><!--black farther left point-->
+    <arg name="initY1" default="0.8"/><!--black farther left point-->
     <arg name="initZ1" default="0"/>
 
 
     <!-- for second CF    -->
-    <arg name="uri2" default="radio://0/120/2M/E7E7E7E703"/>
-    <arg name="frame2" default="cf3"/>
+    <arg name="uri2" default="radio://0/120/2M/E7E7E7E704"/>
+    <arg name="frame2" default="cf4"/>
     <arg name="frame2_active" default="0"/>
     <arg name="frame2__listening_to_key_board" default="1"/>
-    <arg name="frame2_start_delay" default="0"/>
+    <arg name="frame2_start_delay" default="14"/>
     <arg name="traj_list2" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX2" default="0.05"/><!--black closer right point-->
-    <arg name="initY2" default="0.8"/><!--black closer right point-->
+    <arg name="initY2" default="0.65"/><!--black closer right point-->
     <arg name="initZ2" default="0"/>
 
 

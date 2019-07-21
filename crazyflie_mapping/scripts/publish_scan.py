@@ -151,7 +151,7 @@ def get_ranges(msg):
     filter_scan()  # todo using scan as global variable. overwriting values. not good.
     scan_pub.publish(scan)  # publish LaserScan message in LOCAL (drone) coordinates
 
-    if transform is not None and new_data > 0 and z_range >= 0.32:
+    if transform is not None and new_data > 0 and z_range >= 0.2:
         # Start publishing pointCloud only from 0.32 meters high
         pc2_msg_LC = lp.projectLaser(scan)  # convert the message of type LaserScan to a PointCloud2
         pc2_msg_WC = do_transform_cloud(pc2_msg_LC, transform)  # transform pointcloud to world coordinates
