@@ -63,7 +63,7 @@ class Grid:
         self.excelPath = excelPath
         self.validity_matrix = copy.deepcopy(self.matrix)
         self.grid_maze = copy.deepcopy(self.matrix)
-        self.maze_res = 7.62
+        self.maze_res = 8
         if self.useRefEnv:
             self.csv_to_maze()
 
@@ -238,7 +238,7 @@ class Grid:
                     self.update_from_tof_sensing_list(drone_id)
                     # self.complete_wall_in_corners(self.matrix)
 
-        if self.grid_discovered() > 0.75:
+        if self.grid_discovered() > 0.77:
             """Every grid update check grid coverage, if exceeds X%, land all drones! """
 
             rospy.loginfo("Coverage reached, landing all drones!")
@@ -349,6 +349,7 @@ class Grid:
             if self.show_real_pc:
                 if np.linalg.norm(np.subtract([i, j], [i0, j0])) < (self.sens_limit / self.res):
                     self.change_tail_to_empty(i, j)
+                    self.show_real_pc = False
             else:
                 if self.matrix[i][j] == 0 and np.linalg.norm(np.subtract([i, j], [i0, j0])) < (
                         self.sens_limit / self.res):

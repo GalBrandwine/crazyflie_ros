@@ -45,7 +45,7 @@ A few notes:
 <!--    <arg name="initX1" default="0.5334"/>&lt;!&ndash;black farther middle point&ndash;&gt;-->
 <!--    <arg name="initY1" default="1.9050"/>&lt;!&ndash;black farther middle point&ndash;&gt;-->
     <arg name="initX1" default="0.3048"/><!--black farther left point-->
-    <arg name="initY1" default="2.0574"/><!--black farther left point-->
+    <arg name="initY1" default="2.5146"/><!--black farther left point-->
     <arg name="initZ1" default="0"/>
 
 
@@ -60,8 +60,8 @@ A few notes:
 <!--    <arg name="initY2" default="4.115"/>  &lt;!&ndash;red left point&ndash;&gt;-->
 <!--    <arg name="initX2" default="0.1524"/>&lt;!&ndash;black farther middle point&ndash;&gt;-->
 <!--    <arg name="initY2" default="1.9050"/>&lt;!&ndash;black farther middle point&ndash;&gt;-->
-    <arg name="initX2" default="0.0762"/><!--black closer right point-->
-    <arg name="initY2" default="1.6764"/><!--black closer right point-->
+    <arg name="initX2" default="0.3048"/><!--black closer right point-->
+    <arg name="initY2" default="1.905"/><!--black closer right point-->
     <arg name="initZ2" default="0"/>
 
 
