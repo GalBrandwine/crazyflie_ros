@@ -57,27 +57,34 @@ class Agent:
         noise_fac = 1
         close_wall = False
 
-        # if self.astar_path == []:
-        #     vec = np.subtract(self.next_pos[0], self.current_pos[0])
-        # elif(self.is_step_legal(self.current_pos,  np.subtract(self.astar_path[0], self.current_pos[0]), matrix)):
+        # if self.astar_path != [] and self.is_step_legal(self.current_pos,  np.subtract(self.astar_path[0], self.current_pos[0]), matrix):
         #     vec = np.subtract(self.astar_path[0], self.current_pos[0])
         #     as_flag = True
-        # if self.astar_path != [] and np.linalg.norm(np.subtract(self.current_pos[0], self.next_pos[0])) > self.dist_factor * self.step_noise_size\
+        # elif self.astar_path != [] and np.linalg.norm(np.subtract(self.current_pos[0], self.next_pos[0])) > self.dist_factor * self.step_noise_size\
         #         and self.is_step_legal(self.current_pos,  np.subtract(self.next_pos[0], self.current_pos[0]), matrix):
         #     vec = np.subtract(self.next_pos[0], self.current_pos[0])
+        # elif self.is_step_legal(self.current_pos,  np.subtract(self.next_pos[0], self.current_pos[0]), matrix):
+        #     vec = np.subtract(self.next_pos[0], self.current_pos[0])
 
+        # Check if the previous step is over and delete it if true
+        if len(self.astar_path) > 0:
+            if(np.linalg.norm(np.subtract(self.astar_path[0], self.current_pos[0])) <
+                    self.step_noise_size):
+                self.astar_path = np.delete(self.astar_path, 0, 0)
 
-        if self.astar_path != [] and self.is_step_legal(self.current_pos,  np.subtract(self.astar_path[0], self.current_pos[0]), matrix):
+        # If the path and the previous step is not finished and still legal than resume it
+        if (np.linalg.norm(np.subtract(self.current_pos[0], self.next_pos[0])) >= self.step_noise_size):
+            vec = np.subtract(self.next_pos[0], self.current_pos[0])
+        # If there are steps left in the path and the next step is in line of sight then choose it.
+        elif len(self.astar_path) > 0:
             vec = np.subtract(self.astar_path[0], self.current_pos[0])
-            as_flag = True
-        elif self.astar_path != [] and np.linalg.norm(np.subtract(self.current_pos[0], self.next_pos[0])) > self.dist_factor * self.step_noise_size\
-                and self.is_step_legal(self.current_pos,  np.subtract(self.next_pos[0], self.current_pos[0]), matrix):
-            vec = np.subtract(self.next_pos[0], self.current_pos[0])
-        elif self.is_step_legal(self.current_pos,  np.subtract(self.next_pos[0], self.current_pos[0]), matrix):
-            vec = np.subtract(self.next_pos[0], self.current_pos[0])
 
+        # Limit the step size to maximum distance
+        if np.linalg.norm(vec) > self.stepSizeLimit:
+            temp = np.divide(vec, np.linalg.norm(vec))
+            vec = np.multiply(temp, self.stepSizeLimit)
 
-
+        # Check if the chosen step will be to close to a wall
         if sum(vec) != 0:
             ivec, jvec = self.xy_to_ij(vec[0], vec[1])
             for ti in range(ivec - tails_from_wall, ivec + tails_from_wall + 1):
@@ -88,31 +95,19 @@ class Agent:
         else:
             close_wall = True
 
-
+        # If indeed it is to close to a wall then move in the same direction but stop a few tiles before the wall
         if close_wall:
             if np.linalg.norm(np.subtract(self.current_pos[0], self.next_pos[0])) > self.res:
                 step = np.multiply(np.divide(vec, np.linalg.norm(vec)), np.linalg.norm(vec) - (tails_from_wall * self.res))
                 if (np.linalg.norm(vec) - (tails_from_wall * self.res)) > 0:
                     vec = step
 
-            # while break_counter < max_count_val and as_flag == False and sum(vec) != 0:
-            #     break_counter = break_counter + 1
-            #     step = self.step_noise_size * noise_fac * ([0.5, 0.5] - np.random.rand(2)) + self.current_pos[0]
-            #     istep, jstep = self.xy_to_ij(step[0], step[1])
-            #     if self.is_step_legal(self.current_pos, step, matrix) and matrix[istep + tails_from_wall][jstep] != 2 and\
-            #             matrix[istep - tails_from_wall][jstep] != 2 and matrix[istep][jstep + tails_from_wall] != 2 and\
-            #             matrix[istep][jstep - tails_from_wall] != 2:
-            #         vec = step
-            #         break
+        # Check if there is an obstacle in the way
+        if not self.is_step_legal(self.current_pos, vec, matrix):
+            vec = np.zeros(2)
 
-        if np.linalg.norm(vec) > self.stepSizeLimit:
-            temp = np.divide(vec, np.linalg.norm(vec))
-            vec = np.multiply(temp, self.stepSizeLimit)
-
-        if break_counter < max_count_val:
-            self.next_pos = self.current_pos + vec
-            if as_flag and self.astar_path != []:
-                del self.astar_path[0]
+        # Update the step
+        self.next_pos = self.current_pos + vec
 
 # This is the important function, that should be rewriten
     def Dynam_Search_in_maze_old(self, NeighborsPosList, matrix):

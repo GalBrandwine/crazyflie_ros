@@ -160,7 +160,7 @@ class Astar:
         okways = []
         allx, ally, allcost, allmidxs = [], [], [], []
         # pradius = self.scanning_range
-        pradius = math.sqrt((nstart.x - ngoal.x) ** 2 + (nstart.y - ngoal.y) ** 2)
+        pradius = 1.5*math.sqrt((nstart.x - ngoal.x) ** 2 + (nstart.y - ngoal.y) ** 2)
         for j, jend in enumerate(zip(mx, my)):
             dcost = math.sqrt((nstart.x - jend[0]) ** 2 + (nstart.y - jend[1]) ** 2)
             if dcost <= pradius: # Not mandatory if... Only to speed up!
@@ -184,7 +184,7 @@ class Astar:
     def is_path_free(self, si, sj, gi, gj, obmap):
         bpath = list(bresenham(si, sj, gi, gj))
         ok_way = True
-        for ii, elem in enumerate(bpath[1:]):
+        for ii, elem in enumerate(bpath[1:-1]):
             if obmap[elem[0]][elem[1]]:
                 ok_way = False
                 break

@@ -70,10 +70,10 @@ A few notes:
     <arg name="frame3" default="cf2"/>
     <arg name="frame3_active" default="0"/>
     <arg name="frame3__listening_to_key_board" default="1"/>
-    <arg name="frame3_start_delay" default="15"/>
+    <arg name="frame3_start_delay" default="20"/>
     <arg name="traj_list3" default="[$(arg traj1),$(arg traj2)]"/>
     <arg name="initX3" default="0.0762"/><!--black closer right point-->
-    <arg name="initY3" default="2.0574"/><!--black closer right point-->
+    <arg name="initY3" default="1.905"/><!--black closer right point-->
     <arg name="initZ3" default="0"/>
 
 
